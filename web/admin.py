@@ -1,17 +1,17 @@
 #_*_coding:utf-8_*_
 from django.contrib import admin
 from django import forms
+from django.contrib.auth.admin import UserAdmin
 
-# Register your models here.
+
 import models
+
 from django.shortcuts import render_to_response,render,HttpResponse
 
 from django.contrib.admin.views.decorators import staff_member_required
 
-
-
 from django.conf.urls import patterns, include, url
-
+# Register your models here.
 
 
 class HostAdmin(admin.ModelAdmin):
@@ -176,6 +176,9 @@ class TokenAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
     readonly_fields = models.Token._meta.get_all_field_names()
+
+
+
 
 admin.site.register(models.Hosts,HostAdmin)
 admin.site.register(models.HostUsers,HostUserAdmin)
