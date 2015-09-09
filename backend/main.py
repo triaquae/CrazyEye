@@ -8,6 +8,7 @@ from web import models
 from django.contrib import auth
 import datetime
 import django
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 
 def call(sys_args):
@@ -93,16 +94,19 @@ class Features(object):
                 continue
 
             user = auth.authenticate(username=user, password=passwd)
-            if user is not None: #pass authentication
-                if django.utils.timezone.now() > user.userprofile.valid_begin_time and django.utils.timezone.now() < user.userprofile.valid_end_time:
-                    self.login_user = user
-                    self.user_id = user.id
-                    return True
+            try:
+                if user is not None: #pass authentication
+                    if django.utils.timezone.now() > user.userprofile.valid_begin_time and django.utils.timezone.now() < user.userprofile.valid_end_time:
+                        self.login_user = user
+                        self.user_id = user.id
+                        return True
+                    else:
+                        sys.exit("\033[31;1mYour account is expired,please contact your IT guy for this!\033[0m")
                 else:
-                    sys.exit("\033[31;1mYour account is expired,please contact your IT guy for this!\033[0m")
-            else:
-                print "\033[31;1mInvalid username or password!\033[0m"
-                count +=1
+                    print "\033[31;1mInvalid username or password!\033[0m"
+                    count +=1
+            except ObjectDoesNotExist:
+                sys.exit("\033[31;1mhaven't set CrazyEye account yet ,please login http://localhost:8000/admin find 'CrazyEye账户' and create an account first!\033[0m")
        else:
            sys.exit("Invalid username and password, too many attempts,exit.")
 
