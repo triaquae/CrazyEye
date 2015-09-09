@@ -72,7 +72,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'django.core.context_processors.request'
+                'django.core.context_processors.request',
 
             ],
         },
@@ -145,9 +145,11 @@ WebSSH = ['localhost',4200]
 #for django admin customaztion
 
 
-TEMPLATE_CONTEXT_PROCESSORS = TCP + (
-    'django.core.context_processors.request',
-)
+#TEMPLATE_CONTEXT_PROCESSORS = TCP + (
+#    'django.core.context_processors.request',
+#)
+
+
 # Django Suit configuration example
 SUIT_CONFIG = {
     # header
