@@ -85,8 +85,8 @@ class UserProfile(models.Model):
     name = models.CharField(unique=True,max_length=32)
     department = models.ForeignKey('Department',verbose_name=u'部门')
     #user_groups = models.ManyToManyField('PUserGroups') #might use it in the future version
-    host_groups = models.ManyToManyField('HostGroups',verbose_name=u'授权主机组')
-    bind_hosts = models.ManyToManyField('BindHosts',verbose_name=u'授权主机')
+    host_groups = models.ManyToManyField('HostGroups',verbose_name=u'授权主机组',blank=True)
+    bind_hosts = models.ManyToManyField('BindHosts',verbose_name=u'授权主机',blank=True)
     valid_begin_time = models.DateTimeField(default=django.utils.timezone.now)
     valid_end_time = models.DateTimeField()
 
