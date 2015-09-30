@@ -1,0 +1,649 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>CrazyEye堡垒机</title>
+
+
+	<!--STYLESHEET-->
+	<!--=================================================-->
+
+    {% block main-head %}
+	<!--Bootstrap Stylesheet [ REQUIRED ]-->
+	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+
+	<!--Nifty Stylesheet [ REQUIRED ]-->
+	<link href="/static/css/nifty.min.css" rel="stylesheet">
+
+
+	<!--Font Awesome [ OPTIONAL ]-->
+	<link href="/static/css/font-awesome.css" rel="stylesheet">
+
+    <!--Customize Css [ REQUIRED ]-->
+	<link href="/static/css/custom.css" rel="stylesheet">
+
+    <!--bootstrap select Css [ REQUIRED ]-->
+	<link href="/static/plugins/bootstrap-select/bootstrap-select.min.css" rel="stylesheet">
+	<link href="/static/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet">
+	<link href="/static/plugins/bootstrap-fileinput//css/fileinput.min.css" rel="stylesheet">
+
+	<!--SCRIPT-->
+	<!--=================================================-->
+
+	<!--Page Load Progress Bar [ OPTIONAL ]-->
+	<link href="/static/css/pace.min.css" rel="stylesheet">
+	<script src="/static/js/pace.min.js"></script>
+
+    {% endblock %}
+
+
+</head>
+
+<body>
+	<div id="container" class="effect mainnav-lg">
+    {% csrf_token %}
+
+		<!--NAVBAR-->
+		<!--===================================================-->
+		<header id="navbar">
+			<div id="navbar-container" class="boxed" >
+
+				<!--Brand logo & name-->
+				<!--================================-->
+				<div class="navbar-header">
+					<a href="index.html" class="navbar-brand">
+						<img src="/static/img/eye_logo.png" alt="Nifty Logo" class="brand-icon">
+						<div class="brand-title">
+							<span class="brand-text"> &nbsp;&nbsp;CrazyEye</span>
+						</div>
+					</a>
+				</div>
+				<!--================================-->
+				<!--End brand logo & name-->
+
+
+				<!--Navbar Dropdown-->
+				<!--================================-->
+				<div class="navbar-content clearfix">
+					<ul class="nav navbar-top-links pull-left">
+
+						<!--Navigation toogle button-->
+						<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+						<li class="tgl-menu-btn">
+							<a class="mainnav-toggle" href="#">
+								<i class="fa fa-navicon fa-lg"></i>
+							</a>
+						</li>
+						<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+						<!--End Navigation toogle button-->
+
+					</ul>
+					<ul class="nav navbar-top-links pull-right">
+
+						<!--User dropdown-->
+						<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+						<li id="dropdown-user" class="dropdown">
+							<a href="#" data-toggle="dropdown" class="dropdown-toggle text-right">
+								<span class="pull-right">
+									<img class="img-circle img-user media-object" src="/static/img/av1.png" alt="Profile Picture">
+								</span>
+								<div class="username hidden-xs">{{ request.user.userprofile.name }}</div>
+							</a>
+
+
+							<div class="dropdown-menu dropdown-menu-md dropdown-menu-right with-arrow panel-default">
+
+								<!-- User dropdown menu -->
+								<ul class="head-list">
+									<li>
+										<a href="{% url 'personal' %}">
+											<i class="fa fa-user fa-fw fa-lg"></i> 个人信息
+										</a>
+									</li>
+
+								</ul>
+
+								<!-- Dropdown footer -->
+								<div class="pad-all text-right">
+									<a href="{% url 'logout' %}" class="btn btn-primary">
+										<i class="fa fa-sign-out fa-fw"></i> Logout
+									</a>
+								</div>
+							</div>
+						</li>
+						<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+						<!--End user dropdown-->
+
+					</ul>
+				</div>
+				<!--================================-->
+				<!--End Navbar Dropdown-->
+
+			</div>
+		</header>
+		<!--===================================================-->
+		<!--END NAVBAR-->
+
+		<div class="boxed">
+
+			<!--CONTENT CONTAINER-->
+			<!--===================================================-->
+			<div id="content-container">
+
+				<!--Page Title-->
+				<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+				<div id="page-title">
+					<h1 class="page-header text-overflow">{% block page-title %}{% endblock %}</h1>
+
+					<!--Searchbox
+					<div class="searchbox">
+						<div class="input-group custom-search-form">
+							<input type="text" class="form-control" placeholder="Search..">
+							<span class="input-group-btn">
+								<button class="text-muted" type="button"><i class="fa fa-search"></i></button>
+							</span>
+						</div>
+					</div> -->
+				</div>
+				<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+				<!--End page title-->
+
+
+				<!--Breadcrumb-->
+				<!--
+				<ol class="breadcrumb">
+					<li><a href="#">Home</a></li>
+					<li><a href="#">Library</a></li>
+					<li class="active">Data</li>
+				</ol>
+				-->
+				<!--End breadcrumb-->
+
+				<!--Page content-->
+				<!--===================================================-->
+				<div id="page-content">
+                {% block page-content %}
+
+
+                    <div class="row"> <!--首页概览-->
+						<div class="col-sm-6 col-lg-3">
+
+							<!--Registered User-->
+							<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+							<div class="panel media pad-all">
+								<div class="media-left">
+									<span class="icon-wrap icon-wrap-sm icon-circle bg-success">
+									<i class="fa fa-server fa-2x"></i>
+									</span>
+								</div>
+
+								<div class="media-body">
+									<p id="total_servers" class="text-2x mar-no text-thin"></p>
+									<p class="text-muted mar-no">已管理服务器</p>
+								</div>
+							</div>
+							<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+						</div>
+						<div class="col-sm-6 col-lg-3">
+
+							<!--New Order-->
+							<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+							<div class="panel media pad-all">
+								<div class="media-left">
+									<span class="icon-wrap icon-wrap-sm icon-circle bg-info">
+									<i class="fa fa-user fa-2x"></i>
+									</span>
+								</div>
+
+								<div class="media-body">
+									<p id="total_users" class="text-2x mar-no text-thin">0</p>
+									<p class="text-muted mar-no">注册用户数</p>
+								</div>
+							</div>
+							<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+						</div>
+						<div class="col-sm-6 col-lg-3">
+
+							<!--Comments-->
+							<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+							<div class="panel media pad-all">
+								<div class="media-left">
+									<span class="icon-wrap icon-wrap-sm icon-circle bg-warning">
+									<i class="fa fa-comment fa-2x"></i>
+									</span>
+								</div>
+
+								<div class="media-body">
+									<p id="current_logging_users" class="text-2x mar-no text-thin"></p>
+									<p class="text-muted mar-no">当前在线用户</p>
+								</div>
+							</div>
+							<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+						</div>
+						<div class="col-sm-6 col-lg-3">
+
+							<!--Sales-->
+							<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+							<div class="panel media pad-all">
+								<div class="media-left">
+									<span class="icon-wrap icon-wrap-sm icon-circle bg-danger">
+									<i class="fa fa-desktop fa-2x"></i>
+									</span>
+								</div>
+
+								<div class="media-body">
+									<p id="current_connected_hosts" class="text-2x mar-no text-thin"></p>
+									<p class="text-muted mar-no">正在连接的主机数</p>
+								</div>
+							</div>
+							<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+						</div>
+					</div> <!--end首页概览-->
+                    <div class="row">
+                        <div class="col-lg-8">
+
+                            <div class="panel">
+                                <div class="panel-heading">
+									<div class="panel-control">
+										<button id="demo-panel-network-refresh" data-toggle="panel-overlay" data-target="#demo-panel-network" class="btn"><i class="fa fa-rotate-right"></i></button>
+										<div class="btn-group">
+											<button class="dropdown-toggle btn" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-gear"></i></button>
+											<ul class="dropdown-menu dropdown-menu-right">
+												<li><a href="#">Action</a></li>
+												<li><a href="#">Another action</a></li>
+												<li><a href="#">Something else here</a></li>
+												<li class="divider"></li>
+												<li><a href="#">Separated link</a></li>
+											</ul>
+										</div>
+									</div>
+									<h3 class="panel-title">用户登录量统计</h3>
+								</div>
+                            <div id="chart-container" style="height: 300px; min-width: 310px;">
+
+
+                            </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+
+                            <div class="panel">
+                                <div class="panel-heading">
+
+									<h3 class="panel-title">最近一周活跃用户</h3>
+								</div>
+
+                                <div  class="panel-body" style="height: 300px">
+
+                                    <table class="table  table-condensed">
+											<thead>
+												<tr>
+													<th>用户</th>
+													<th>登录次数</th>
+													<th>操作命令数</th>
+												</tr>
+											</thead>
+											<tbody id="recent_active_users">
+
+											</tbody>
+									</table>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                         <div class="col-lg-12">
+
+                            <div class="panel">
+                                <div class="panel-heading">
+									<h3 class="panel-title">近期批量任务</h3>
+								</div>
+                                <div class="table-responsive">
+								<table class="table table-striped">
+                                {% load custom_tag %}
+									<thead>
+										<tr>
+											<th class="text-center">任务ID</th>
+											<th class="text-center">日期</th>
+											<th>操作用户</th>
+											<th>操作主机数</th>
+											<th>操作类型</th>
+											<th>操作内容</th>
+											<th>成功数</th>
+											<th>失败数</th>
+											<th>未知数</th>
+										</tr>
+									</thead>
+									<tbody>
+
+									{% for task in recent_tasks %}
+                                    <tr>
+                                        <td><a class="btn-link" href="#" >#{{ task.id }}</a></td>
+                                        <td>{{ task.start_time }}</td>
+                                        <td>{{ task.user }}</td>
+                                         <td>{{ task.hosts.select_related.count }}</td>
+                                        <td>{{ task.task_type }}</td>
+
+                                        <td>{{ task.cmd }}</td>
+                                        <td>{% query_set task.tasklogdetail_set "result" "success" %}</td>
+                                        <td>{% query_set task.tasklogdetail_set "result" "failed" %}</td>
+                                        <td>{% query_set task.tasklogdetail_set "result" "unknown" %}</td>
+                                    </tr>
+                                    {% endfor %}
+									</tbody>
+								</table>
+							</div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+
+                            <div class="panel">
+                                <div class="panel-heading">
+
+									<h3 class="panel-title">近期危险操作统计</h3>
+								</div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                {% endblock %}
+				</div>
+				<!--===================================================-->
+				<!--End page content-->
+			</div>
+			<!--===================================================-->
+			<!--END CONTENT CONTAINER-->
+
+			<!--MAIN NAVIGATION-->
+			<!--===================================================-->
+			<nav id="mainnav-container" style="height: 111%">
+				<div id="mainnav">
+
+					<!--Shortcut buttons-->
+					<!--================================
+					<div id="mainnav-shortcut">
+						<ul class="list-unstyled">
+							<li class="col-xs-4" data-content="Shortcut 1">
+								<a class="shortcut-grid" href="#">
+									<i class="fa fa-car"></i>
+								</a>
+							</li>
+							<li class="col-xs-4" data-content="Shortcut 2">
+								<a class="shortcut-grid" href="#">
+									<i class="fa fa-taxi"></i>
+								</a>
+							</li>
+							<li class="col-xs-4" data-content="Shortcut 3">
+								<a class="shortcut-grid" href="#">
+									<i class="fa fa-bus"></i>
+								</a>
+							</li>
+						</ul>
+					</div>
+					================================-->
+					<!--End shortcut buttons-->
+					<!--Menu-->
+					<!--================================-->
+					<div id="mainnav-menu-wrap">
+						<div class="nano">
+							<div class="nano-content">
+								<ul id="mainnav-menu" class="list-group">
+									<!--Menu list item-->
+									{% if request.user.is_superuser %}
+									<li >
+										<a href="/">
+											<i class="fa fa-dashboard"></i>
+											<span class="menu-title">首页</span>
+										</a>
+									</li>
+									{% endif %}
+
+									<!--Menu list item-->
+									<li>
+										<a href="/hosts/?selected_group=-1">
+											<i class="fa fa-server"></i>
+											<span class="menu-title">
+												<strong>主机</strong>
+											</span>
+										</a>
+									</li>
+
+									<!--Menu list item-->
+									<li>
+										<a href="#">
+											<i class="fa fa-random"></i>
+											<span class="menu-title">
+												批量
+
+											</span>
+										</a>
+										<!--Submenu-->
+										<ul class="collapse">
+											<li><a href="/hosts/multi">批量命令</a></li>
+											<li><a href="/hosts/multi/filetrans">文件分发</a></li>
+											<li><a href="/hosts/crontab/">计划任务</a></li>
+											<!--li class="list-divider"></li>
+											<li><a href="#">Separate link</a></li-->
+
+										</ul>
+									</li>
+
+									<!--Menu list item-->
+									<li>
+										<a href="/user_audit/1">
+											<i class="fa fa-book"></i>
+											<span class="menu-title">
+												操作纪录
+											</span>
+										</a>
+
+									</li>
+
+									<li>
+										<a href="/admin/" target="_blank">
+											<i class="fa fa-cog"></i>
+											<span class="menu-title">
+												配置
+											</span>
+										</a>
+
+									</li>
+
+									<!--Category name-->
+
+
+								</ul>
+
+
+
+							</div>
+						</div>
+					</div>
+					<!--================================-->
+					<!--End menu-->
+
+				</div>
+			</nav>
+			<!--===================================================-->
+			<!--END MAIN NAVIGATION-->
+
+        {% block aside-bar %}
+        {% endblock   %}
+		</div>
+
+
+
+		<!-- FOOTER -->
+		<!--===================================================-->
+		<footer id="footer">
+
+			<div class="hide-fixed pull-right pad-rgt">Currently v1.0</div>
+
+
+			<p class="pad-lft">&#0169; 2015 CrazyEye ; Powered by OldBoy edu(老男孩IT教育).</p>
+
+
+		</footer>
+		<!--===================================================-->
+		<!-- END FOOTER -->
+
+
+		<!-- SCROLL TOP BUTTON -->
+		<!--===================================================-->
+		<button id="scroll-top" class="btn"><i class="fa fa-chevron-up"></i></button>
+		<!--===================================================-->
+
+
+
+	</div>
+	<!--===================================================-->
+	<!-- END OF CONTAINER -->
+
+
+	<!--JAVASCRIPT-->
+	<!--=================================================-->
+
+	<!--jQuery [ REQUIRED ]-->
+	<script src="/static/js/jquery-2.1.1.min.js"></script>
+
+	<!--BootstrapJS [ RECOMMENDED ]-->
+	<script src="/static/js/bootstrap.min.js"></script>
+
+	<!--Fast Click [ OPTIONAL ]-->
+	<script src="/static/js/fastclick.min.js"></script>
+
+	<!--Nifty Admin [ RECOMMENDED ]-->
+	<script src="/static/js/nifty.min.js"></script>
+	<script src="/static/plugins/bootstrap-select/bootstrap-select.min.js"></script>
+	<script src="/static/plugins/js.cookie.js"></script>
+	<script src="/static/plugins/jquery-ui/jquery-ui.min.js"></script>
+	<script src="/static/plugins/bootstrap-fileinput/js/fileinput.js"></script>
+	<script src="/static/plugins/bootstrap-fileinput/js/plugins/canvas-to-blob.js"></script>
+	<script src="/static/plugins/bootstrap-fileinput/js/fileinput_locale_zh.js"></script>
+
+    <script src="/static/plugins/bootstrap-validator/bootstrapValidator.js"></script>
+    <script src="/static/plugins/highstock/js/highstock.js"></script>
+    <script src="/static/plugins/highstock/js/modules/exporting.js"></script>
+
+
+
+
+    <script type="text/javascript">
+        // using jQuery
+        $(document).ready(function(){
+
+            //var csrftoken = $.cookie('csrftoken');
+            var csrftoken = Cookies.get('csrftoken');
+
+            function csrfSafeMethod(method) {
+                // these HTTP methods do not require CSRF protection
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+            }
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+
+        //set active menu node on left sidebar
+        SetActiveMenu("{{active_node}}");
+
+        })
+
+        function SetActiveMenu(active_node){
+
+            //console.log("activ---enode:: " + active_node);
+            if (active_node == ''){
+                active_node = '/';
+            }
+            var node_ele = $("#mainnav-menu-wrap "+ " a[href='" +active_node + "']").parent();
+            node_ele.addClass("active-link");
+            if (node_ele.parent().hasClass("collapse")){
+                node_ele.parent().addClass("in");
+            }
+
+        }
+
+        //for chart
+    $(function () {
+
+        Highcharts.setOptions({
+            global: {
+                timezoneOffset:new Date().getTimezoneOffset()/60
+
+            }
+        });
+
+        $.getJSON("{% url 'dashboard_summary' %}", function (data) {
+            // Create the chart
+            console.log(data);
+            $('#chart-container').highcharts('StockChart', {
+                credits: {
+                  enabled: false
+                },
+                exporting: { enabled: false },
+                rangeSelector : {
+                    selected : 1
+                },
+
+                series : [{
+                    type:'column',
+                    name : '用户数',
+                    data : data.user_login_statistics,
+                    tooltip: {
+                        valueDecimals: 0
+                    }
+                }]
+            });//end chart
+
+            recent_active_users(data);
+            summary_data(data);
+
+        });
+
+    });
+        //end chart
+
+    function recent_active_users(data){
+        var html_ele = '';
+        $.each(data.recent_active_users,function(key,val){
+           var item_ele = "<tr><td><a class='btn-link' href='/user_audit/" + val.user +"/' >" +val.user__name + "</a><td>" + val.user__count +"</td><td>" + active_user_cmd_count(data,val.user) +"</td><tr>";
+           html_ele += item_ele;
+        });
+        $("#recent_active_users").html(html_ele);
+    };
+    function active_user_cmd_count(data,user_id){
+        var cmd_count;
+        $.each(data.recent_active_users_cmd_count,function(key,val){
+            if (val.user == user_id){
+                cmd_count= val.cmd__count;
+            }
+        });//end each
+        return cmd_count
+    }
+    function summary_data(data){
+        $("#total_servers").html(data.summary.total_servers);
+        $("#total_users").html(data.summary.total_users);
+        $("#current_logging_users").html(data.summary.current_logging_users);
+        $("#current_connected_hosts").html(data.summary.current_connected_hosts);
+    }
+
+    </script>
+    {% block bottom-js %}
+    <div></div>
+    {% endblock %}
+</body>
+</html>

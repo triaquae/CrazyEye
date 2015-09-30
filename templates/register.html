@@ -1,0 +1,14 @@
+{% extends 'index.html' %}
+
+{% block page-content %}
+Register
+
+    <form class="panel-body form-horizontal form-padding" action="/register/" method="POST" >{% csrf_token %}
+        {{ form }}
+        {% print form.errors %}
+        {% for field in form %}
+        {{ field.errors }}
+        {% endfor %}
+        <input type="submit" value="Register" />
+    </form>
+{% endblock %}

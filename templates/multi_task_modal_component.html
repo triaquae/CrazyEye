@@ -1,0 +1,42 @@
+
+<!-- Modal -<模态对话框-->
+<div class="modal fade" id="taskRunConfirmModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">任务执行确认</h4>
+      </div>
+      <div class="modal-body">
+        <span id="modal_content">确定要执行么？</span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+        <button type="button" id="submit_task_confirm" onclick="submit_task(this,'/api/multitask/cmd/')" class="btn btn-primary">确定执行</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!--end 模态对话框-->
+
+
+<!-- Modal -<模态对话框-->
+<div class="modal fade" id="fileDownloadConfirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">文件下载确认</h4>
+      </div>
+      <div class="modal-body">
+        <span id="modal_content">还有任务未完成，确定要下载么？</span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+        <button type="button"  onclick="download_file(this)" class="btn btn-primary">确定下载</button>
+        <button type="button"  class="btn btn-primary"><a href="{% url 'file_download_url' 0 %}">确定下载2</a></button>
+      </div>
+    </div>
+  </div>
+</div>
+<!--end 模态对话框-->

@@ -1,0 +1,32 @@
+{% extends 'index.html' %}
+
+
+{% block page-title %}
+批量命令
+{% endblock %}
+
+
+{% block page-content %}
+    {% csrf_token %}
+    <div class="row" >
+
+        {% include 'host_list_menu_component.html' %}
+        {% include 'hosts_multi_cmd_component.html' %}
+
+    </div> <!--end row-->
+    <div class="row">
+        {% include 'hosts_recent_task_component.html' %}
+
+    </div>
+
+
+
+
+
+{% include 'multi_task_modal_component.html' %}
+
+{% endblock %}
+
+{% block bottom-js %}
+{% include 'multi_task_js_component.html' %}
+{% endblock %}

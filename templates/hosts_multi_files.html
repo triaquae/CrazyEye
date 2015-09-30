@@ -1,0 +1,201 @@
+{% extends 'index.html' %}
+
+
+{% block page-title %}
+
+文件分发
+
+{% endblock %}
+
+
+{% block page-content %}
+<div class="row">
+    {% include 'host_list_menu_component.html' %}
+
+    {% include 'multi_task_action_files_component.html' %}
+</div>
+<div class="row">
+
+    {% include 'hosts_recent_task_component.html' %}
+</div>
+
+{% include 'multi_task_modal_component.html' %}
+
+{% endblock %}
+
+
+
+{% block bottom-js %}
+{% include 'multi_task_js_component.html' %}
+<script type="text/javascript">
+    var rand = function() {
+        return Math.random().toString(36).substr(2); // remove `0.`
+    };
+
+    var token = function() {
+        return rand() + rand(); // to make it longer
+    };
+
+    //console.log(token());
+
+
+    $(document).ready(function(){
+        var page_url = "{% url 'multitask_file' %}";
+        $("#submit_task_confirm").attr("onclick","submit_task(this,'" + page_url + "')");
+
+
+
+        $("#task_type").on("change",function(){
+            if (this.value == 'file_send'){
+                $(".file-input").removeClass("hide");
+                $("#file-download-to-local").addClass("hide")
+            }else{
+                $(".file-input").addClass("hide");
+                $("#file-download-to-local").removeClass("hide")
+            }
+
+        });//end on change
+        $("#file-exec-btn").click(function(){
+           var task_expire_time = $("select[name='task_expire_time']").val();
+           var remote_file_path = $("#remote_file_path").val();
+
+           var params = {
+               'selected_hosts':[],
+               'expire_time':task_expire_time
+           };
+           var err_msg_list = [];
+           var task_type = $("#task_type").val();
+
+            var selected_hosts = $("label[input_label='host']").filter(".active");
+
+            if (selected_hosts.length == 0){
+                err_msg_list.push("未选中任何主机执行任务！");
+            }
+            $(selected_hosts).children().each(function(){
+                params["selected_hosts"].push($(this).attr("id"));
+            });
+
+
+           if (task_type=='file_send'){ //for file upload
+               var file_list = [];
+               $(".file-upload-indicator[title='上传']").parent().parent().children().filter(".file-footer-caption").each(function(){
+                   console.log($(this).html());
+                   file_list.push($(this).html());
+               });
+               //console.log(file_list);
+               if (file_list.length ==0){
+                   err_msg_list.push("未选择要上传的文件！");
+               }
+
+               if (remote_file_path.trim().length == 0 ){
+                   err_msg_list.push("未指定要分发到远程的文件路径！");
+               }
+
+               params['remote_file_path'] = remote_file_path;
+               params['local_file_list'] = file_list;
+           }else{
+
+               if (remote_file_path.trim().length == 0 ){
+                   err_msg_list.push("未指定要从远程下载的文件绝对路径名！");
+               }
+               params['remote_file_path'] = remote_file_path;
+           }
+
+          if (err_msg_list.length >0){
+              show_alert(err_msg_list);
+          }else{
+              postDic = {'task_type':task_type,'params':JSON.stringify(params)}
+              $("#taskRunConfirmModal").modal('show');
+              //FileFormSubmit(task_type,params);
+
+          }
+
+        });
+
+        function FileFormSubmit(task_type,params){
+            var post_url = "{% url 'multitask_file' %}";
+            console.log( params);
+            $.post(post_url,{'task_type':task_type,'params':JSON.stringify(params)}, function(callback){
+
+                console.log(callback);
+            })
+
+        }
+
+        $("#file_upload").fileinput({
+            uploadUrl: "/api/multitask/file_upload/", // server upload action
+            uploadAsync: true,
+            language:'zh',
+            maxFileSize:2000,
+            maxFileCount: 5,
+
+        });
+        $('#file_upload').on('fileuploaded', function(event, data, previewId, index) {
+            var form = data.form, files = data.files, extra = data.extra,
+                response = data.response, reader = data.reader;
+        });
+
+        $("#file-download-to-local").click(function (){
+                var task_id = $(this).attr("task_id");
+                console.log('==task_id:' +task_id );
+                if (task_id == 'None'){
+                   $("#fileDownloadConfirm .modal-body span").html("任务还未执行，无文件可下载！");
+                   $("#fileDownloadConfirm button[onclick='download_file(this)']").addClass("hide");
+                }else{
+                    $("#fileDownloadConfirm button[onclick='download_file(this)']").removeClass("hide");
+                    var total_task_num = $(".task_result .badge").length;
+                    var total_undone_num = $(".task_result .badge-warning").length;
+                    if (total_undone_num !=0){
+                        var html = total_task_num +"个主机中还有" + total_undone_num +"主机未返回结果，确认不等全部任务完成后再下载文件么？";
+                    }else{
+                        var html = total_task_num +"个主机已全部执行完毕，可以下载啦！";
+                    }
+                    $("#fileDownloadConfirm .modal-body span").html(html);
+
+                }
+                var download_url = $("#fileDownloadConfirm a").attr("href").split("/");
+
+                download_url.pop();
+                download_url.pop();
+                download_url = download_url.join('/');
+                console.log('==>' + download_url);
+                download_url += "/" + task_id;
+                $("#fileDownloadConfirm a").attr("href",download_url);
+
+                $("#fileDownloadConfirm").modal("show");
+        });//end download file to local
+
+
+$('#file_form').bootstrapValidator({
+        message: 'This value is not valid',
+        feedbackIcons: {
+            valid: 'glyphicon glyphicon-ok',
+            invalid: 'glyphicon glyphicon-remove',
+            validating: 'glyphicon glyphicon-refresh'
+        },
+        fields: {
+            remote_file_path: {
+                message: 'The field is not valid',
+                validators: {
+                    notEmpty: {
+                        message: 'The remote file path  is required and cannot be empty'
+                    },
+                    stringLength: {
+                        min: 1,
+                        max: 128,
+                        message: 'The file path must be more than 6 and less than 128 characters long'
+                    },
+                    regexp: {
+                        regexp: /^[a-zA-Z0-9_\/\.]+$/,
+                        message: 'The file path can only consist of alphabetical, number and underscore'
+                    }
+                }
+            }
+
+        }
+    });//end form validator
+
+
+    });//end document ready
+</script>
+{% endblock %}

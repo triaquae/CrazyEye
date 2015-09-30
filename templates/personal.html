@@ -1,0 +1,181 @@
+{% extends 'index.html' %}
+
+{% block page-content %}
+
+    <div class="panel">
+        <div class="panel-heading">
+            <h3 class="panel-title">个人信息</h3>
+        </div>
+
+        <form class="panel-body form-horizontal form-padding">
+
+            <!--Static-->
+            <div class="form-group">
+                <label class="col-md-2 control-label">用户名</label>
+                <div class="col-md-9"><p class="form-control-static">{{ request.user.username }}</p></div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">姓名</label>
+                <div class="col-md-9"><p class="form-control-static">{{ request.user.userprofile.name }}</p></div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">Email</label>
+                <div class="col-md-9"><p class="form-control-static">{{ request.user.email}}</p></div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">部门</label>
+                <div class="col-md-9"><p class="form-control-static">{{ request.user.userprofile.department.name}}</p></div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">账户有效期至</label>
+                <div class="col-md-9"><p class="form-control-static">{{ request.user.userprofile.valid_end_time}}</p></div>
+            </div>
+
+
+
+
+            <div class="form-group pad-ver">
+                <label class="col-md-2 control-label">修改密码</label>
+                <div class="col-md-9">
+                    <hr class="hr-sm">
+                    <input name='old_passwd' type="password" id="demo-password-input" class="form-control" placeholder="输入旧密码"><br/>
+                    <input name='new_passwd'  type="password" id="demo-password-input" class="form-control" placeholder="新密码">
+                    <input name='new_passwd_confirm'  type="password" id="demo-password-input" class="form-control" placeholder="再次输入新密码">
+                </div>
+
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label"></label>
+                <div class="col-md-9">
+                    <span onclick="change_passwd()" class="pull-left btn btn-info ">
+                    修改密码
+                    </span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label"></label>
+                <div class="col-md-9">
+                   <span id="passwd_change_res"></span>
+                </div>
+            </div>
+        </form>
+        <!--===================================================-->
+        <!-- END BASIC FORM ELEMENTS -->
+
+
+    </div>
+
+
+{% endblock %}
+{% block bottom-js %}
+<script type="text/javascript" >
+
+    function change_passwd(){
+        var data = $("form").serialize();
+        var new_passwd = $("input[name='new_passwd']").val();
+        var new_passwd_confirm = $("input[name='new_passwd_confirm']").val();
+        if (new_passwd != new_passwd_confirm){
+            alert("两次输入的新密码不相符！");
+        }else{
+            var err_msg = "新密码不能少与6位，且需至少包含大小写和数字！";
+            var p_str_upper = new RegExp("[A-Z]");
+            var p_str_lower = new RegExp("[a-z]");
+            var p_str_num = new RegExp("[0-9]");
+            console.log(p_str_lower.exec(new_passwd));
+            if (new_passwd.length <6){
+                alert(err_msg);
+            }else if (!p_str_lower.exec(new_passwd)){
+                alert(err_msg);
+            }else if (!p_str_upper.exec(new_passwd)){
+                alert(err_msg);
+            }else if (!p_str_num.exec(new_passwd)){
+                alert(err_msg);
+            }else{
+                $.post("{% url 'personal' %}",data,  function(callback){
+                    var callback = JSON.parse(callback);
+                    if(callback.res == 'success'){
+
+                        $("#passwd_change_res").addClass("btn-success");
+                    }else{
+                         $("#passwd_change_res").addClass("btn-danger");
+                    }
+
+                    $("#passwd_change_res").html(callback.msg);
+                    console.log(callback);
+                } );//end post
+            }
+        }
+    }//end change passwd
+
+    $(document).ready(function(){
+
+    $('form').bootstrapValidator({
+        message: 'This value is not valid',
+        feedbackIcons: {
+            valid: 'glyphicon glyphicon-ok',
+            invalid: 'glyphicon glyphicon-remove',
+            validating: 'glyphicon glyphicon-refresh'
+        },
+        fields: {
+
+            old_passwd:{
+                message: "The password is not valid",
+                validators:{
+                    notEmpty:{
+                        'message': "the password is required and cannot be empty"
+                    },
+                    stringLength:{
+                        regexp: /^[a-zA-Z0-9_]+$/,
+                        min:6,
+                        max:30,
+                        message:'The password must be more than 6 and less than 30 characters long'
+                    },
+                }
+            },
+            new_passwd_confirm:{
+                message: "The password is not valid",
+                validators:{
+                    notEmpty:{
+                        'message': "the password is required and cannot be empty"
+                    },
+                    stringLength:{
+                        min:6,
+                        max:30,
+                        message:'The password must be more than 6 and less than 30 characters long'
+                    },
+                }
+            },
+            new_passwd:{
+                message: "The password is not valid",
+                validators:{
+                    notEmpty:{
+                        'message': "the password is required and cannot be empty"
+                    },
+                    stringLength:{
+                        min:6,
+                        max:30,
+                        message:'The password must be more than 6 and less than 30 characters long'
+                    },
+                }
+            },
+            email: {
+                validators: {
+                    notEmpty: {
+                        message: 'The email is required and cannot be empty'
+                    },
+                    emailAddress: {
+                        message: 'The input is not a valid email address'
+                    }
+                }
+            }
+        }
+    });
+
+
+
+
+    });
+
+
+</script>
+{% endblock %}

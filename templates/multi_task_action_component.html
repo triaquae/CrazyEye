@@ -1,0 +1,50 @@
+        <div class="col-sm-7 col-lg-9 pull-right task_res_div">
+            <div class="panel ">
+
+                <!-- Panel heading -->
+                <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+                <div class="pannel-heading">
+                    <div class="panel-control">
+                        <button class="btn btn-default " type="button" data-toggle="collapse" data-target="#demo-chat-body" aria-expanded="true">
+                            <i class="fa fa-chevron-down "></i>
+                        </button>
+                    </div>
+                    <h3 class="panel-title">{% block multi_task_action_title %}批量文件分发{% endblock %}</h3>
+                </div>
+
+                <!-- Panel body -->
+                <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+                <div class="panel-body">
+                    <!-- Content here -->
+
+                    <div class="pad-ver">
+
+
+                            <!--Send button-->
+                          <select name="task_expire_time" class="btn-info">
+                            <option value="30">任务超时时间(30分钟)</option>
+                            <option value="45">45分钟</option>
+                            <option value="60">60分钟</option>
+                            <option value="90">90分钟</option>
+                            <option value="120">120分钟</option>
+                            <option value="180">180分钟</option>
+                          </select>
+
+
+                            <!--Send button-->
+                            <button id="task-exec-btn" type="button" class="btn btn-success btn-labeled">
+                                <span class="btn-label"><i class="fa fa-bicycle"></i></span> 执行命令
+                            </button>
+
+                            <!--Save draft button-->
+                            <button id="mail-save-btn" type="button" class="btn btn-danger btn-labeled">
+                                <span class="btn-label"><i class="fa fa-stop"></i></span> 停止
+                            </button>
+
+                    </div>
+                    <br>
+                    {% include 'multi_task_result_display_component.html' %}
+
+                </div>
+            </div> <!--end panel-default-->
+        </div> <!--end col-lg-9-->

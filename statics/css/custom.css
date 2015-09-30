@@ -1,0 +1,55 @@
+
+
+.test_div{
+    width: 900px;
+    height: 900px;
+    border: dotted;
+}
+
+.content{
+    background: white;
+    height: 100%;
+    width: 100%;
+    min-height: 900px;
+    padding: 15px;
+}
+
+.aside_nav{
+    /*左边栏，非左边主栏*/
+    height: 100%;
+    min-height: 500px;
+    width: 300px;
+    border: dotted;
+    float: left;
+}
+.clear_both{
+    clear:both;
+}
+.content_with_aside{
+    /*左边栏右边的内容面板，只在有左边栏时用*/
+    height: 100%;
+    min-height: 500px;
+    width: 750px;
+    border: dotted;
+    float: left;
+
+}
+.cursor{
+    cursor:pointer;
+}
+
+#cmd-record-modal .modal-header span{
+    color:green;
+    font-weight: bold;
+}
+#cmd_log_content{
+    color:#00FF00;
+}
+
+#cmd-record-modal  .modal-body{
+    font-size:14px;
+    height:500px;
+    overflow:auto;
+    background-color:black;
+    opacity: 0.9;
+}

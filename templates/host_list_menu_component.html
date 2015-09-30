@@ -1,0 +1,87 @@
+        <div class="col-sm-7 col-lg-3 host_list_div" >
+             <div class="panel" style="padding:0 20px 80px 20px" >
+                <div class="pannel-heading">
+                    <h3 class="panel-title">主机组 <span class="label label-info">已选主机: <b id="total_chosen_hosts">0</b>台</span></h3>
+                    <span id="unfold-all" class="label label-success">展开</span>
+                    <span id="collapse-all" class="label label-success">收缩</span>
+                    <span id="show-all-checked" class="label label-success">已选</span>
+                    <span id="show-all-unchecked" class="label label-success">未选</span>
+                    <span id="check-all" class="label label-success">全选</span>
+                    <span id="uncheck-all" class="label label-success">取消全选</span>
+
+
+                </div>
+                <div class="pannel-body">
+                    <div class="searchbox">
+                            <div class="input-group custom-search-form">
+                                <input type="text" id="search-host" class="form-control" placeholder="搜索主机..">
+                                <span class="input-group-btn">
+                                    <button class="text-muted" type="button"><i class="fa fa-search"></i></button>
+                                </span>
+                            </div>
+                    </div>
+                    {#% for g_id,data in host_groups.items %#}
+                    <!--未分类主机-->
+                        <div class="" style="padding-top:5px;pdding-bottom:0px;">
+
+                            <!--Block level checkboxes-->
+                            <!--===================================================-->
+                            <form  class="form-block host-list">
+                                <ul class="list-group">
+                                    <li style="border:0px;padding:0px" class="list-group-item">
+                                        <span class="badge badge-primary"><i class="fa fa-chevron-down " id="group_toggle_-2" onclick="ToggleGroup(-2)"></i></span>
+                                        <span data_label="group" class="badge badge-primary">全选</span>
+                                        <b>未分类主机 [{{  request.user.userprofile.bind_hosts.select_related.count }}]</b>
+                                    </li>
+
+								</ul>
+
+                                {% for host in  request.user.userprofile.bind_hosts.select_related %}
+                                    <label input_label='host' style='display:none' onclick="SelectedHostCounter()" class="form-checkbox form-normal form-primary form-text active">
+                                        <input type="checkbox" id="host_{{ host.id }}" >{{ host.host.hostname }}({{ host.host.ip_addr }}) @ {{ host.host_user.username }}
+                                    </label>
+                                {% endfor %}
+
+
+                            </form>
+                            <!--===================================================-->
+
+                        </div>
+                        <hr style="margin:0px">
+
+                    <!--end未分类主机-->
+
+                    {% for g in request.user.userprofile.host_groups.select_related  %}
+                        <div class="" style="padding-top:5px;pdding-bottom:0px;">
+
+                            <!--Block level checkboxes-->
+                            <!--===================================================-->
+                            <form  class="form-block host-list">
+                                <ul class="list-group">
+                                    <li style="border:0px;padding:0px" class="list-group-item">
+                                        <span class="badge badge-primary"><i class="fa fa-chevron-down " id="group_toggle_{{ g.id }}" onclick="ToggleGroup({{ g.id }})"></i></span>
+                                        <span data_label="group" class="badge badge-primary">全选</span>
+                                        <b>{{ g.name }} [{{  g.bindhosts_set.select_related.count}}]</b>
+                                    </li>
+
+								</ul>
+
+                                {% for host in  g.bindhosts_set.select_related %}
+                                    <label input_label='host' style='display:none' onclick="SelectedHostCounter()" class="form-checkbox form-normal form-primary form-text active">
+                                        <input type="checkbox" id="host_{{ host.id }}" >{{ host.host.hostname }}({{ host.host.ip_addr }}) @ {{ host.host_user.username }}
+                                    </label>
+                                {% endfor %}
+
+
+                            </form>
+                            <!--===================================================-->
+
+                        </div>
+                        <hr style="margin:0px">
+
+                    {% endfor %}
+
+                </div>
+
+             </div>
+        </div>

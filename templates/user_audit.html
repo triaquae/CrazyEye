@@ -1,0 +1,320 @@
+{% extends 'index.html' %}
+{% load custom_tag %}
+
+{% block page-title %}
+用户审计
+{% endblock %}
+{% block page-content %}
+<div class="row" >
+    <div class="col-sm-6 col-lg-3">
+        <div class="panel">
+            <div class="panel-heading">
+                <h3 class="panel-title">用户列表</h3>
+            </div>
+            <div class="panel-body" >
+                <div class="list-group bord-no">
+
+                {% for department in department_list %}
+                    <a data-label="department-name" class=" list-group-item" href="#"><b>{{ department }}</b><span style="color:red" class="badge badge-info">{{ department.userprofile_set.select_related|length }}</span></a>
+                    {% for user in department.userprofile_set.select_related %}
+
+                        <a data-label="username"  user-id="{{ user.id }}" style="margin-left:2%;width:96%" class="list-group-item  collapse" href="/user_audit/{{ user.id }}/">&nbsp;&nbsp;&nbsp;{{ user.name }}</a>
+                    {% endfor %}
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div> <!--end col-lg-3-->
+    <div class="col-sm-6 col-lg-9">
+        <div class="panel">
+
+            <div class="panel-body" style="margin-left:0" >
+
+                <div class="row" >
+                    <label class="col-md-2 control-label">账户</label>
+                    <div  class="col-md-9 ">
+                        <b>{{ user_obj.name}}</b>
+                        <hr/>
+                    </div>
+                </div>
+                <div class="row" >
+                    <label class="col-md-2 control-label">账户有效期</label>
+                    <div  class="col-md-9 ">
+                        从 <b>{{ user_obj.valid_begin_time }}</b> 至 <b>{{ user_obj.valid_end_time }}</b>
+                        <hr/>
+                    </div>
+                </div>
+                <div class="row" >
+                    <label class="col-md-2 control-label">可管理主机组</label>
+                    <div  class="col-md-9 ">
+                        {% for group in user_obj.host_groups.select_related %}
+                        {{ group.name }}<br>
+                        {% endfor %}
+                    <hr/>
+                    </div>
+                </div>
+
+                <div class="row" >
+                    <label class="col-md-2 control-label">可操作主机列表</label>
+                    <div  class="col-md-9 ">
+
+                        <table class="table  table-hover table-condensed">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>主机名</th>
+                                <th>IP</th>
+                                <th>远程用户</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                         {% for bind_host in user_obj.bind_hosts.select_related %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td><a href="#fakelink" class="btn-link">{{ bind_host.host.hostname}}</a></td>
+                                <td>{{  bind_host.host.hostname }} </td>
+                                <td>{{  bind_host.host_user.username }} </td>
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+                        </table>
+
+
+                     <hr/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-6 col-lg-12">
+
+        <div class="panel panel-primary">
+
+            <!--Panel heading-->
+            <div class="panel-heading">
+                <div class="panel-control">
+
+                    <!--Nav tabs-->
+                    <ul class="nav nav-tabs">
+                        {% if data_type == 'multi_task' %}
+
+                            <li class=""><a data-toggle="tab" href="#demo-tabs-box-1" aria-expanded="true">单机操作</a>
+                            </li>
+                            <li class="active"><a data-toggle="tab" href="#demo-tabs-box-2" aria-expanded="false">批量操作</a>
+                            </li>
+                        {% else %}
+                            <li class="active"><a data-toggle="tab" href="#demo-tabs-box-1" aria-expanded="true">单机操作</a>
+                            </li>
+                            <li class=""><a data-toggle="tab" href="#demo-tabs-box-2" aria-expanded="false">批量操作</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+
+                </div>
+                <h3 class="panel-title"><b>{{ user_obj.name }}</b> 的操作纪录</h3>
+            </div>
+
+            <!--Panel body-->
+            <div class="panel-body">
+
+                <!--Tabs content-->
+                <div class="tab-content">
+                    {% if data_type == 'multi_task' %}
+                    <div id="demo-tabs-box-1" class="tab-pane fade">
+                    {% else %}
+                    <div id="demo-tabs-box-1" class="tab-pane fade active in ">
+                    {% endif %}
+                      <table class="table  table-hover table-condensed">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+
+                                    <th>主机名</th>
+                                    <th>IP</th>
+                                    <th>远程用户</th>
+                                    <th>登录日期</th>
+                                    <th>登出日期</th>
+                                    <th>操作指令数</th>
+                                    <th>#</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in user_login_records %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td data-label="hostname"><a href="#fakelink" class="btn-link">{{ record.host.host.hostname}}</a></td>
+                                    <td data-label="ip_addr">{{ record.host.host.ip_addr }} </td>
+                                    <td data-label="username">{{ record.host.host_user.username }} </td>
+                                    <td data-label="login_date"><b >{{ record.date|date:"Y-m-d H:i" }}</b> </td>
+                                    <td data-label="logout_date">{{ record.session.auditlog_set.select_related.last.date|date:"Y-m-d H:i" }} </td>
+                                    <td>{{ record.session.auditlog_set.select_related.count}} </td>
+                                    <td><a onclick="ShowRecordDetail(this,'{{ record.session.id }}')"  class="badge badge-success">查看详细</a> </td>
+                                </tr>
+                                {% endfor %}
+                           </tbody>
+
+                      </table>
+
+                    <div class="pagination pull-right ">
+                        {% pagenator user_login_records 'cmd_log' %}
+                    </div>
+
+                    </div>
+                    {% if data_type == 'multi_task' %}
+                    <div id="demo-tabs-box-2" class="tab-pane fade active in">
+                    {% else %}
+                    <div id="demo-tabs-box-2" class="tab-pane fade">
+                    {% endif %}
+
+                          <table class="table  table-hover table-condensed">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+
+                                        <th>任务ID</th>
+                                        <th>任务类型</th>
+                                        <th>任务内容</th>
+                                        <th>成功数</th>
+                                        <th>失败数</th>
+                                        <th>未知数</th>
+                                        <th>详细</th>
+
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for record in multitask_records %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ record.id }}</td>
+                                        <td>{{ record.task_type }}</td>
+                                        <td>{{ record.cmd }}</td>
+                                         <td>{% query_set record.tasklogdetail_set "result" "success" %}</td>
+                                        <td>{% query_set record.tasklogdetail_set "result" "failed" %}</td>
+                                        <td>{% query_set record.tasklogdetail_set "result" "unknown" %}</td>
+                                        <td><a class="badge badge-info" href="{% url 'multi_task_log_detail' record.id %}">查看详细</a></td>
+
+                                    </tr>
+                                    {% endfor %}
+                               </tbody>
+
+                          </table>
+
+                        <div class="pagination pull-right ">
+                            {% pagenator multitask_records 'multi_task' %}
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div> <!--end col-sm-6 col-lg-12-->
+</div>
+
+<!--Large Bootstrap Modal-->
+<!--===================================================-->
+<div id="cmd-record-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" >
+            <div class="modal-header" style="opacity:1">
+                <button class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title" id="myLargeModalLabel">详细操作纪录</h4>
+                <div class="row" style="margin-top:5px">
+                    <div class="col-md-2" id="modal-username">用户名: <span></span></div>
+                    <div class="col-md-4" id="modal-hostname">主机: <span></span></div>
+                    <div class="col-md-3" id="modal-login-date">Login: <span></span></div>
+                    <div class="col-md-3" id="modal-logout-date">Logout: <span></span></div>
+                </div>
+            </div>
+            <div class="modal-body" >
+                <div id="cmd_log_content" style=""/>
+                </div>
+           </div>
+        </div>
+    </div>
+</div>
+<!--===================================================-->
+<!--End Large Bootstrap Modal-->
+
+{% endblock %}
+{% block aside-bar %}
+
+{% endblock %}
+{% block bottom-js %}
+<script type="text/javascript" >
+
+    function ShowRecordDetail(this_ele,session_id){
+        //console.log(session_id);
+
+        $.getJSON('/api/audit/cmd_logs/',{session_id: session_id},function(callback){
+            console.log(callback)
+            var html_ele = ''
+            $.each(callback.data,function(index,item){
+                html_ele += "<div class='row'><div class='col-md-3'><span>" + item.date + "</span></div><div class='col-md-9'><span >" + item.cmd +"</span></div></div>";
+                //console.log(item)
+            });
+            $("#cmd_log_content").html(html_ele);
+            var tr_ele = $(this_ele).parent().parent();
+            var hostname = tr_ele.children("td[data-label='hostname']").text();
+            var ip_addr = tr_ele.children("td[data-label='ip_addr']").text();
+            var username = tr_ele.children("td[data-label='username']").text();
+            var login_date = tr_ele.children("td[data-label='login_date']").text();
+            var logout_date = tr_ele.children("td[data-label='logout_date']").text();
+
+            $("#modal-username span").text(username);
+            $("#modal-hostname span").text(hostname + "("+ ip_addr +")");
+            $("#modal-login-date span").text(login_date);
+            $("#modal-logout-date span").text(logout_date);
+        });//end getJSON
+        $("#cmd-record-modal").modal('show');
+
+    }
+
+    $(document).ready(function(){
+
+        if ("{{ data_type }}" == 'multi_task'){
+
+        }
+
+        $("a[data-label='department-name']").click(function(){
+            $(this).toggleClass('active');
+
+            $(this).nextUntil("a[data-label='department-name']").toggleClass("collapse");
+        });//end click
+        $("a[data-label='username']").click(function(){
+
+            $(this).parent().children("a[data-label='username']").removeClass("btn-default");
+            $(this).addClass("btn-default");
+
+        });//end click
+
+
+        //highlight the active user when page loaded
+        var active_user_ele = $("a[user-id='{{ user_obj.id }}']");
+        active_user_ele.toggleClass("collapse");
+        if (active_user_ele.prev().attr('data-label') == 'department-name'){
+            active_user_ele.prev().toggleClass('active');
+        }else{
+            var parent_node = active_user_ele.prevUntil("a[data-label='department-name']")[0];
+            $(parent_node).prev().toggleClass('active');
+
+        }
+        //end highlight the active user when page loaded
+
+    });
+
+
+</script>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% load custom_tag %}
+        <div class="col-lg-9 recent_tasks_div pull-right" >
+             <div class="panel " >
+                <div class="pannel-heading">
+                    <div class="panel-control">
+                        <button class="btn btn-default " type="button" data-toggle="collapse" data-target="#demo-chat-body" aria-expanded="true">
+                            <i class="fa fa-chevron-down "></i>
+                        </button>
+
+                    </div>
+                    <h3 class="panel-title">最近操作</h3>
+                </div>
+                <div class="pannel-body">
+                   <div class="list-group" >
+
+                            <div class="table-responsive">
+                                <table class="table table-condensed">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">#</th>
+                                            <th>任务ID</th>
+                                            <th>任务类型</th>
+                                            <th>任务内容</th>
+                                            <th>主机个数</th>
+                                            <th>成功</th>
+                                            <th>失败</th>
+                                            <th>未知</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for task in recent_tasks %}
+                                        <tr>
+                                            <td class="text-center">{{ forloop.counter }}</td>
+                                            <td><a href="#" onclick="$('.task_result').html('');PrintTaskResult({{ task.id }})" class="btn-link">{{ task.id }}</a></td>
+                                            <td>{{ task.task_type }}</td>
+                                            <td>{{ task.cmd }}</td>
+                                            <td>{{ task.hosts.select_related.count}}</td>
+                                            <td>{% query_set task.tasklogdetail_set "result" "success" %}</td>
+                                            <td>{% query_set task.tasklogdetail_set "result" "failed" %}</td>
+                                            <td>{% query_set task.tasklogdetail_set "result" "unknown" %}</td>
+                                            <td><span class="">{{ host.host_user.username }}</span></td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div> <!--end table div-->
+
+
+                   </div>
+                </div>
+             </div>
+        </div>
+ 

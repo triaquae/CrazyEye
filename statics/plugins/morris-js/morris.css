@@ -1,0 +1,51 @@
+/* @license
+morris.js v0.5.1
+Copyright 2014 Olly Smith All rights reserved.
+Licensed under the BSD-2-Clause License.
+*/
+
+
+.morris-hover{
+	position:absolute;
+	border-radius: 3px;
+	text-align: right;
+	z-index:1000;
+	cursor: default;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.morris-hover.morris-default-style{
+	padding:7px 15px;
+	background-color: #3a3f44;
+
+}
+
+.morris-hover.morris-default-style .morris-hover-row-label{
+	font-size: 1.2em;
+	font-weight:500;
+	white-space:nowrap;
+	color:#fff;
+}
+
+.morris-hover.morris-default-style .morris-hover-point{
+	white-space:nowrap;
+	color: #f3f3f3 !important;
+	font-weight: 300
+}
+
+.morris-legend-items {
+	display: inline-block;
+	padding:5px 10px 5px 5px;
+}
+.morris-legend-items > span{
+	display: inline-block;
+	width: 12px;
+	height: 10px;
+	border-radius: 1px;
+	margin-right: 10px;
+}

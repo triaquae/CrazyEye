@@ -1,0 +1,83 @@
+{% extends 'index.html' %}
+
+{% block page-title %}
+用户批量操作纪录审计
+{% endblock %}
+
+{% block page-content %}
+
+<div class="panel">
+
+
+    <div class="panel-body">
+
+        <div class="row" >
+            <label class="col-md-2 control-label">用户名</label>
+            <div  class="col-md-9 ">
+                <b>{{ log_obj.user.name }}</b>
+                <a href="{% url 'user_audit' log_obj.user.id %}" class="pull-right badge badge-success">
+                    返回上一页
+                    <i class="fa fa-reply"></i>
+                </a>
+                <hr/>
+            </div>
+        </div>
+
+        <div class="row" >
+            <label class="col-md-2 control-label">任务类型</label>
+            <div  class="col-md-9 ">
+                <b>{{ log_obj.task_type }}</b>
+            </div>
+        </div>
+        <div class="row" >
+            <label class="col-md-2 control-label">任务内容</label>
+            <div  class="col-md-9 ">
+                <b>{{ log_obj.cmd }}</b>
+            </div>
+
+        </div>
+        <div class="row" >
+            <label class="col-md-2 control-label">任务开始时间</label>
+            <div  class="col-md-9 ">
+                <b>{{ log_obj.start_time }}</b>
+            </div>
+        </div>
+        <div class="row" >
+            <label class="col-md-2 control-label">任务结束时间</label>
+            <div  class="col-md-9 ">
+                <b>{{ log_obj.start_time }}</b>
+            </div>
+        </div>
+        <div class="row" >
+            <label class="col-md-2 control-label">任务超时时间</label>
+            <div  class="col-md-9 ">
+                <b>{{ log_obj.expire_time }} </b> 分钟
+            </div>
+        </div>
+         <div class="row" >
+            <label class="col-md-2 control-label">任务备注</label>
+            <div  class="col-md-9 ">
+                <b>{{ log_obj.note }}</b>
+                <hr/>
+            </div>
+        </div>
+        {% include 'multi_task_result_display_component.html' %}
+    </div>
+
+
+</div>
+{% endblock %}
+{% block bottom-js %}
+    {% include 'multi_task_js_component.html' %}
+    <script type="text/javascript">
+
+    $(document).ready(function(){
+        PrintTaskResult('{{ log_obj.id }}');
+
+
+    });//end doc ready
+
+
+
+    </script>
+{% endblock %}

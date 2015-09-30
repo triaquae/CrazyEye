@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Login page |CrazyEye堡垒机</title>
+
+
+	<!--STYLESHEET-->
+	<!--=================================================-->
+
+
+
+	<!--Bootstrap Stylesheet [ REQUIRED ]-->
+	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+
+	<!--Nifty Stylesheet [ REQUIRED ]-->
+	<link href="/static/css/nifty.min.css" rel="stylesheet">
+
+    <link href="/static/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="/static/plugins/bootstrap-validator/bootstrapValidator.min.css" rel="stylesheet">
+		
+
+</head>
+
+<!--TIPS-->
+<!--You may remove all ID or Class names which contain "demo-", they are only used for demonstration. -->
+
+<body>
+	<div id="container" class="cls-container">
+		
+		<!-- BACKGROUND IMAGE -->
+		<!--===================================================-->
+		<div id="bg-overlay" ></div>
+		
+		
+		<!-- HEADER -->
+		<!--===================================================-->
+		<div class="cls-header cls-header-lg">
+			<div class="cls-brand">
+				<a class="box-inline" href="index.html">
+					<!-- <img alt="Nifty Admin" src="img/logo.png" class="brand-icon"> -->
+
+                    <img src="/static/img/eye_logo.png" alt="Nifty Logo"  >
+
+
+				</a>
+			</div>
+		</div>
+		<!--===================================================-->
+		
+		
+		<!-- LOGIN FORM -->
+		<!--===================================================-->
+		<div class="cls-content">
+			<div class="cls-content-sm panel">
+				<div class="panel-body">
+					<p class="pad-btm">欢迎使用CrazyEye堡垒机</p>
+
+					<form id="loginForm" action="{% url 'login' %}?next={{ next  }}" method="POST"> {% csrf_token %}
+						<div class="form-group">
+							<div class="input-group">
+								<div class="input-group-addon"><i class="fa fa-user"></i></div>
+								<input type="text" class="form-control" name="username" placeholder="Username">
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="input-group">
+								<div class="input-group-addon"><i class="fa fa-asterisk"></i></div>
+								<input type="password" class="form-control" name="password" placeholder="Password">
+							</div>
+						</div>
+						<!--div class="row">
+							<div class="col-xs-8 text-left checkbox">
+								<label class="form-checkbox form-icon">
+								<input type="checkbox"> 记住我
+								</label>
+							</div>
+							<div class="col-xs-8">
+								<div class="form-group text-right">
+								<button class="btn btn-success text-uppercase" type="submit">登录</button>
+								</div>
+							</div>
+						</div>
+						<div class="mar-btm"><em>- or -</em></div-->
+						<button class="btn btn-success  btn-block" type="submit">
+							<b>登录</b>
+						</button>
+                        <input type="hidden" name="next" value="{{ next }}" />
+                        <h4 style="color: red"><b>{{ login_err }}</b></h4>
+					</form>
+				</div>
+			</div>
+			<div class="pad-ver">
+				<a href="pages-password-reminder.html" class="btn-link mar-rgt">Forgot password ?</a>
+				<a href="pages-register.html" class="btn-link mar-lft">Create a new account</a>
+			</div>
+		</div>
+		<!--===================================================-->
+		
+
+		
+		
+	</div>
+	<!--===================================================-->
+	<!-- END OF CONTAINER -->
+
+
+		
+	<!--JAVASCRIPT-->
+	<!--=================================================-->
+
+	<!--jQuery [ REQUIRED ]-->
+	<script src="/static/js/jquery-2.1.1.min.js"></script>
+
+
+	<!--BootstrapJS [ RECOMMENDED ]-->
+	<script src="/static/js/bootstrap.min.js"></script>
+
+
+
+    <script src="/static/plugins/bootstrap-validator/bootstrapValidator.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#loginForm').bootstrapValidator({
+        message: 'This value is not valid',
+        feedbackIcons: {
+            valid: 'glyphicon glyphicon-ok',
+            invalid: 'glyphicon glyphicon-remove',
+            validating: 'glyphicon glyphicon-refresh'
+        },
+        fields: {
+            username: {
+                message: 'The username is not valid',
+                validators: {
+                    notEmpty: {
+                        message: 'The username is required and cannot be empty'
+                    },
+                    stringLength: {
+                        min: 2,
+                        max: 30,
+                        message: 'The username must be more than 6 and less than 30 characters long'
+                    },
+                    regexp: {
+                        regexp: /^[a-zA-Z0-9_]+$/,
+                        message: 'The username can only consist of alphabetical, number and underscore'
+                    }
+                }
+            },
+            password:{
+                message: "The password is not valid",
+                validators:{
+                    notEmpty:{
+                        'message': "the password is required and cannot be empty"
+                    },
+                    stringLength:{
+                        min:3,
+                        max:30,
+                        message:'The username must be more than 6 and less than 30 characters long'
+                    },
+                }
+            },
+
+            email: {
+                validators: {
+                    notEmpty: {
+                        message: 'The email is required and cannot be empty'
+                    },
+                    emailAddress: {
+                        message: 'The input is not a valid email address'
+                    }
+                }
+            }
+        }
+    });
+});
+
+</script>
+
+</body>
+</html>

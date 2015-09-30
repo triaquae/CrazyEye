@@ -1,0 +1,143 @@
+{% extends 'index.html' %}
+{% block page-title %}
+操作主机
+{% endblock %}
+
+{% block page-content %}
+    <div class="row" >
+        <div class="col-lg-3" >
+             <div class="panel" >
+                <div class="pannel-heading">
+                    <h3 class="panel-title">主机组</h3>
+                </div>
+                <div class="pannel-body">
+                    <div class="list-group bord-no">
+
+                        {% ifequal selected_g_id '-1' %}
+                            <a class="list-group-item active" href="/hosts/?selected_group=-1"><b>最近登录[3]</b></a>
+                        {% else %}
+                             <a class="list-group-item" href="/hosts/?selected_group=-1">最近登录[3]</a>
+                        {% endifequal %}
+                        {% ifequal selected_g_id '-2' %}
+                            <a class="list-group-item active" href="/hosts/?selected_group=-2"><b>未分组主机 [{{ request.user.userprofile.bind_hosts.select_related.count }}]</b></a>
+                        {% else %}
+                             <a class="list-group-item" href="/hosts/?selected_group=-2">未分组主机 [{{ request.user.userprofile.bind_hosts.select_related.count }}]</a>
+                        {% endifequal %}
+
+
+                        {% for g in request.user.userprofile.host_groups.select_related %}
+                            {% ifequal g.id selected_g_id %}
+
+                                <a class="list-group-item active" href="{% url 'host_list'  %}?selected_group={{g.id}}"><b>{{g.name }} [{{ g.bindhosts_set.select_related.count }}]</b></a>
+                            {% else %}
+                                <a class="list-group-item" href="{% url 'host_list'  %}?selected_group={{g.id}}"><b>{{g.name }} [{{  g.bindhosts_set.select_related.count}}]</b></a>
+                            {% endifequal %}
+
+                        {% endfor %}
+
+
+                    </div>
+
+                </div>
+
+             </div>
+        </div>
+        <div class="col-lg-9" >
+             <div class="panel" >
+                <div class="pannel-heading">
+                    <h3 class="panel-title">主机列表</h3>
+                </div>
+                <div class="pannel-body">
+                   <div class="list-group" >
+                       {#% for g_id,data in host_group_dic.items %#}
+
+
+                            <div class="table-responsive">
+                                <table class="table table-condensed">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">#</th>
+                                            <th>主机名</th>
+                                            <th>IP Addr</th>
+                                            <th>系统</th>
+                                            <th>主机备注</th>
+                                            <th>绑定用户</th>
+                                            <th>临时Token</th>
+                                            <th>登录</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                            {% for g in request.user.userprofile.host_groups.select_related  %}
+                                {% ifequal selected_g_id g.id %}
+                                    {% for host in g.bindhosts_set.select_related %}
+                                        <tr>
+                                            <td class="text-center">{{ forloop.counter }}</td>
+                                            <td><a href="#" class="btn-link">{{ host.host.hostname }}</a></td>
+                                            <td><a href="#" class="">{{ host.host.ip_addr }}</a></td>
+                                            <td><a href="#" class="">{{ host.host.system_type }}</a></td>
+                                            <td><a href="#" class="">{{ host.host.memo }}</a></td>
+                                            <td><span class="">{{ host.host_user.username }}</span></td>
+                                            <td><span class=""></span></td>
+                                            <td>
+                                                <span  bind_host_id="{{ host.id }}" class="label label-info cursor gen_token">生成Token</span>
+                                                <a href="http://{{ webssh.0 }}:{{ webssh.1 }}" target="_blank"><span class="label label-success cursor host_login">Login</span></a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+
+                                {% endifequal %}
+
+                           {% endfor %}
+                            {% if selected_g_id == '-2' %} <!-- 未分组主机-->
+                                    {% for host in request.user.userprofile.bind_hosts.select_related %}
+                                        <tr>
+                                            <td class="text-center">{{ forloop.counter }}</td>
+                                            <td><a href="#" class="btn-link">{{ host.host.hostname }}</a></td>
+                                            <td><a href="#" class="">{{ host.host.ip_addr }}</a></td>
+                                            <td><a href="#" class="">{{ host.host.system_type }}</a></td>
+                                            <td><a href="#" class="">{{ host.host.memo }}</a></td>
+                                            <td><span class="">{{ host.host_user.username }}</span></td>
+                                            <td><span class=""></span></td>
+                                            <td>
+                                                <span  bind_host_id="{{ host.id }}" class="label label-info cursor gen_token">生成Token</span>
+                                                <a href="http://{{ webssh.0 }}:{{ webssh.1 }}" target="_blank"><span class="label label-success cursor host_login">Login</span></a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                            {% endif %}
+
+                                    </tbody>
+                                </table>
+                            </div> <!--end table div-->
+
+
+
+
+
+                   </div>
+                </div>
+             </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block bottom-js %}
+<script type="text/javascript" >
+    $(document).ready(function(){
+
+       $(".gen_token").click(function(){
+           var bind_host_id = $(this).attr("bind_host_id");
+           var token_ele = $(this).parent().prev().children("span");
+           $.post("{% url 'token_gen' %}", {'token_type':'host_token','bind_host_id':bind_host_id},function(callback){
+               var token_obj = JSON.parse(callback);
+               //console.log('--token' + token_obj.token);
+               token_ele.html(token_obj.token);
+           });//end post
+
+       }) ;
+    });
+
+</script>
+{% endblock %}
