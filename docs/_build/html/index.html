@@ -6,9 +6,9 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to CrazyEye’s documentation! &mdash; CrazyEye 1.0 文档</title>
+    <title>CrazyEye介绍 &mdash; CrazyEye 1.0 文档</title>
     
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -24,61 +24,172 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="_static/translations.js"></script>
-    <link rel="top" title="CrazyEye 1.0 文档" href="#" />
-   
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
-
+    <link rel="top" title="CrazyEye 1.0 文档" href="#" /> 
   </head>
-  <body role="document">  
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="总目录"
+             accesskey="I">索引</a></li>
+        <li class="nav-item nav-item-0"><a href="#">CrazyEye 1.0 文档</a> &raquo;</li> 
+      </ul>
+    </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="welcome-to-crazyeye-s-documentation">
-<h1>Welcome to CrazyEye&#8217;s documentation!<a class="headerlink" href="#welcome-to-crazyeye-s-documentation" title="永久链接至标题">¶</a></h1>
-<p>Contents:</p>
-<div class="toctree-wrapper compound">
+  <div class="section" id="crazyeye">
+<h1>CrazyEye介绍<a class="headerlink" href="#crazyeye" title="永久链接至标题">¶</a></h1>
+<p>CrazyEye是基于Python开发的一款简单易用的IT管理软件，目前主要具体以下功能：</p>
+<ul>
+<li><dl class="first docutils">
+<dt>运维审计</dt>
+<dd><ul class="first last simple">
+<li>支持主机分组管理</li>
+<li>可为运维人员分配指定服务器、指定账号的操作权限</li>
+<li>运维人员的所有操作均可被记录下来以供日后审计</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>主机批量操作</dt>
+<dd><ul class="first last simple">
+<li>可对指定数量的机器进行批量命令、文件分发操作，可实时查看操作进度和结果</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="admonition warning">
+<p class="first admonition-title">警告</p>
+<p class="last">目前暂时不支持对Windows系统的操作审计和批量任务</p>
+</div>
+</div>
+<div class="section" id="id1">
+<h1>安装<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h1>
+<p>在安装CrazyEye前请确保你的Linux系统的Python版本是2.7+,Python3.0+还未做过测试,请谨慎使用</p>
+<p>CrazyEye安装所需要的组件：</p>
 <ul class="simple">
+<li>Django 1.8+</li>
+<li>Paramiko 最新版本</li>
+<li>Django suite</li>
+<li>Shellinabox</li>
+<li>Mysql</li>
+<li>Python 连接Mysql的模块</li>
+</ul>
+<p>开始安装</p>
+<ol class="arabic simple">
+<li>安装Django,Paramiko,Django-suite,MySQL-python</li>
+</ol>
+<div class="highlight-shell"><div class="highlight"><pre>pip install <span class="nv">Django</span><span class="o">==</span>1.8.4
+
+pip install django-suit<span class="o">==</span>0.2.15
+
+pip install paramiko
+
+<span class="c">#安装python连接mysql的模块</span>
+yum install MySQL-python  <span class="c">#for CentOS</span>
+pip install MySQL-python  <span class="c">#for Ubuntu</span>
+</pre></div>
+</div>
+<ol class="arabic" start="2">
+<li><p class="first">安装Shellinabox</p>
+<p>从此处下载 <a class="reference external" href="https://code.google.com/p/shellinabox/downloads/list">https://code.google.com/p/shellinabox/downloads/list</a></p>
+<p>解压下载包进入shellinabox源码目录，进行编译安装</p>
+</li>
+</ol>
+<div class="highlight-shell"><div class="highlight"><pre>./configure
+make <span class="o">&amp;&amp;</span> makeinstall
+</pre></div>
+</div>
+<ol class="arabic" start="3">
+<li><p class="first">安装CrazyEye</p>
+<p>下载最新版CrazyEye源码并解压后，编辑主配置文件
+<code class="code docutils literal"><span class="pre">CrazyEye/settings.py</span></code>, 在此配置文件中配置好与Mysql数据库的连接</p>
+</li>
+</ol>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Database</span>
+<span class="c"># https://docs.djangoproject.com/en/1.8/ref/settings/#databases</span>
+
+<span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s">&#39;django.db.backends.mysql&#39;</span><span class="p">,</span>
+        <span class="s">&#39;NAME&#39;</span><span class="p">:</span> <span class="s">&#39;CrazyEyes&#39;</span><span class="p">,</span>  <span class="c">#需要你自己在你的mysql数据库中先创建好该数据库</span>
+        <span class="s">&#39;HOST&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>  <span class="c">#如果数据库在远程的机器上，此处填写远程数据库服务器的IP</span>
+        <span class="s">&#39;PORT&#39;</span><span class="p">:</span><span class="mi">3306</span><span class="p">,</span>
+        <span class="s">&#39;USER&#39;</span><span class="p">:</span><span class="s">&#39;root&#39;</span><span class="p">,</span>
+        <span class="s">&#39;PASSWORD&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span>  <span class="c">#为空代表没密码</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li>在主目录执行以下命令来初始化CrazyEye的数据库表结构：</li>
+</ol>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">makemigrations</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">migrate</span>
+
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">createsuperuser</span> <span class="c">#创建管理员用户</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li>创建一个审计用户:code:<cite>crazy_audit</cite>,并在此用户的:code:<a href="#id2"><span class="problematic" id="id3">`</span></a>.bashrc`用户环境变量文件的最底部，加上以下两条代码：</li>
+</ol>
+<div class="highlight-shell"><div class="highlight"><pre>useradd crazy_audit
+
+su - crazy_audit
+vi .bashrc
+#在尾部添加以下2行代码：
+python /YourCrazyEyeInstallPath/CrazyEye/crazy_eyes_mgr.py run
+logout
+
+#此时crazy_audit用户的环境变量配置文件 看上去如下
+more /home/crazy_audit/.bashrc
+...
+...
+<span class="hll">python /YourCrazyEyeInstallPath/CrazyEye/crazy_eyes_mgr.py run   #把YourCrazyEyeInstallPath替换成你自己的软件安装目录
+</span><span class="hll">logout
+</span><span class="hll">
+</span>#用ssh登录到此用户，在输入用户名密码后，如果显示以下提示，则代表配置成功
+
+press ENTER if you don&#39;t have token, [input your token]: #此处敲回车
+Username:
+Password:
+</pre></div>
+</div>
+<ol class="arabic" start="6">
+<li><p class="first">启动WEB登录页面</p>
+<p><code class="code docutils literal"><span class="pre">python</span> <span class="pre">manage.py</span> <span class="pre">runserver</span> <span class="pre">0.0.0.0:8000</span></code>, 然后在浏览器输入此地址:code:<cite>http://localhost:8000/admin</cite>,输入你刚才创建的管理员用户名和密码</p>
+<img alt="_images/crazy_eye_admin_login.png" src="_images/crazy_eye_admin_login.png" />
+</li>
+</ol>
+<p>恭喜！你已成功安装了CrazyEye,现在可以开始配置使用了！</p>
+</div>
+<div class="section" id="id4">
+<h1>配置CrazyEye<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="host_config.html#id1"><span>创建主机</span></a></li>
+<li><a class="reference internal" href="host_config.html#id3"><span>创建远程用户</span></a></li>
+<li><a class="reference internal" href="host_config.html#id5"><span>创建主机与远程用户绑定关系</span></a></li>
+<li><a class="reference internal" href="host_config.html#crazyeye"><span>创建CrazyEye账户</span></a></li>
 </ul>
 </div>
+<div class="section" id="id5">
+<h1>部署到生产环境<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h1>
+<p>CrazyEye默认是以测试环境运行的，在测试环境下，所有的功能虽然和生产环境模式都是一样的，但是却是不能支持多并发的，因为CrazyEye所依赖的Django WEB服务器是单线程的，So如果想让CrazeEye支持高并发，需要借助Apachel或Nginx Web服务器，我们建议你使用Nginx来做CrazyEye的高并发。</p>
+<p>若想让nginx支持Django web服务，需要借助一个第三方Python模块叫uwsgi,具体安装和配置nginx支持Django的方法请参考uwsgi官方文档！</p>
+<p>Uwsgi文档: <a class="reference external" href="http://uwsgi-docs.readthedocs.org/en/latest/tutorials/Django_and_nginx.html">http://uwsgi-docs.readthedocs.org/en/latest/tutorials/Django_and_nginx.html</a></p>
 </div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="永久链接至标题">¶</a></h1>
-<ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span>索引</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span>模块索引</span></a></li>
-<li><a class="reference internal" href="search.html"><span>搜索页面</span></a></li>
-<li><span class="xref std std-ref">test</span></li>
-</ul>
-<p>This is <em>emphasized text</em>.</p>
-</div>
-<div class="section" id="indices-and-3">
-<h1>Indices and 3<a class="headerlink" href="#indices-and-3" title="永久链接至标题">¶</a></h1>
-<table border="1" class="docutils">
-<colgroup>
-<col width="52%" />
-<col width="26%" />
-<col width="22%" />
-</colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">Header row, column 1</th>
-<th class="head">Header 2</th>
-<th class="head">Header 3</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr class="row-even"><td>body row 1, column 1</td>
-<td>column 2</td>
-<td>column 3</td>
-</tr>
-<tr class="row-odd"><td>body row 2</td>
-<td colspan="2">Cells may span</td>
-</tr>
-</tbody>
-</table>
+<div class="section" id="live-demo">
+<h1>Live Demo<a class="headerlink" href="#live-demo" title="永久链接至标题">¶</a></h1>
+<p>Demo 地址:
+username:
+password:</p>
 </div>
 
 
@@ -89,17 +200,13 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">內容目录</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Welcome to CrazyEye&#8217;s documentation!</a></li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
-<li><a class="reference internal" href="#indices-and-3">Indices and 3</a></li>
+<li><a class="reference internal" href="#">CrazyEye介绍</a></li>
+<li><a class="reference internal" href="#id1">安装</a></li>
+<li><a class="reference internal" href="#id4">配置CrazyEye</a></li>
+<li><a class="reference internal" href="#id5">部署到生产环境</a></li>
+<li><a class="reference internal" href="#live-demo">Live Demo</a></li>
 </ul>
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="#">Documentation overview</a><ul>
-  </ul></li>
-</ul>
-</div>
+
   <div role="note" aria-label="source link">
     <h3>本页</h3>
     <ul class="this-page-menu">
@@ -124,20 +231,18 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="footer">
-      &copy;2015, Alex Li.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
-      
-      |
-      <a href="_sources/index.txt"
-          rel="nofollow">Page source</a>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="总目录"
+             >索引</a></li>
+        <li class="nav-item nav-item-0"><a href="#">CrazyEye 1.0 文档</a> &raquo;</li> 
+      </ul>
     </div>
-
-    
-
-    
+    <div class="footer" role="contentinfo">
+        &copy; 版权所有 2015, Alex Li.
+      由 <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1 创建。
+    </div>
   </body>
 </html>
