@@ -67,8 +67,23 @@ class AuditLogAdmin(admin.ModelAdmin):
             return {'class': css_class, 'data': obj.action_type}
 
 
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+    readonly_fields = models.AuditLog._meta.get_all_field_names()
+
 class TaskLogAdmin(admin.ModelAdmin):
     list_display = ('id','start_time','end_time','task_type','user','cmd','expire_time')
+
+    readonly_fields = models.TaskLog._meta.get_all_field_names()
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 
 class TaskLogDetailAdmin(admin.ModelAdmin):
     list_display = ('child_of_task','bind_host','result','date')
@@ -81,6 +96,12 @@ class TaskLogDetailAdmin(admin.ModelAdmin):
         }.get(obj.result)
         if css_class:
             return {'class': css_class, 'data': obj.result}
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+    readonly_fields = models.TaskLogDetail._meta.get_all_field_names()
 
 
 class TokenAdmin(admin.ModelAdmin):

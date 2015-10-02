@@ -7,9 +7,9 @@
 	<title>CrazyEye堡垒机</title>
 
 
-	<!--STYLESHEET-->
 	<!--=================================================-->
 
+	<!--STYLESHEET-->
     {% block main-head %}
 	<!--Bootstrap Stylesheet [ REQUIRED ]-->
 	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
@@ -440,6 +440,7 @@
 									</li>
 
 									<!--Menu list item-->
+									{% if request.user.is_superuser %}
 									<li>
 										<a href="/user_audit/1">
 											<i class="fa fa-book"></i>
@@ -449,6 +450,7 @@
 										</a>
 
 									</li>
+									{% endif %}
 
 									<li>
 										<a href="/admin/" target="_blank">
@@ -599,6 +601,20 @@
                     selected : 1
                 },
 
+
+                plotOptions: {
+                    series: {
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+                                    alert('Category: ' + this.x + ', value: ' + this.y);
+                                }
+                            }
+                        }
+                    }
+                } ,
+
                 series : [{
                     type:'column',
                     name : '用户数',
@@ -616,6 +632,12 @@
 
     });
         //end chart
+
+
+    function GetOneDayLoginRecords(time_stamp){
+
+
+    }
 
     function recent_active_users(data){
         var html_ele = '';

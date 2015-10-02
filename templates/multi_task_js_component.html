@@ -285,6 +285,7 @@
             if (logdata['summary'].unknown_num == 0 ){
                 if (typeof ResultRefresh !='undefined' ){
                     clearInterval(ResultRefresh);
+                    $("#submit_task_confirm").prop("disabled",false);
                 }
 
                 $("button[onclick='submit_task(this)']").attr("disabled",false);
