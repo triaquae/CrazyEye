@@ -92,8 +92,8 @@
       <file leaf-file-name="index.rst" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/docs/index.rst">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.8137255">
-              <caret line="206" column="77" selection-start-line="206" selection-start-column="77" selection-end-line="206" selection-end-column="77" />
+            <state vertical-scroll-proportion="0.58986926">
+              <caret line="28" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="211" selection-end-column="99" />
               <folding />
             </state>
           </provider>
@@ -1128,8 +1128,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/docs/index.rst">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.8137255">
-          <caret line="206" column="77" selection-start-line="206" selection-start-column="77" selection-end-line="206" selection-end-column="77" />
+        <state vertical-scroll-proportion="0.58986926">
+          <caret line="28" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="211" selection-end-column="99" />
           <folding />
         </state>
       </provider>
