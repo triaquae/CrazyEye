@@ -21,7 +21,7 @@ CrazyEye是基于Python开发的一款简单易用的IT管理软件，目前主�
 下载
 ========
 
-git clone https://github.com/triaquae/CrazyEye.git 
+`$ git clone https://github.com/triaquae/CrazyEye.git`
 
 
 
@@ -52,4 +52,4 @@ Alex,多年运维+自动化开发经验,曾任职公安部、飞信、Nokia中�
 技术支持
 =============
 
-目前CrazyEye发布是的1.0测试版,由于时间有限，在使用过程中难免会出现一些小bug,你可以加入 CrazyEye官方支持QQ群(29215534) 提交bug,我会尽快回复！
+目前CrazyEye发布是的1.0测试版,由于时间有限，在使用过程中难免会出现一些小bug,你可以加入 `CrazyEye官方支持QQ群(29215534)` 提交bug,我会尽快回复！
