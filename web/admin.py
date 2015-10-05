@@ -36,7 +36,7 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 class AuditLogAdmin(admin.ModelAdmin):
     list_display = ('id','session','user','host','action_type','cmd','date')
-    date_hierarchy = 'date'
+    list_filter = ('session','user','host','action_type','date')
     search_fields = ['user__user__username','host__host__hostname','host__host__ip_addr','cmd']
     actions = ['make_published']
 
@@ -75,8 +75,8 @@ class AuditLogAdmin(admin.ModelAdmin):
     readonly_fields = models.AuditLog._meta.get_all_field_names()
 
 class TaskLogAdmin(admin.ModelAdmin):
-    list_display = ('id','start_time','end_time','task_type','user','cmd','expire_time')
-
+    list_display = ('id','start_time','end_time','task_type','user','cmd','total_task','success_task','failed_task','unknown_task','expire_time')
+    list_filter = ('task_type','user','start_time')
     readonly_fields = models.TaskLog._meta.get_all_field_names()
     def has_add_permission(self, request, obj=None):
         return False
@@ -84,10 +84,21 @@ class TaskLogAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+    def total_task(self, obj):
+        return obj.tasklogdetail_set.select_related().count()
+    def success_task(self, obj):
+        return obj.tasklogdetail_set.select_related().filter(result='success').count()
+    def failed_task(self, obj):
+        return obj.tasklogdetail_set.select_related().filter(result='failed').count()
+    def unknown_task(self, obj):
+        data = "<a href='#'> %s </a> " % obj.tasklogdetail_set.select_related().filter(result='unknown').count()
+
+        return data
+    unknown_task.allow_tags = True
 
 class TaskLogDetailAdmin(admin.ModelAdmin):
     list_display = ('child_of_task','bind_host','result','date')
-
+    list_filter = ('child_of_task','result','date')
     def suit_row_attributes(self, obj, request):
         css_class = {
             'success': 'success',
@@ -106,6 +117,12 @@ class TaskLogDetailAdmin(admin.ModelAdmin):
 
 class TokenAdmin(admin.ModelAdmin):
     list_display = ('user','host','token','date','expire')
+    def has_add_permission(self, request, obj=None):
+        return False
+    def has_delete_permission(self, request, obj=None):
+        return False
+    readonly_fields = models.Token._meta.get_all_field_names()
+
 admin.site.register(models.Hosts,HostAdmin)
 admin.site.register(models.HostUsers,HostUserAdmin)
 admin.site.register(models.BindHosts,BindHostAdmin)

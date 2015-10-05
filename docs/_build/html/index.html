@@ -128,7 +128,21 @@ make <span class="o">&amp;&amp;</span> makeinstall
 <span class="p">}</span>
 </pre></div>
 </div>
-<ol class="arabic simple" start="4">
+<ol class="arabic" start="4">
+<li><p class="first">配置Mysql数据库支持中文</p>
+<p>打开mysql 数据库配置文件，分别在[mysqld]和[client]部分添加以下内容:</p>
+</li>
+</ol>
+<div class="highlight-shell"><div class="highlight"><pre><span class="o">[</span>mysqld<span class="o">]</span>
+character-set-server<span class="o">=</span>utf8
+...
+
+<span class="o">[</span>client<span class="o">]</span>
+default-character-set<span class="o">=</span>utf8
+<span class="c">#注意，修改完配置后需要重启Mysql服务后才能生活噢！</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
 <li>在主目录执行以下命令来初始化CrazyEye的数据库表结构：</li>
 </ol>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">makemigrations</span>
@@ -137,8 +151,8 @@ make <span class="o">&amp;&amp;</span> makeinstall
 <span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">createsuperuser</span> <span class="c">#创建管理员用户</span>
 </pre></div>
 </div>
-<ol class="arabic simple" start="5">
-<li>创建一个审计用户:code:<cite>crazy_audit</cite>,并在此用户的:code:<a href="#id2"><span class="problematic" id="id3">`</span></a>.bashrc`用户环境变量文件的最底部，加上以下两条代码：</li>
+<ol class="arabic simple" start="6">
+<li>创建一个审计用户 <code class="code docutils literal"><span class="pre">crazy_audit</span></code> ,并在此用户的 <code class="code docutils literal"><span class="pre">.bashrc</span></code> 用户环境变量文件的最底部，加上以下两条代码：</li>
 </ol>
 <div class="highlight-shell"><div class="highlight"><pre>useradd crazy_audit
 
@@ -162,7 +176,7 @@ Username:
 Password:
 </pre></div>
 </div>
-<ol class="arabic" start="6">
+<ol class="arabic" start="7">
 <li><p class="first">启动WEB登录页面</p>
 <p><code class="code docutils literal"><span class="pre">python</span> <span class="pre">manage.py</span> <span class="pre">runserver</span> <span class="pre">0.0.0.0:8000</span></code>, 然后在浏览器输入此地址:code:<cite>http://localhost:8000/admin</cite>,输入你刚才创建的管理员用户名和密码</p>
 <img alt="_images/crazy_eye_admin_login.png" src="_images/crazy_eye_admin_login.png" />
@@ -170,26 +184,48 @@ Password:
 </ol>
 <p>恭喜！你已成功安装了CrazyEye,现在可以开始配置使用了！</p>
 </div>
-<div class="section" id="id4">
-<h1>配置CrazyEye<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h1>
+<div class="section" id="id2">
+<h1>配置CrazyEye<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h1>
 <ul class="simple">
 <li><a class="reference internal" href="host_config.html#id1"><span>创建主机</span></a></li>
 <li><a class="reference internal" href="host_config.html#id3"><span>创建远程用户</span></a></li>
 <li><a class="reference internal" href="host_config.html#id5"><span>创建主机与远程用户绑定关系</span></a></li>
 <li><a class="reference internal" href="host_config.html#crazyeye"><span>创建CrazyEye账户</span></a></li>
+<li><a class="reference internal" href="host_config.html#webssh"><span>配置WebSSH</span></a></li>
+<li><a class="reference internal" href="host_config.html#id8"><span>设置批量任务最大并发数</span></a></li>
+<li><a class="reference internal" href="host_config.html#webssh"><span>配置WebSSH</span></a></li>
 </ul>
 </div>
-<div class="section" id="id5">
-<h1>部署到生产环境<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h1>
+<div class="section" id="id3">
+<h1>部署到生产环境<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h1>
 <p>CrazyEye默认是以测试环境运行的，在测试环境下，所有的功能虽然和生产环境模式都是一样的，但是却是不能支持多并发的，因为CrazyEye所依赖的Django WEB服务器是单线程的，So如果想让CrazeEye支持高并发，需要借助Apachel或Nginx Web服务器，我们建议你使用Nginx来做CrazyEye的高并发。</p>
 <p>若想让nginx支持Django web服务，需要借助一个第三方Python模块叫uwsgi,具体安装和配置nginx支持Django的方法请参考uwsgi官方文档！</p>
 <p>Uwsgi文档: <a class="reference external" href="http://uwsgi-docs.readthedocs.org/en/latest/tutorials/Django_and_nginx.html">http://uwsgi-docs.readthedocs.org/en/latest/tutorials/Django_and_nginx.html</a></p>
 </div>
+<div class="section" id="screenshots">
+<h1>ScreenShots<a class="headerlink" href="#screenshots" title="永久链接至标题">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="screenshots.html#screenshots"><span>查看软件相关功能截图</span></a></li>
+</ul>
+</div>
 <div class="section" id="live-demo">
 <h1>Live Demo<a class="headerlink" href="#live-demo" title="永久链接至标题">¶</a></h1>
-<p>Demo 地址:
-username:
-password:</p>
+<p>Demo 地址:</p>
+<p>username:</p>
+<p>password:</p>
+</div>
+<div class="section" id="id4">
+<h1>作者介绍<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h1>
+<p>Alex,多年运维+自动化开发经验,曾任职公安部、飞信、Nokia中国、中金公司、Advent软件、汽车之家等公司,目前任老男孩教育Python教学总监，热爱技术、电影、音乐、旅游、妹子！</p>
+<div class="admonition note">
+<p class="first admonition-title">注解</p>
+<p class="last">他的Python教学视频 <a class="reference external" href="http://edu.51cto.com/lecturer/user_id-3050674.html">http://edu.51cto.com/lecturer/user_id-3050674.html</a></p>
+</div>
+<img alt="_images/author_pic.jpg" src="_images/author_pic.jpg" />
+</div>
+<div class="section" id="id5">
+<h1>技术支持<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h1>
+<p>目前CrazyEye发布是的1.0测试版,由于时间有限，在使用过程中难免会出现一些小bug,你可以加入 <code class="code docutils literal"><span class="pre">CrazyEye官方支持QQ群(29215534)</span></code> 提交bug,我会尽快回复！</p>
 </div>
 
 
@@ -202,18 +238,14 @@ password:</p>
   <ul>
 <li><a class="reference internal" href="#">CrazyEye介绍</a></li>
 <li><a class="reference internal" href="#id1">安装</a></li>
-<li><a class="reference internal" href="#id4">配置CrazyEye</a></li>
-<li><a class="reference internal" href="#id5">部署到生产环境</a></li>
+<li><a class="reference internal" href="#id2">配置CrazyEye</a></li>
+<li><a class="reference internal" href="#id3">部署到生产环境</a></li>
+<li><a class="reference internal" href="#screenshots">ScreenShots</a></li>
 <li><a class="reference internal" href="#live-demo">Live Demo</a></li>
+<li><a class="reference internal" href="#id4">作者介绍</a></li>
+<li><a class="reference internal" href="#id5">技术支持</a></li>
 </ul>
 
-  <div role="note" aria-label="source link">
-    <h3>本页</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/index.txt"
-            rel="nofollow">显示源代码</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>快速搜索</h3>
     <form class="search" action="search.html" method="get">

@@ -104,8 +104,28 @@ def get_all_logged_in_users():
         uid_list.append(data.get('_auth_user_id', None))
 
     # Query all logged in users based on id list
-    return User.objects.filter(id__in=uid_list).count()
+    return User.objects.filter(id__in=uid_list)
 
+class Dashboard(object):
+    def __init__(self,request):
+        self.request = request
+
+    def get(self):
+        data_type = self.request.GET.get("data_type")
+        assert  data_type is not None
+        func = getattr(self,data_type)
+        return func()
+    def get_online_users(self):
+        return  get_all_logged_in_users().values('userprofile__name','userprofile__department__name','last_login','userprofile__id')
+
+    def get_online_hosts(self):
+        return   models.SessionTrack.objects.filter(auditlog__action_type=1,closed=0).values('auditlog__host__host__hostname',
+                                                                                             'auditlog__user__name',
+                                                                                             'auditlog__host__host__ip_addr',
+                                                                                             'auditlog__host__host__id',
+                                                                                             'auditlog__host__host_user__username',
+                                                                                             'auditlog__session',
+                                                                                             'id','date')
 def dashboard_summary(request):
     data_dic = {
         'user_login_statistics' :[],
@@ -121,7 +141,7 @@ def dashboard_summary(request):
     data_dic['recent_active_users_cmd_count'] = list(recent_active_users_cmd_count)
     data_dic['summary']['total_servers'] = models.Hosts.objects.count()
     data_dic['summary']['total_users'] = models.UserProfile.objects.count()
-    data_dic['summary']['current_logging_users'] = get_all_logged_in_users()
+    data_dic['summary']['current_logging_users'] = get_all_logged_in_users().count()
 
     #current_connection servers
     current_connected_hosts = models.SessionTrack.objects.filter(closed=0).count()

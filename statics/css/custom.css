@@ -38,6 +38,12 @@
     cursor:pointer;
 }
 
+#cmd-record-modal{
+    z-index: 10;
+}
+#large-modal{
+    z-index: auto;
+}
 #cmd-record-modal .modal-header span{
     color:green;
     font-weight: bold;
@@ -52,4 +58,15 @@
     overflow:auto;
     background-color:black;
     opacity: 0.9;
+}
+
+#large-modal-content{
+    height:400px;
+
+    overflow:auto;
+}
+
+#host_list {
+    height: 300px;
+    overflow: auto;
 }

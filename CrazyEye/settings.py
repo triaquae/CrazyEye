@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'web',
     'debugtools',
+    'session_security',
 
 
 )
@@ -55,6 +56,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'session_security.middleware.SessionSecurityMiddleware',
 )
 
 ROOT_URLCONF = 'CrazyEye.urls'
@@ -70,6 +72,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.core.context_processors.request'
 
             ],
         },
@@ -127,8 +130,8 @@ RSA_PRIVATE_KEY_FILE = '%s/%s'%(BASE_DIR,'var/rsa_key/id_rsa')
 
 
 Welcome_msg = '''
-|-------\033[32;1m[Welcome login OldBoy Auditing server]\033[0m-------|
-|            Version :   0.1                         |
+|-------\033[32;1m[Welcome login CrazyEye Auditing System]\033[0m-----|
+|            Version :   1.0                         |
 |            Author  :   Alex Li                     |
 |            QQ Group:   29215534                    |
 |----------------------------------------------------|\n\n'''

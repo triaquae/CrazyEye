@@ -43,6 +43,8 @@
 </head>
 
 <body>
+
+
 	<div id="container" class="effect mainnav-lg">
     {% csrf_token %}
 
@@ -218,8 +220,8 @@
 									</span>
 								</div>
 
-								<div class="media-body">
-									<p id="current_logging_users" class="text-2x mar-no text-thin"></p>
+								<div  class="media-body">
+									<p id="current_logging_users" style="cursor: pointer" onclick="ShowOnlineUsers()" class="text-2x btn-link  mar-no text-thin"></p>
 									<p class="text-muted mar-no">当前在线用户</p>
 								</div>
 							</div>
@@ -238,7 +240,7 @@
 								</div>
 
 								<div class="media-body">
-									<p id="current_connected_hosts" class="text-2x mar-no text-thin"></p>
+									<p id="current_connected_hosts" style="cursor: pointer" onclick="ShowOnlineHosts()"  class="text-2x mar-no btn-link text-thin"></p>
 									<p class="text-muted mar-no">正在连接的主机数</p>
 								</div>
 							</div>
@@ -442,13 +444,19 @@
 									<!--Menu list item-->
 									{% if request.user.is_superuser %}
 									<li>
-										<a href="/user_audit/1">
+										<a href="#">
 											<i class="fa fa-book"></i>
 											<span class="menu-title">
 												操作纪录
 											</span>
 										</a>
+										<ul class="collapse">
+											<li><a href="/user_audit/1/">按用户</a></li>
+											<li><a href="/host/detail/">按主机</a></li>
+											<!--li class="list-divider"></li>
+											<li><a href="#">Separate link</a></li-->
 
+										</ul>
 									</li>
 									{% endif %}
 
@@ -481,6 +489,10 @@
 			<!--END MAIN NAVIGATION-->
 
         {% block aside-bar %}
+
+        {% include 'user_audit_modal.html' %}
+        {% include 'user_audit_js.html' %}
+
         {% endblock   %}
 		</div>
 
@@ -511,7 +523,25 @@
 	</div>
 	<!--===================================================-->
 	<!-- END OF CONTAINER -->
+<!--Large Bootstrap Modal-->
+<!--===================================================-->
+<div id="large-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" >
+            <div class="modal-header" style="opacity:1">
+                <button class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title" id="myLargeModalLabel">当天登录用户</h4>
 
+            </div>
+            <div class="modal-body" >
+                <div id="large-modal-content" style=""/>
+                </div>
+           </div>
+        </div>
+    </div>
+</div>
+<!--===================================================-->
+<!--End Large Bootstrap Modal-->
 
 	<!--JAVASCRIPT-->
 	<!--=================================================-->
@@ -608,7 +638,12 @@
                         point: {
                             events: {
                                 click: function () {
-                                    alert('Category: ' + this.x + ', value: ' + this.y);
+                                    //alert('Category: ' + this.x + ', value: ' + this.y);
+                                    $.getJSON("{% url 'user_login_counts' %}", {time_stamp: this.x},function(callback){
+                                        console.log(callback);
+                                        ShowCurrentDayRecords(callback);
+
+                                    });//end getJSON
                                 }
                             }
                         }
@@ -634,8 +669,76 @@
         //end chart
 
 
-    function GetOneDayLoginRecords(time_stamp){
 
+    function ShowOnlineHosts(){
+
+
+         $.getJSON("{% url 'dashboard_detail' %}", {'data_type':'get_online_hosts'},function(callback){
+
+            console.log(callback);
+            var table_html = "<table class='table table-hover' > <tr><th>#</th><th>主机名</th><th>IP</th><th>远程用户</th><th>操作用户</th><th>登录时间</th><th></th></tr>";
+
+            $.each(callback, function(index,item){
+                var row = "<tr><td>" + index +
+                        "</td><td data-label='hostname'><a class='btn-link' href='/host/detail/?host_id=" + item.auditlog__host__host__id + "' >" + item.auditlog__host__host__hostname +
+                        "</a></td><td data-label='ip_addr' >" + item.auditlog__host__host__ip_addr +
+                        "</td><td data-label='username' >" + item.auditlog__host__host_user__username +
+                        "</td><td>" + item.auditlog__user__name +
+                        "</td><td>" + item.date +
+                        "</td><td><a href='#' class='badge badge-success' onclick='ShowRecordDetail(this," + item.auditlog__session + ")'>查看详细</a></td></tr>";
+                table_html += row;
+
+            });
+            $("#large-modal-content").html(table_html);
+
+         });//end getJSON
+
+        $("#myLargeModalLabel").html("当前正在连接的主机");
+        $("#large-modal").modal("show");
+
+    }
+    function ShowOnlineUsers(){
+
+        $.getJSON("{% url 'dashboard_detail' %}", {'data_type':'get_online_users'},function(callback){
+
+
+            var table_html = "<table class='table table-hover'><tr><th>#</th><th>在线用户</th><th>部门</th><th>登录时间</th></tr>";
+            $.each(callback,function(index,item){
+                var row = "<tr><td>" + index +
+                            "</td><td><a class='btn-link' href='/user_audit/" + item.userprofile__id +"/' >"+ item.userprofile__name +
+                            "</a></td><td>" + item.userprofile__department +
+                            "</td><td>" + item.last_login +"</td></tr>";
+                table_html += row;
+
+            });//end each
+
+            $("#large-modal-content").html(table_html);
+        });//end getJSON
+
+        $("#myLargeModalLabel").html("当前在线用户");
+        $("#large-modal").modal("show");
+    }
+
+    function ShowCurrentDayRecords(data){
+
+        $("#large-modal").modal("show");
+        var html_ele = "<table class='table table-hover'><tr><th>#</th><th>登录日期</th><th>操作人</th><th>主机名</th><th>远程用户</th><th></th></tr>";
+        $.each(data,function(index,item){
+            console.log(item);
+            var row = "<tr><td>" + index +
+                      "</td><td data-label='login_date'>" + item.date +
+                      "</td><td data-label='username'><a class='btn-link' href='/user_audit/" + item.user + "/'>" + item.user__name +
+                      "</a></td><td data-label='hostname'>" + item.host__host__hostname +
+                      "</td><td>" + item.host__host_user__username +
+                      "</td><td> <a onclick='ShowRecordDetail(this," + item.session + ")' class='badge badge-success'>查看详细</a> </td>" +
+                      "</td></tr>";
+            html_ele += row;
+
+
+        });//end each
+        html_ele += "</table>";
+
+        $("#large-modal-content").html(html_ele);
 
     }
 
@@ -664,8 +767,13 @@
     }
 
     </script>
+
+
     {% block bottom-js %}
     <div></div>
     {% endblock %}
+
+
+{% include 'session_security/all.html' %}
 </body>
 </html>

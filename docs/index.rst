@@ -1,5 +1,7 @@
 
 
+
+
 .. CrazyEye documentation master file, created by
    sphinx-quickstart on Thu Oct  1 11:28:16 2015.
    You can adapt this file completely to your liking, but it should at least
@@ -89,7 +91,23 @@ CrazyEye安装所需要的组件：
    }
 
 
-4. 在主目录执行以下命令来初始化CrazyEye的数据库表结构：
+4. 配置Mysql数据库支持中文
+
+   打开mysql 数据库配置文件，分别在[mysqld]和[client]部分添加以下内容:
+
+.. code-block:: shell
+
+   [mysqld]
+   character-set-server=utf8
+   ...
+
+   [client]
+   default-character-set=utf8
+   #注意，修改完配置后需要重启Mysql服务后才能生活噢！
+
+
+
+5. 在主目录执行以下命令来初始化CrazyEye的数据库表结构：
 
 .. code-block:: python
 
@@ -99,7 +117,7 @@ CrazyEye安装所需要的组件：
    python manage.py createsuperuser #创建管理员用户
 
 
-5. 创建一个审计用户:code:`crazy_audit`,并在此用户的:code:`.bashrc`用户环境变量文件的最底部，加上以下两条代码：
+6. 创建一个审计用户 :code:`crazy_audit` ,并在此用户的 :code:`.bashrc` 用户环境变量文件的最底部，加上以下两条代码：
 
 .. code-block:: shell
    :emphasize-lines: 13,14,15
@@ -126,7 +144,7 @@ CrazyEye安装所需要的组件：
    Password:
 
 
-6. 启动WEB登录页面
+7. 启动WEB登录页面
 
    :code:`python manage.py runserver 0.0.0.0:8000`, 然后在浏览器输入此地址:code:`http://localhost:8000/admin`,输入你刚才创建的管理员用户名和密码
 
@@ -142,6 +160,9 @@ CrazyEye安装所需要的组件：
 - :ref:`创建远程用户`
 - :ref:`创建主机与远程用户绑定关系`
 - :ref:`创建CrazyEye账户`
+- :ref:`配置WebSSH`
+- :ref:`设置批量任务最大并发数`
+- :ref:`配置WebSSH`
 
 
 
@@ -155,6 +176,12 @@ CrazyEye默认是以测试环境运行的，在测试环境下，所有的功能
 Uwsgi文档: http://uwsgi-docs.readthedocs.org/en/latest/tutorials/Django_and_nginx.html
 
 
+
+ScreenShots
+============
+
+- :ref:`ScreenShots`
+
 Live Demo
 =============
 
@@ -163,3 +190,18 @@ Demo 地址:
 username:
 
 password:
+
+
+作者介绍
+=============
+
+Alex,多年运维+自动化开发经验,曾任职公安部、飞信、Nokia中国、中金公司、Advent软件、汽车之家等公司,目前任老男孩教育Python教学总监，热爱技术、电影、音乐、旅游、妹子！
+
+.. note:: 他的Python教学视频 http://edu.51cto.com/lecturer/user_id-3050674.html
+
+.. image:: _static/imgs/author_pic.jpg
+
+技术支持
+=============
+
+目前CrazyEye发布是的1.0测试版,由于时间有限，在使用过程中难免会出现一些小bug,你可以加入 :code:`CrazyEye官方支持QQ群(29215534)` 提交bug,我会尽快回复！

@@ -138,6 +138,7 @@ class TaskLog(models.Model):
     hosts = models.ManyToManyField('BindHosts')
     cmd = models.TextField()
     expire_time = models.IntegerField(default=30)
+    task_pid = models.IntegerField(default=0)
     note = models.CharField(max_length=100,blank=True,null=True)
     def __unicode__(self):
         return "taskid:%s cmd:%s" %(self.id,self.cmd)

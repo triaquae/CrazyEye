@@ -60,6 +60,29 @@
 <span id="id7"></span><h1>创建CrazyEye账户<a class="headerlink" href="#crazyeye" title="永久链接至标题">¶</a></h1>
 <img alt="_images/create_userprofile.png" src="_images/create_userprofile.png" />
 </div>
+<div class="section" id="id8">
+<span id="id9"></span><h1>设置批量任务最大并发数<a class="headerlink" href="#id8" title="永久链接至标题">¶</a></h1>
+<p>CrazyEye以多进程并发的形式执行批量任务，你可以通过修改配置文件 <code class="code docutils literal"><span class="pre">settings.py</span></code> 中的 <code class="code docutils literal"><span class="pre">MaxTaskProcesses</span></code> 来修改批量任务的最大并发数，根据CrazyEye Server的配置可以设置不同的并发数，但并发数过高时反而可能会使整个批量任务过慢，我们的建议是最大并发不要超过CrazyEye server的CPU核数的2倍，例如你的设置是8核的，那 <code class="code docutils literal"><span class="pre">MaxTaskProcesses</span></code> 的值最好不要超过16.</p>
+</div>
+<div class="section" id="webssh">
+<span id="id10"></span><h1>配置WebSSH<a class="headerlink" href="#webssh" title="永久链接至标题">¶</a></h1>
+<p>如果想允许用户通过WEB浏览器直接登录目标机器，需要在:code:<a href="#id11"><span class="problematic" id="id12">`</span></a>settings.py`中配置好WEB SSH连接信息</p>
+<div class="highlight-shell"><div class="highlight"><pre><span class="c">#还记得在安装CrazyEye时需要安装的Shellinabox吗,Well，你的WEB SSH支持就得依赖这个插件，事实上Shellinabox是一个独立的开源工具，我们只不需要在CrazyEye配置好如何调用它即可</span>
+<span class="c">#当你安装完Shellinabox后，执行shellinaboxd 即可启动该软件，然后执行netstat -tulnp |grep 4200查看其状态</span>
+
+shellinaboxd <span class="c">#启动shellinabox</span>
+
+netstat -tulnp<span class="p">|</span>grep 4200
+tcp        <span class="m">0</span>      <span class="m">0</span> 0.0.0.0:4200            0.0.0.0:*               LISTEN
+
+<span class="c">#接下来配置settings.py,找到WebSSH部分</span>
+<span class="nv">WebSSH</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;localhost&#39;</span>,4200<span class="o">]</span> <span class="c">#把’localhost‘替换成你的Shellinabox服务的启动IP</span>
+
+<span class="c">#此时，再打开WEB页面,就可以直接从WEB登录啦！</span>
+</pre></div>
+</div>
+<img alt="_images/work_with_webssh.png" src="_images/work_with_webssh.png" />
+</div>
 
 
           </div>
@@ -73,15 +96,10 @@
 <li><a class="reference internal" href="#id3">创建远程用户</a></li>
 <li><a class="reference internal" href="#id5">创建主机与远程用户绑定关系</a></li>
 <li><a class="reference internal" href="#crazyeye">创建CrazyEye账户</a></li>
+<li><a class="reference internal" href="#id8">设置批量任务最大并发数</a></li>
+<li><a class="reference internal" href="#webssh">配置WebSSH</a></li>
 </ul>
 
-  <div role="note" aria-label="source link">
-    <h3>本页</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/host_config.txt"
-            rel="nofollow">显示源代码</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>快速搜索</h3>
     <form class="search" action="search.html" method="get">

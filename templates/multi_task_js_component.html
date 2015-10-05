@@ -160,6 +160,40 @@
         });
     }
 
+    function show_alert_info(msg_list){
+        var err_msg = "";
+        for (msg_index in msg_list){
+            err_msg += msg_index + ". " + msg_list[msg_index] + "<br/>";
+        }
+
+        $.niftyNoty({
+            type: 'info',
+            container : '#alert-panel',
+            html : '<h4 class="alert-title">Message</h4>' +
+            '<p class="alert-message">'+  err_msg +  '</p>' +
+            '<div class="mar-top">' +
+                '<button type="button" class="btn btn-info" data-dismiss="noty">知道了</button>' +
+            '</div>',
+            closeBtn : false
+        });
+    }
+    function show_alert_warning(msg_list){
+        var err_msg = "";
+        for (msg_index in msg_list){
+            err_msg += msg_index + ". " + msg_list[msg_index] + "<br/>";
+        }
+
+        $.niftyNoty({
+            type: 'warning',
+            container : '#alert-panel',
+            html : '<h4 class="alert-title">Warning</h4>' +
+            '<p class="alert-message">'+  err_msg +  '</p>' +
+            '<div class="mar-top">' +
+                '<button type="button" class="btn btn-warning" data-dismiss="noty">知道了</button>' +
+            '</div>',
+            closeBtn : false
+        });
+    }
 //------------------
 
     function task_detail_toggle(action_type,ele){
@@ -292,6 +326,29 @@
 
             }
         });//end getJSON
+    }
+
+    function TerminateTask(){
+        var current_task_id = $("#current_task_id span").text();
+        if (current_task_id != ''){
+            $.post("{% url 'multitask_action' %}", {'action': 'terminate_task', 'task_id':current_task_id},function(callback){
+
+                if (callback.indexOf("has terminated") > -1){ //task got terminated..
+                    clearInterval(ResultRefresh);
+
+                    show_alert_info([callback]);
+                     $("#submit_task_confirm").prop("disabled",false);
+                }else{
+
+                    show_alert_warning([callback]);
+                }
+
+
+            });//end post
+        }else{
+            show_alert(['当前无任务运行，何谈停止任务？']);
+        }
+
     }
     function GetTaskResult(task_id,run_type){
         if (run_type=='refresh'){

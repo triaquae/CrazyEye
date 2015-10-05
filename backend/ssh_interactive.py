@@ -131,6 +131,7 @@ def login(main_ins,h):
         chan.invoke_shell()
         print('*** Here we go! ***\n')
         main_ins.flush_cmd_input('---- Logged in! ----',h,1)
+        main_ins.flush_audit_log(h)
         interactive.interactive_shell(chan,main_ins,ip,username,h)
         chan.close()
         t.close()

@@ -25,6 +25,16 @@ def query_set(table_related_field,query_field,string):
     data_set = table_related_field.filter(**{query_field:string}).count()
 
     return data_set
+
+@register.simple_tag
+def query_logout_date(obj, query_field, string):
+    data_set = obj.filter(**{query_field:string})
+    if data_set:
+
+        return data_set[0].date.strftime("%Y-%m-%d %H:%M:%S")
+
+
+
 @register.simple_tag
 def pagenator(obj,data_type):
     html = '''<ul class="pagination">'''
@@ -39,6 +49,24 @@ def pagenator(obj,data_type):
             html += '''<li ><a href="?page=%s&type=%s">%s</a></li>''' %(p_num,data_type,p_num)
     if obj.has_next():
         html += '''<li class="disabled"><a href="?page=%s&type=%s" class="fa fa-angle-double-right"></a></li>''' %( obj.next_page_number(),data_type)
+
+    html += "</ul>"
+
+    return html
+
+@register.simple_tag
+def pagenator2(obj,arg_name,arg_val):
+    html = '''<ul class="pagination">'''
+    if obj.has_previous():
+        html += '''<li class="disabled"><a href="?page=%s&%s=%s" class="fa fa-angle-double-left"></a></li>''' %(obj.previous_page_number(),arg_name,arg_val)
+
+    for p_num in obj.paginator.page_range:
+        if p_num == obj.number:
+            html += '''<li class="active"><a href="?page=%s&%s=%s">%s</a></li>''' %(p_num,arg_name,arg_val,p_num)
+        else:
+            html += '''<li ><a href="?page=%s&%s=%s">%s</a></li>''' %(p_num,arg_name,arg_val,p_num)
+    if obj.has_next():
+        html += '''<li class="disabled"><a href="?page=%s&%s=%s" class="fa fa-angle-double-right"></a></li>''' %( obj.next_page_number(),arg_name,arg_val)
 
     html += "</ul>"
 

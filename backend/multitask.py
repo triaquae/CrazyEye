@@ -65,7 +65,8 @@ def file_tranfer_exec(task_id,bind_host_id,user_id,content ):
 
             t.connect(username=bind_host.host_user.username,password=bind_host.host_user.password)
         else:
-            t.connect(username=bind_host.host_user.username,pkey='test')
+            key = paramiko.RSAKey.from_private_key_file(settings.RSA_PRIVATE_KEY_FILE)
+            t.connect(username=bind_host.host_user.username,pkey=key)
 
         sftp = paramiko.SFTPClient.from_transport(t)
 
@@ -88,10 +89,7 @@ def file_tranfer_exec(task_id,bind_host_id,user_id,content ):
         else:
 
             local_path = "%s/%s/%s/%s" %(settings.BASE_DIR,settings.FileUploadDir,user_id,task_id)
-            try:
-                os.mkdir(local_path)
-            except OSError,e:
-                pass
+
 
             remote_filename = remote_path.split("/")[-1]
             local_file_path = "%s.%s" %(remote_filename,bind_host.host.ip_addr)

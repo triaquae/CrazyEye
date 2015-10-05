@@ -6,11 +6,13 @@ from django.contrib.auth.decorators import login_required
 import host_mgr
 # Create your views here.
 import models,utils
-import json
+import json,datetime
 from CrazyEye import settings
 import forms
 from backend.utils import json_date_to_stamp,json_date_handler
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+import django.utils.timezone
+
 
 @login_required
 def dashboard(request):
@@ -37,17 +39,20 @@ def hosts(request):
                                         'webssh':settings.WebSSH})
 
 def login(request):
-    #redirect_to_page = request.POST,request.GET.get('next')
+
     if request.method == "POST":
 
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = auth.authenticate(username=username,password=password)
         if user is not None:
-            auth.login(request,user)
-            request.session.set_expiry(60*30)
-            print 'session expires at :',request.session.get_expiry_date()
-            return HttpResponseRedirect('/')
+            if django.utils.timezone.now() > user.userprofile.valid_begin_time and django.utils.timezone.now()  < user.userprofile.valid_end_time:
+                auth.login(request,user)
+                request.session.set_expiry(60*30)
+                #print 'session expires at :',request.session.get_expiry_date()
+                return HttpResponseRedirect('/')
+            else:
+                return render(request,'login.html',{'login_err': 'User account is expired,please contact your IT guy for this!'})
         else:
             return render(request,'login.html',{'login_err': 'Wrong username or password!'})
     else:
@@ -134,23 +139,14 @@ def multitask_file(request):
 def multitask_res(request):
     multi_task = host_mgr.MultiTask('get_task_result',request)
     task_result = multi_task.run()
-    #print 'log result:', task_result
     return HttpResponse(task_result)
 
 @login_required
 def file_download(request,task_id):
 
-    print '=====>file download:',task_id
-    #file_path = "%s/%s/%s" %(settings.BASE_DIR,settings.FileUploadDir,request.GET.get('task_id'))
     file_path = "%s/%s/%s/%s" %(settings.BASE_DIR,settings.FileUploadDir,request.user.userprofile.id,task_id)
     return utils.send_zipfile(request, task_id,file_path)
 
-#below test
-def article_detail(request,year,month,day,test):
-    print '--->',year,month,day , test
-    from django.http import Http404,HttpResponseNotFound
-    return HttpResponseNotFound('<h1>Page not found</h1>')
-    #raise  Http404("ttt")
 
 @login_required
 def token_gen(request):
@@ -160,7 +156,7 @@ def token_gen(request):
 
     return HttpResponse(token_key)
 
-
+@login_required
 def dashboard_summary(request):
 
     if request.method == 'GET':
@@ -169,7 +165,42 @@ def dashboard_summary(request):
         summary_data = utils.dashboard_summary(request)
         return HttpResponse(json.dumps(summary_data,default=json_date_to_stamp))
 
+@login_required
+def dashboard_detail(request):
+    if request.method == 'GET':
+        detail_ins = utils.Dashboard(request)
+        res = list(detail_ins.get())
+        print '-->',res
+        return HttpResponse(json.dumps(res,default=json_date_handler))
 
+@login_required
+def host_detail(request):
+    host_id = request.GET.get('host_id')
+    access_records = []
+
+    all_hosts = models.Hosts.objects.all()
+    if host_id:
+        host_id = int(host_id)
+
+        access_records = models.AuditLog.objects.filter(host__host_id=host_id,action_type=1).order_by('-date')
+        paginator = Paginator(access_records,10)
+        page = request.GET.get('page')
+        try:
+            access_records = paginator.page(page)
+        except PageNotAnInteger:
+            access_records = paginator.page(1)
+        except EmptyPage:
+            access_records = paginator.page(paginator.num_pages)
+
+
+
+    return  render(request, 'host_detail.html', {'all_hosts':all_hosts,
+                                                 'current_host_id': host_id,
+                                                 'access_records': access_records,
+                                                 'active_node':'/host/detail/'})
+
+
+@login_required
 def user_audit(request,user_id):
 
     user_obj = models.UserProfile.objects.get(id=int(user_id))
@@ -201,18 +232,28 @@ def user_audit(request,user_id):
         'user_obj':user_obj,
         'user_login_records':login_records,
         'multitask_records':multitask_records,
-        'active_node':'/user_audit/1',
+        'active_node':'/user_audit/1/',
         'data_type': data_type #for tab switch usage
     })
 
+@login_required
+def multitask_task_action(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        m = host_mgr.MultiTask(action,request)
+        res = m.run()
+        print '-->task res:',res
 
+        return  HttpResponse(json.dumps(res))
 
+@login_required
 def multi_task_log_detail(request,task_id):
 
     log_obj = models.TaskLog.objects.get(id=task_id)
 
     return render(request,'multi_task_log_detail.html',{'log_obj':log_obj})
 
+@login_required
 def audit_cmd_logs(request):
     session_id  = request.GET.get('session_id')
     if session_id:
@@ -226,25 +267,16 @@ def audit_cmd_logs(request):
 
         return  HttpResponse(json.dumps(data,default=json_date_handler))
 
+@login_required
+def user_login_counts(request):
+    filter_time_stamp = request.GET.get('time_stamp')
+    assert  filter_time_stamp.isdigit()
+    filter_time_stamp = int(filter_time_stamp) / 1000
+    filter_date_begin = datetime.datetime.fromtimestamp(filter_time_stamp)
+    filter_date_end = filter_date_begin + datetime.timedelta(days=1)
 
+    user_login_records = models.AuditLog.objects.filter(action_type=1,date__range=[filter_date_begin,filter_date_end]).values('host','host__host_user__username','user','user__name','host__host__hostname','session','date')
 
-#---------below test ----------
-
-def register(request):
-    print 'SESSION:', dir(request.session)
-    print request.session.session_key
-    print request.session.get_expiry_age()
-    print request.session.set_expiry(30)
-    if request.method == 'GET':
-        register_form = forms.RegistrationForm()
-        return  render(request, 'register.html',{'form': register_form})
-    else:
-        print request.POST
-        register_form = forms.RegistrationForm(request.POST)
-        if register_form.is_valid():
-            print '--->',register_form.cleaned_data
-            return HttpResponse("register success!")
-        else:
-            print '---error:',register_form.errors
-            return  render(request, 'register.html',{'form': register_form})
+    print user_login_records
+    return  HttpResponse(json.dumps(list(user_login_records),default=json_date_handler))
 

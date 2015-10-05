@@ -1,0 +1,202 @@
+{% extends 'index.html' %}
+{% load custom_tag %}
+
+{% block page-title %}
+主机详情
+{% endblock %}
+{% block page-content %}
+
+<div class="row">
+     <div class="col-sm-6 col-lg-3">
+        <div class="panel">
+            <div class="panel-heading">
+                <h3 class="panel-title">主机列表</h3>
+            </div>
+            <div  class="panel-body " >
+
+                      <input type="text" oninput="SearchHost(this)" id="host_search" class="form-control" placeholder="查找主机...">
+
+
+
+                <div id="host_list">
+                    <div style="margin-bottom:0;" class="list-group bg-trans">
+                     {% for host in all_hosts %}
+
+                            {% if host.id == current_host_id %}
+                                <a class="list-group-item active" host_id="{{ host.id }}" href="/host/detail/?host_id={{host.id }}">{{ host.hostname }}({{ host.ip_addr }})</a>
+                            {% else %}
+                                <a class="list-group-item" host_id="{{ host.id }}" href="/host/detail/?host_id={{host.id }}" >{{ host.hostname }}({{ host.ip_addr }})</a>
+                            {% endif %}
+                     {% endfor %}
+                     </div>
+                </div>
+
+
+
+
+            </div>
+        </div>
+     </div>
+
+    <div class="col-sm-6 col-lg-9">
+        <div class="panel">
+             <div class="panel-heading">
+                <h3 class="panel-title">主机信息</h3>
+            </div>
+            <div class="panel-body" >
+
+                {% for host in all_hosts %}
+
+                    {% if host.id == current_host_id %}
+                    <div class="row" >
+                        <label class="col-md-2 control-label">主机名(IP)</label>
+                        <div  class="col-md-9 ">
+                            <b>{{ host }}</b>
+                        </div>
+                    </div>
+                    <div class="row" >
+                        <label class="col-md-2 control-label">操作系统</label>
+                        <div  class="col-md-9 ">
+                            <b>{{ host.system_type }}</b>
+                        </div>
+                    </div>
+                    <div class="row" >
+                        <label class="col-md-2 control-label">端口</label>
+                        <div  class="col-md-9 ">
+                            <b>{{ host.port }}</b>
+                        </div>
+                    </div>
+
+                    <div class="row" >
+                        <label class="col-md-2 control-label">所在机房</label>
+                        <div  class="col-md-9 ">
+                            <b>{{ host.idc }}</b>
+                        </div>
+                    </div>
+                    <div class="row" >
+                        <label class="col-md-2 control-label">主机状态</label>
+                        <div  class="col-md-9 ">
+                            {% if host.enabled %}
+                            <span class="badge badge-success">已启用</span>
+                            {% else %}
+                            <span class="badge badge-danger">已停用</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row" >
+                        <label class="col-md-2 control-label">所在机房</label>
+                        <div  class="col-md-9 ">
+                            <b>{{ host.idc }}</b>
+                            <hr/>
+                        </div>
+
+                    </div>
+
+                    <div class="row" >
+                        <label class="col-md-2 control-label">已绑定远程用户信息</label>
+                        <div  class="col-md-9 ">
+                            {% for bind_host in host.bindhosts_set.select_related %}
+                            <div><b>{{ bind_host.host_user.username }}
+                                -->属组:{% for group in  bind_host.host_group.select_related %}
+                                    <span class="badge badge-info">{{ group.name }}</span>{% endfor %}</b>
+                                {% if not bind_host.enabled %}<span class="badge badge-danger">此账户已禁用</span>{% endif %}
+                            </div>
+
+                            {% endfor %}
+                        </div>
+                    </div>
+
+
+                    <div class="row" >
+                        <hr/>
+                        <label class="col-md-2 control-label panel-title">用户访问纪录</label>
+
+                        <table class="table table-hover">
+                            <tr>
+                                <th>#</th>
+                                <th>操作用户</th>
+                                <th>远程用户</th>
+                                <th>登录日期</th>
+                                <th>登出日期</th>
+                                <th>命令数</th>
+                                <th>状态</th>
+
+                            </tr>
+                            {% for log in access_records %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td data-label="hostname" class="hide" >{{ log.host.host.hostname }}</td>
+                                <td>{{ log.user.name }}</td>
+                                <td data-label="username">{{ log.host.host_user.username }}</td>
+                                <td data-label="login-date">{{ log.date |date:"Y-m-d H:i:s" }}</td>
+                                <td data-label="logout-date">{% query_logout_date  log.session.auditlog_set.select_related 'action_type' 2 %}</td>
+                                <td ><a href="#" onclick="ShowRecordDetail(this,'{{ log.session.id }}')" class="btn-link">{{ log.session.auditlog_set.select_related.count }}</a></td>
+                                {% if log.session.closed %}
+                                    <td ><span class="badge badge-info">已结束</span></td>
+                                {% else %}
+                                    <td><span class="badge badge-warning">连接中</span></td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+
+                        </table>
+                        <div class="pagination pull-right ">
+                            {% pagenator2 access_records 'host_id' current_host_id %}
+                        </div>
+                    </div>
+
+
+
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block bottom-js %}
+<script type="text/javascript">
+
+    $(document).ready(function(){
+
+        host_list = {};
+        $("#host_list div").children().each(function(index){
+
+          host_list[$(this).attr("host_id")] = $(this).text();
+        });
+
+        $("#host_list a[host_id='" + "{{ current_host_id }}" + "']").prependTo("#host_list div");
+        console.log($("#host_list active")[0])
+
+
+    });//end doc ready
+
+    function SearchHost(ele){
+
+        var search_str = $(ele).val()
+        var host_list_html ='' ;
+
+        $.each(host_list,function(host_id,val){
+            if (val.indexOf(search_str) >-1){
+                console.log(val);
+                var html_row = "<a class='list-group-item' host_id='" + host_id + "' href='/host/detail/?host_id=" + host_id + "' > " + val + "</a>";
+                host_list_html += html_row ;
+
+            }
+
+        });//end each
+
+        $("#host_list").html(host_list_html);
+    }
+
+
+</script>
+{% endblock %}
+
+
+

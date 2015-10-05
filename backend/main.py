@@ -94,11 +94,12 @@ class Features(object):
 
             user = auth.authenticate(username=user, password=passwd)
             if user is not None: #pass authentication
-
-                self.login_user = user
-                self.user_id = user.id
-
-                return True
+                if django.utils.timezone.now() > user.userprofile.valid_begin_time and django.utils.timezone.now() < user.userprofile.valid_end_time:
+                    self.login_user = user
+                    self.user_id = user.id
+                    return True
+                else:
+                    sys.exit("\033[31;1mYour account is expired,please contact your IT guy for this!\033[0m")
             else:
                 print "\033[31;1mInvalid username or password!\033[0m"
                 count +=1

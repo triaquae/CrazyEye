@@ -35,7 +35,14 @@
                     <label class="col-md-2 control-label">账户</label>
                     <div  class="col-md-9 ">
                         <b>{{ user_obj.name}}</b>
-                        <hr/>
+
+                    </div>
+                </div>
+                <div class="row" >
+                    <label class="col-md-2 control-label">部门</label>
+                    <div  class="col-md-9 ">
+                        <b>{{ user_obj.department.name}}</b>
+
                     </div>
                 </div>
                 <div class="row" >
@@ -223,64 +230,17 @@
     </div> <!--end col-sm-6 col-lg-12-->
 </div>
 
-<!--Large Bootstrap Modal-->
-<!--===================================================-->
-<div id="cmd-record-modal" class="modal fade" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" >
-            <div class="modal-header" style="opacity:1">
-                <button class="close" data-dismiss="modal"><span>&times;</span></button>
-                <h4 class="modal-title" id="myLargeModalLabel">详细操作纪录</h4>
-                <div class="row" style="margin-top:5px">
-                    <div class="col-md-2" id="modal-username">用户名: <span></span></div>
-                    <div class="col-md-4" id="modal-hostname">主机: <span></span></div>
-                    <div class="col-md-3" id="modal-login-date">Login: <span></span></div>
-                    <div class="col-md-3" id="modal-logout-date">Logout: <span></span></div>
-                </div>
-            </div>
-            <div class="modal-body" >
-                <div id="cmd_log_content" style=""/>
-                </div>
-           </div>
-        </div>
-    </div>
-</div>
-<!--===================================================-->
-<!--End Large Bootstrap Modal-->
+{% include 'user_audit_modal.html' %}
+
 
 {% endblock %}
 {% block aside-bar %}
 
 {% endblock %}
 {% block bottom-js %}
+{% include 'user_audit_js.html' %}
 <script type="text/javascript" >
 
-    function ShowRecordDetail(this_ele,session_id){
-        //console.log(session_id);
-
-        $.getJSON('/api/audit/cmd_logs/',{session_id: session_id},function(callback){
-            console.log(callback)
-            var html_ele = ''
-            $.each(callback.data,function(index,item){
-                html_ele += "<div class='row'><div class='col-md-3'><span>" + item.date + "</span></div><div class='col-md-9'><span >" + item.cmd +"</span></div></div>";
-                //console.log(item)
-            });
-            $("#cmd_log_content").html(html_ele);
-            var tr_ele = $(this_ele).parent().parent();
-            var hostname = tr_ele.children("td[data-label='hostname']").text();
-            var ip_addr = tr_ele.children("td[data-label='ip_addr']").text();
-            var username = tr_ele.children("td[data-label='username']").text();
-            var login_date = tr_ele.children("td[data-label='login_date']").text();
-            var logout_date = tr_ele.children("td[data-label='logout_date']").text();
-
-            $("#modal-username span").text(username);
-            $("#modal-hostname span").text(hostname + "("+ ip_addr +")");
-            $("#modal-login-date span").text(login_date);
-            $("#modal-logout-date span").text(logout_date);
-        });//end getJSON
-        $("#cmd-record-modal").modal('show');
-
-    }
 
     $(document).ready(function(){
 
