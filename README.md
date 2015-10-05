@@ -21,6 +21,7 @@ CrazyEye是基于Python开发的一款简单易用的IT管理软件，目前主�
 下载
 ========
 
+git clone https://github.com/triaquae/CrazyEye.git 
 
 
 
