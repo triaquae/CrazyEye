@@ -37,7 +37,7 @@
 								</ul>
 
                                 {% for host in  request.user.userprofile.bind_hosts.select_related %}
-                                    <label input_label='host' style='display:none' onclick="SelectedHostCounter()" class="form-checkbox form-normal form-primary form-text active">
+                                    <label input_label='host' style='display:none'  class="form-checkbox form-normal form-primary form-text active">
                                         <input type="checkbox" id="host_{{ host.id }}" >{{ host.host.hostname }}({{ host.host.ip_addr }}) @ {{ host.host_user.username }}
                                     </label>
                                 {% endfor %}
@@ -67,7 +67,7 @@
 								</ul>
 
                                 {% for host in  g.bindhosts_set.select_related %}
-                                    <label input_label='host' style='display:none' onclick="SelectedHostCounter()" class="form-checkbox form-normal form-primary form-text active">
+                                    <label input_label='host' style='display:none'  class="form-checkbox form-normal form-primary form-text active">
                                         <input type="checkbox" id="host_{{ host.id }}" >{{ host.host.hostname }}({{ host.host.ip_addr }}) @ {{ host.host_user.username }}
                                     </label>
                                 {% endfor %}

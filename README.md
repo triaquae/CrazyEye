@@ -27,13 +27,13 @@ CrazyEye是基于Python开发的一款简单易用的IT管理软件，目前主�
 安装
 ==================
 
-请看详细安装文档: http://crazyeyes.readthedocs.org/en/latest/index.html#id2
+请看详细安装文档: http://crazyeyedoc.readthedocs.org/en/latest/#
 
 
 Live Demo
 =============
 
-Demo 地址:
+Demo 地址: #有木有人愿意捐赠个虚拟主机来跑demo? 哈哈
 
 username:
 
