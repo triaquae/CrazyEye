@@ -41,7 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'web',
-    'debugtools',
+    #'debugtools',
     'session_security',
 
 
