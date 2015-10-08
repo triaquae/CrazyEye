@@ -1,0 +1,5 @@
+Django==1.8.4
+django-suit==0.2.15
+django-session-security
+paramiko
+MySQL-python
