@@ -1,3 +1,4 @@
+#_*_coding:utf-8_*_
 from django.shortcuts import render,HttpResponseRedirect,HttpResponse
 from django.contrib import auth
 
@@ -12,7 +13,7 @@ import forms
 from backend.utils import json_date_to_stamp,json_date_handler
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import django.utils.timezone
-
+from django.core.exceptions import ObjectDoesNotExist
 
 @login_required
 def dashboard(request):
@@ -46,13 +47,17 @@ def login(request):
         password = request.POST.get('password')
         user = auth.authenticate(username=username,password=password)
         if user is not None:
-            if django.utils.timezone.now() > user.userprofile.valid_begin_time and django.utils.timezone.now()  < user.userprofile.valid_end_time:
-                auth.login(request,user)
-                request.session.set_expiry(60*30)
-                #print 'session expires at :',request.session.get_expiry_date()
-                return HttpResponseRedirect('/')
-            else:
-                return render(request,'login.html',{'login_err': 'User account is expired,please contact your IT guy for this!'})
+            try:
+                if django.utils.timezone.now() > user.userprofile.valid_begin_time and django.utils.timezone.now()  < user.userprofile.valid_end_time:
+                    auth.login(request,user)
+                    request.session.set_expiry(60*30)
+                    #print 'session expires at :',request.session.get_expiry_date()
+                    return HttpResponseRedirect('/')
+                else:
+                    return render(request,'login.html',{'login_err': 'User account is expired,please contact your IT guy for this!'})
+            except ObjectDoesNotExist:
+                    return render(request,'login.html',{'login_err': u'CrazyEye账户还未设定,请先登录后台管理界面创建CrazyEye账户!'})
+
         else:
             return render(request,'login.html',{'login_err': 'Wrong username or password!'})
     else:
