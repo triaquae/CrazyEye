@@ -193,7 +193,7 @@ def host_detail(request):
         try:
             access_records = paginator.page(page)
         except PageNotAnInteger:
-            access_records = paginator.page(10)
+            access_records = paginator.page(1)
         except EmptyPage:
             access_records = paginator.page(paginator.num_pages)
 

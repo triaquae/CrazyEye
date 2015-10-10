@@ -84,7 +84,7 @@ def manual_auth(ins,username, hostname,pw,host_obj,main_ins):
 
 
 # setup logging
-paramiko.util.log_to_file('demo.log')
+#paramiko.util.log_to_file('demo.log')
 
 def login(main_ins,h):
     ip,port,username,password=h.host.ip_addr,h.host.port,h.host_user.username,h.host_user.password
