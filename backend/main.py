@@ -155,6 +155,8 @@ class Features(object):
                     print_msg('Bye!','warning',exit=True)
             except (KeyboardInterrupt,EOFError):
                 print_msg("input 'exit' to logout!",'err')
+            except UnicodeEncodeError,e:
+                print_msg("%s, make sure you terminal supports utf8 charset!" % str(e),'err',exit=True)
     def flush_cmd_input(self,log,host,action_type):
         current_time = django.utils.timezone.now()
         self.cmd_logs.append([current_time,log,action_type])

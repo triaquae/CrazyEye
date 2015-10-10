@@ -21,6 +21,8 @@ import socket
 import sys
 from paramiko.py3compat import u
 
+unsupport_cmd_list = ['rz','sz']
+
 # windows does not have termios...
 try:
     import termios
@@ -71,6 +73,8 @@ def posix_shell(chan,self,host_ip,username,host_ins):
 
                 except socket.timeout:
                     pass
+                except UnicodeDecodeError,e:
+                    pass         
             if sys.stdin in r:
                 x = sys.stdin.read(1)
                 if len(x) == 0:
@@ -78,8 +82,12 @@ def posix_shell(chan,self,host_ip,username,host_ins):
                 if not x == '\r':
                     cmd +=x
                 else:
-                    self.flush_cmd_input(cmd,host_ins,0)
+                    if len(cmd.strip())>0:
+                        self.flush_cmd_input(cmd,host_ins,0)
+                    if cmd in unsupport_cmd_list:
+                        x="...Operation is not supported!\r\n"
                     cmd=''
+
                 if x == '\t':
                     tab_input_flag = True
                 chan.send(x)

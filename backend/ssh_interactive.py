@@ -114,7 +114,7 @@ def login(main_ins,h):
             try:
                 keys = paramiko.util.load_host_keys(os.path.expanduser('~/ssh/known_hosts'))
             except IOError:
-                print('*** Unable to open host keys file')
+                #print('*** Unable to open host keys file')
                 keys = {}
 
 
@@ -127,9 +127,10 @@ def login(main_ins,h):
             sys.exit(1)
 
         chan = t.open_session()
-        chan.get_pty()
+        #t_width,t_height = get_terminal_size()
+        chan.get_pty(term='vt100')
         chan.invoke_shell()
-        print('*** Here we go! ***\n')
+        print('*** Login success ***\n')
         main_ins.flush_cmd_input('---- Logged in! ----',h,1)
         main_ins.flush_audit_log(h)
         interactive.interactive_shell(chan,main_ins,ip,username,h)
@@ -137,17 +138,47 @@ def login(main_ins,h):
         t.close()
 
     except Exception as e:
-        print('*** Caught exception: ' + str(e.__class__) + ': ' + str(e))
+        print('\033[31;1m%s\033[0m' % str(e))
         main_ins.flush_cmd_input(str(e),h,1)
         main_ins.flush_cmd_input('--session closed--',h,2)
 
-        traceback.print_exc()
+        #traceback.print_exc()
         try:
             t.close()
         except:
             pass
-        sys.exit(1)
+        #sys.exit(1)
+
+
+
+def get_terminal_size():
+    """Returns a tuple (x, y) representing the width(x) and the height(x)
+    in characters of the terminal window."""
+    def ioctl_GWINSZ(fd):
+        try:
+            import fcntl, struct
+            cr = struct.unpack('hh', fcntl.ioctl(fd, termios.TIOCGWINSZ,
+        '1234'))
+        except:
+            return None
+        return cr
+    cr = ioctl_GWINSZ(0) or ioctl_GWINSZ(1) or ioctl_GWINSZ(2)
+    if not cr:
+        try:
+            fd = os.open(os.ctermid(), os.O_RDONLY)
+            cr = ioctl_GWINSZ(fd)
+            os.close(fd)
+        except:
+            pass
+    if not cr:
+        try:
+            cr = (env['LINES'], env['COLUMNS'])
+        except:
+            cr = (25, 80)
+    return int(cr[1]), int(cr[0])
+
 
 
 if __name__ == '__main__':
-    login('192.168.2.250', 22,'alex','alex3714')
+    #login('192.168.2.250', 22,'alex','alex3714')
+    print get_terminal_size()
