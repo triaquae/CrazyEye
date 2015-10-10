@@ -117,10 +117,14 @@ class Features(object):
 
         while True:
             try:
+
+                print 'z. Ungrouped [%s]' % self.login_user.userprofile.bind_hosts.select_related().count()
                 for index,h_group in enumerate(host_groups):
                     #host_list = models.BindHosts.objects.filter(host_group__id=h_group.id)
                     host_list = h_group.bindhosts_set.select_related()
-                    print index, h_group.name,'[%s]' %len(host_list)
+                    print '%s. %s [%s]' % (index, h_group.name,len(host_list))
+
+
 
                 user_choice = raw_input("\033[32;1m>>:\033[0m").strip()
 
@@ -151,6 +155,30 @@ class Features(object):
 
                     else:
                         print_msg("No this option!", 'err')
+                elif user_choice == 'z': #for ungrouped hosts
+                    hosts = self.login_user.userprofile.bind_hosts.select_related()
+                    while True:
+                        for index,h in enumerate(hosts):
+                            print "  %s.\t%s(%s)  %s" %(index,h.host.hostname,h.host.ip_addr,h.host_user.username)
+                        user_choice2 = raw_input("\033[32;1m['b'(back)]>>>:\033[0m").strip()
+
+                        if user_choice2.isdigit():
+                            user_choice2 = int(user_choice2)
+                            if user_choice2 <len(hosts):
+                                h= hosts[user_choice2]
+                                print '\033[32;1m-----connecting [%s] with user [%s]-----\033[0m' %(h.host.ip_addr,h.host_user.username)
+                                try:
+                                    ssh_interactive.login(self,h)
+                                except Exception,e:
+                                    print "\033[31;1m%s\033[0m" %e
+                                finally:
+                                    self.flush_audit_log(h)
+                            else:
+                                print_msg("No this option!", 'err')
+                        elif user_choice2 == 'b':
+                            break
+
+
                 elif user_choice == 'exit':
                     print_msg('Bye!','warning',exit=True)
             except (KeyboardInterrupt,EOFError):

@@ -91,6 +91,7 @@ def login(main_ins,h):
     # now connect
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(15)
         sock.connect((ip, port))
     except Exception as e:
         print('*** Connect failed: ' + str(e))
