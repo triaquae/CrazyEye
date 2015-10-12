@@ -14,9 +14,9 @@
                     <div class="list-group bord-no">
 
                         {% ifequal selected_g_id '-1' %}
-                            <a class="list-group-item active" href="/hosts/?selected_group=-1"><b>最近登录[3]</b></a>
+                            <a class="list-group-item active" href="/hosts/?selected_group=-1"><b>最近登录 [{{ recent_logins|length }}]</b></a>
                         {% else %}
-                             <a class="list-group-item" href="/hosts/?selected_group=-1">最近登录[3]</a>
+                             <a class="list-group-item" href="/hosts/?selected_group=-1">最近登录 [{{ recent_logins|length }}]</a>
                         {% endifequal %}
                         {% ifequal selected_g_id '-2' %}
                             <a class="list-group-item active" href="/hosts/?selected_group=-2"><b>未分组主机 [{{ request.user.userprofile.bind_hosts.select_related.count }}]</b></a>
@@ -80,7 +80,8 @@
                                             <td><span class=""></span></td>
                                             <td>
                                                 <span  bind_host_id="{{ host.id }}" class="label label-info cursor gen_token">生成Token</span>
-                                                <a href="http://{{ webssh.0 }}:{{ webssh.1 }}" target="_blank"><span class="label label-success cursor host_login">Login</span></a>
+                                                <a href="http://{{ webssh.host }}:{{ webssh.port }}?u={{ webssh.username }}&?p={{ webssh.password }}" target="_blank"><span class="label label-success cursor host_login">Login</span></a>
+
                                             </td>
                                         </tr>
                                     {% endfor %}
@@ -100,14 +101,31 @@
                                             <td><span class=""></span></td>
                                             <td>
                                                 <span  bind_host_id="{{ host.id }}" class="label label-info cursor gen_token">生成Token</span>
-                                                <a href="http://{{ webssh.0 }}:{{ webssh.1 }}" target="_blank"><span class="label label-success cursor host_login">Login</span></a>
+                                                <a href="http://{{ webssh.host }}:{{ webssh.port }}?u={{ webssh.username }}&?p={{ webssh.password }}" target="_blank"><span class="label label-success cursor host_login">Login</span></a>
                                             </td>
                                         </tr>
                                     {% endfor %}
                             {% endif %}
-
+                            {% if selected_g_id == '-1' %} <!-- 最近登录主机-->
+                                    {% for host in  recent_logins %}
+                                        <tr>
+                                            <td class="text-center">{{ forloop.counter }}</td>
+                                            <td><a href="#" class="btn-link">{{ host.host.host.hostname }}</a></td>
+                                            <td><a href="#" class="">{{ host.host.host.ip_addr }}</a></td>
+                                            <td><a href="#" class="">{{ host.host.host.system_type }}</a></td>
+                                            <td><a href="#" class="">{{ host.host.host.memo }}</a></td>
+                                            <td><span class="">{{ host.host.host_user.username }}</span></td>
+                                            <td><span class=""></span></td>
+                                            <td>
+                                                <span  bind_host_id="{{ host.host.id }}" class="label label-info cursor gen_token">生成Token</span>
+                                                <a href="http://{{ webssh.host }}:{{ webssh.port }}?u={{ webssh.username }}&?p={{ webssh.password }}" target="_blank"><span class="label label-success cursor host_login">Login</span></a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                            {% endif %}
                                     </tbody>
                                 </table>
+
                             </div> <!--end table div-->
 
 

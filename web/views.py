@@ -34,10 +34,14 @@ def hosts(request):
     if selected_g_id:
         if selected_g_id.isdigit():
             selected_g_id = int(selected_g_id)
+
+    recent_logins = utils.recent_accssed_hosts(request)
+
     return render(request,'hosts.html',{'login_user':request.user,
                                          'selected_g_id': selected_g_id,
                                         'active_node':"/hosts/?selected_group=-1",
-                                        'webssh':settings.WebSSH})
+                                        'recent_logins':recent_logins,
+                                        'webssh':settings.SHELLINABOX})
 
 def login(request):
 

@@ -151,3 +151,14 @@ def dashboard_summary(request):
 
 
     return  data_dic
+
+
+def recent_accssed_hosts(request):
+    days_before_14 = django.utils.timezone.now() +django.utils.timezone.timedelta(days=-14)
+    recent_logins = models.AuditLog.objects.filter(date__gt = days_before_14,user_id=request.user.userprofile.id,action_type=1).order_by('date')
+    unique_bindhost_ids = set([i[0] for i in recent_logins.values_list('host_id')])
+    recent_login_hosts = []
+    for h_id in unique_bindhost_ids:
+        recent_login_hosts.append(recent_logins.filter(host_id=h_id).latest('date'))
+
+    return  set(recent_login_hosts)

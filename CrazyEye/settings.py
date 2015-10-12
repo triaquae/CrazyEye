@@ -41,7 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'web',
-    #'debugtools',
+    'debugtools',
     'session_security',
 
 
@@ -139,15 +139,17 @@ Welcome_msg = '''
 
 FileUploadDir = 'uploads'
 
-WebSSH = ['localhost',4200]
+#WebSSH = ['localhost',4200] #deprecated
+
+SHELLINABOX = {
+    'host':'localhost',
+    'port':4200,
+    'username':'crazy_audit',
+    'password': 'alex3714'
+}
 
 
 #for django admin customaztion
-
-
-#TEMPLATE_CONTEXT_PROCESSORS = TCP + (
-#    'django.core.context_processors.request',
-#)
 
 
 # Django Suit configuration example
