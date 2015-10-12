@@ -142,10 +142,10 @@ FileUploadDir = 'uploads'
 #WebSSH = ['localhost',4200] #deprecated
 
 SHELLINABOX = {
-    'host':'localhost',
+    'host':'192.168.2.200',
     'port':4200,
-    'username':'crazy_audit',
-    'password': 'alex3714'
+    'username':'crazy_audit2',
+    'password': '123'
 }
 
 
