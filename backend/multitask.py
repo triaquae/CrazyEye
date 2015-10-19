@@ -19,7 +19,7 @@ def cmd_exec(task_id,bind_host_id,user_id,cmd ):
     try:
         if bind_host.host_user.auth_method == 'ssh-password':
             s.connect(bind_host.host.ip_addr,
-                      bind_host.host.port,
+                      int(bind_host.host.port),
                       bind_host.host_user.username,
                       bind_host.host_user.password,
                       timeout=5)
@@ -27,7 +27,7 @@ def cmd_exec(task_id,bind_host_id,user_id,cmd ):
 
             key = paramiko.RSAKey.from_private_key_file(settings.RSA_PRIVATE_KEY_FILE)
             s.connect(bind_host.host.ip_addr,
-                      bind_host.host.port,
+                      int(bind_host.host.port),
                       bind_host.host_user.username,
                       pkey=key,
                       timeout=5)
@@ -60,7 +60,7 @@ def file_tranfer_exec(task_id,bind_host_id,user_id,content ):
 
 
     try:
-        t = paramiko.Transport((bind_host.host.ip_addr,bind_host.host.port))
+        t = paramiko.Transport((bind_host.host.ip_addr,int(bind_host.host.port) ))
         if bind_host.host_user.auth_method == 'ssh-password':
 
             t.connect(username=bind_host.host_user.username,password=bind_host.host_user.password)
