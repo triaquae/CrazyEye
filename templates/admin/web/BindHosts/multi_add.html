@@ -131,8 +131,7 @@
 
                     </select>
                     <span class="btn-danger">{{ err.host_user }}</span>
-                    <a class="related-widget-wrapper-link change-related" id="change_id_idc" data-href-template="/admin/web/idc/__fk__/?_to_field=id&amp;_popup=1" title="Change selected IDC" href="/admin/web/idc/3/?_to_field=id&amp;_popup=1"><img src="/static/admin/img/icon_changelink.gif" width="10" height="10" alt="Change"></a>
-                    <a class="related-widget-wrapper-link add-related" id="add_id_idc" href="/admin/web/idc/add/?_to_field=id&amp;_popup=1" title="Add another IDC"><img src="/static/admin/img/icon_addlink.gif" width="10" height="10" alt="Add"></a>
+                    <!--a class="related-widget-wrapper-link add-related" id="add_id_hostuser" href="/admin/web/hostusers/add/?_to_field=id&amp;_popup=1" title="Add another HostUser"><img src="/static/admin/img/icon_addlink.gif" width="10" height="10" alt="Add"></a-->
                 </div>
 
 
@@ -152,16 +151,16 @@
 
                 <div class="related-widget-wrapper">
 
-                    <a class="related-widget-wrapper-link add-related" id="add_id_host_group" href="/admin/web/hostgroups/add/?_to_field=id&amp;_popup=1" title="Add another 主机组">
+                    <!--a class="related-widget-wrapper-link add-related" id="add_id_hosts" href="/admin/web/hosts/add/?_to_field=id&amp;_popup=1" title="Add another 主机组">
                         <img src="/static/admin/img/icon_addlink.gif" width="10" height="10" alt="Add">
-                    </a>
+                    </a-->
                     <div class="selector">
                         <div class="selector-available">
                             <h2>Available hosts </h2>
-                            <p id="id_host_group_filter" class="selector-filter">
-                            <label for="id_host_group_input">
+                            <p id="id_host_filter" class="selector-filter">
+                            <label for="id_host_input">
                             <img src="/static/admin/img/selector-search.gif" class="help-tooltip" alt="" title="Type into this box to filter down the list of available host group.">
-                            </label> <input type="text" oninput="FilterItem(this,host_list)"  placeholder="Filter" id="id_host_group_input"></p>
+                            </label> <input type="text" oninput="FilterItem(this,host_list)"  placeholder="Filter" id="id_host_input"></p>
 
                             <select multiple="multiple" data-set="host_list"  class="filtered" id="id_hosts_from" >
 
@@ -216,9 +215,9 @@
 
                 <div class="related-widget-wrapper">
 
-                    <a class="related-widget-wrapper-link add-related" id="add_id_host_group" href="/admin/web/hostgroups/add/?_to_field=id&amp;_popup=1" title="Add another 主机组">
+                    <!--a class="related-widget-wrapper-link add-related" id="add_id_host_group" href="/admin/web/hostgroups/add/?_to_field=id&amp;_popup=1" target="_blank" title="Add another 主机组">
                         <img src="/static/admin/img/icon_addlink.gif" width="10" height="10" alt="Add">
-                    </a>
+                    </a-->
                     <div class="selector">
                         <div class="selector-available">
                             <h2>Available groups </h2>
