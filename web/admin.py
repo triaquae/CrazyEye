@@ -1,13 +1,16 @@
 #_*_coding:utf-8_*_
 from django.contrib import admin
-
+from django import forms
 
 # Register your models here.
 import models
+from django.shortcuts import render_to_response,render,HttpResponse
+
+from django.contrib.admin.views.decorators import staff_member_required
 
 
-class BindHostsInline(admin.TabularInline):
-    model = models.BindHosts
+
+from django.conf.urls import patterns, include, url
 
 
 
@@ -16,19 +19,70 @@ class HostAdmin(admin.ModelAdmin):
     list_display = ('hostname','ip_addr','port','system_type','enabled')
 
 
+class BindHostInline(admin.TabularInline):
+    model = models.BindHosts.host_group.through
+
+    readonly_fields = ['hostname']
+    def hostname(self, instance):
+        print dir(instance)
+        return '%s(%s)' %(instance.bindhosts.host.hostname,instance.bindhosts.host.ip_addr)
+    hostname.short_description = 'row name'
+
+
 class HostUserAdmin(admin.ModelAdmin):
-    list_display = ('auth_method','username','password')
+    list_display = ('auth_method','username')
 class BindHostAdmin(admin.ModelAdmin):
     list_display = ('host','host_user','get_groups')
+    list_filter = ('host','host_user','host_group')
     filter_horizontal = ('host_group',)
     raw_id_fields = ("host",'host_user')
 
+    def get_urls(self):
 
+        urls = super(BindHostAdmin, self).get_urls()
+        my_urls = patterns("",
+            url(r"^multi_add/$", self.multi_add)
+        )
+        return my_urls + urls
+
+
+    #@staff_member_required
+    def multi_add(self, request):
+        if request.user.is_superuser:
+            import admin_custom_view
+            err = {}
+            result = None
+            chosen_data = {}
+            if request.method == 'POST':
+                print request.POST
+                form_obj = admin_custom_view.BindHostsMultiHandle(request)
+                if form_obj.is_valid():
+                    form_obj.save()
+                    result = form_obj.result
+                else:
+                    err = form_obj.err_dic
+                chosen_data = form_obj.clean_data
+
+            #else:
+            host_users = models.HostUsers.objects.all()
+            hosts = models.Hosts.objects.all()
+            host_groups = models.HostGroups.objects.all()
+            return render(request,'admin/web/BindHosts/multi_add.html',{
+                'user':request.user,
+                'host_users':host_users,
+                'host_groups':host_groups,
+                'hosts':hosts,
+                'err':err,
+                'chosen_data': chosen_data,
+                'result': result
+            })
+        else:
+            return HttpResponse("Only superuser can access this page!")
 class HostGroupAdmin(admin.ModelAdmin):
     list_display = ('name',)
-    #inlines = [
-    #    BindHostsInline,
-    #]
+    inlines = [
+        BindHostInline,
+    ]
 
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user','name','department','valid_begin_time','valid_end_time')

@@ -19,9 +19,7 @@ def current_time(context, format_string):
 @register.simple_tag
 #def filter_table(table, field, *args, **kwargs):
 def query_set(table_related_field,query_field,string):
-    #warning = kwargs['warning']
-    #profile = kwargs['profile']
-    #print '==>',table_related_field,query_field,string
+
     data_set = table_related_field.filter(**{query_field:string}).count()
 
     return data_set
@@ -93,3 +91,9 @@ def get_range( value ):
   """
   return range( value )
 
+
+@register.filter
+def int_to_str(value):
+
+    print '--->str',value
+    return str(value)

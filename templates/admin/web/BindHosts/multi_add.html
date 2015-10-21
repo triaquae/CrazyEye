@@ -1,0 +1,445 @@
+{% extends "admin/index.html" %}
+{% load i18n admin_static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+
+<div id="suit-center" class="suit-column">
+
+
+
+    <ul class="breadcrumb">
+      <li>
+        <a href="/admin/">Home</a>
+        <span class="divider">»</span>
+      </li>
+      <li>
+        <a href="/admin/web/">Web</a>
+        <span class="divider">»</span>
+      </li>
+      <li>
+
+          <a href="/admin/web/bindhosts/">
+            主机远程与用户绑定</a>
+        <span class="divider">»</span>
+      </li>
+      <li class="active">
+        批量添加
+      </li>
+    </ul>
+        {% if result.success %}
+          <div class="alert alert-success">
+            <button class="close" data-dismiss="alert">×</button>
+            {% for res in result.success %}
+                批量添加主机与远程用户绑定: {{ res.host.hostname  }} --> {{ res.host_user.username }} -->{{ res.host_group.select_related }} was added successfully.<br/>
+
+            {% endfor %}
+
+          </div>
+        {% endif %}
+
+        {% if result.failed %}
+          <div class="alert alert-warning">
+            <button class="close" data-dismiss="alert">×</button>
+
+            {% for res in result.failed %}
+                批量添加主机与远程用户绑定: {{ res.host.hostname  }} --> {{ res.host_user.username }} -->{{ res.host_group.select_related }} 发现重复纪录,因此只更新了原有数据.<br/>
+
+            {% endfor %}
+          </div>
+        {% endif %}
+
+            <!-- Content -->
+            <div id="content" class="colM row-fluid">
+
+
+                <h2 class="content-title">Change 主机与远程用户绑定</h2>
+
+  <div id="content-main" class="inner-two-columns">
+
+    <form enctype="multipart/form-data" action="" method="post" id="bindhosts_form" class="form-horizontal">{% csrf_token %}
+
+      <div class="inner-right-column">
+
+        <div class="box save-box">
+
+
+            <div class="submit-row clearfix">
+              <button type="submit" onclick="SelectAllChosenItems()" class="btn btn-high btn-info" name="_save">Save</button>
+
+
+              <!--a href="delete/" class="text-error deletelink">Delete</a-->
+
+            </div>
+
+        </div>
+
+            <h4 class="italic-title">Tools</h4>
+            <ul class="box menu-box">
+
+                <li><a href="history/" class="historylink"><i class="icon-time icon-alpha75"></i>History</a>
+                </li>
+
+
+
+                  <li>
+                    <a href="../add/"><i class="icon-plus-sign icon-alpha75"></i>Add 主机与远程用户绑定
+                    </a></li>
+
+            </ul>
+
+
+      </div>
+<div class="inner-center-column">
+
+<div class="tab-content tab-content-main">
+
+
+
+
+<fieldset class="module aligned first ">
+
+      <div class="control-group form-row field-host_group ">
+        <div>
+            <div class="control-label">
+            选择远程用户
+            </div>
+            <div class="controls">
+
+
+                <div class="related-widget-wrapper">
+                    <select id="id_host_user" name="host_user">
+                      <option value="">---------</option>
+                      {% for host_user in host_users %}
+                        {% if not chosen_data.host_user %}
+                            <option value="{{ host_user.id }}" >{{ host_user.auth_method }}|{{ host_user.username }}({{ host_user.password }})</option>
+                        {% else %}
+                            {% if host_user.id == chosen_data.host_user %}
+                                <option value="{{ host_user.id }}" selected>{{ host_user.auth_method }}|{{ host_user.username }}({{ host_user.password }})</option>
+                            {% else %}
+                                <option value="{{ host_user.id }}" >{{ host_user.auth_method }}|{{ host_user.username }}({{ host_user.password }})</option>
+                            {% endif %}
+                        {% endif %}
+                      {% endfor %}
+
+                    </select>
+                    <span class="btn-danger">{{ err.host_user }}</span>
+                    <a class="related-widget-wrapper-link change-related" id="change_id_idc" data-href-template="/admin/web/idc/__fk__/?_to_field=id&amp;_popup=1" title="Change selected IDC" href="/admin/web/idc/3/?_to_field=id&amp;_popup=1"><img src="/static/admin/img/icon_changelink.gif" width="10" height="10" alt="Change"></a>
+                    <a class="related-widget-wrapper-link add-related" id="add_id_idc" href="/admin/web/idc/add/?_to_field=id&amp;_popup=1" title="Add another IDC"><img src="/static/admin/img/icon_addlink.gif" width="10" height="10" alt="Add"></a>
+                </div>
+
+
+            </div> <!--end controls-->
+
+        </div>
+
+      </div> <!--end control-group form-row field-host_group -->
+
+
+      <div class="control-group form-row field-host_group ">
+        <div>
+            <div class="control-label">
+            选择要绑定的主机
+            </div>
+            <div class="controls">
+
+                <div class="related-widget-wrapper">
+
+                    <a class="related-widget-wrapper-link add-related" id="add_id_host_group" href="/admin/web/hostgroups/add/?_to_field=id&amp;_popup=1" title="Add another 主机组">
+                        <img src="/static/admin/img/icon_addlink.gif" width="10" height="10" alt="Add">
+                    </a>
+                    <div class="selector">
+                        <div class="selector-available">
+                            <h2>Available hosts </h2>
+                            <p id="id_host_group_filter" class="selector-filter">
+                            <label for="id_host_group_input">
+                            <img src="/static/admin/img/selector-search.gif" class="help-tooltip" alt="" title="Type into this box to filter down the list of available host group.">
+                            </label> <input type="text" oninput="FilterItem(this,host_list)"  placeholder="Filter" id="id_host_group_input"></p>
+
+                            <select multiple="multiple" data-set="host_list"  class="filtered" id="id_hosts_from" >
+
+                                {% for host in hosts %}
+                                    {% if not chosen_data.hosts %}
+                                        <option value="{{ host.id }}" >{{ host}}</option>
+
+                                    {% else %}
+                                        {% if host.id not in chosen_data.hosts %}
+                                           <option value="{{ host.id }}" >{{ host}}</option>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+                        <ul class="selector-chooser">
+                            <li><a title="Choose" href='#' id="id_host_group_add_link" class="selector-add">Choose</a></li>
+                            <li><a title="Remove" href='#' class="selector-remove">Remove</a></li></ul>
+                        <div class="selector-chosen">
+                            <h2>Chosen hosts  </h2>
+                            <select data-set="host_list"  id="id_hosts_to" multiple="multiple" size="0" name="hosts" class="filtered" style="height: 110px;">
+                                {% for host in hosts %}
+                                    {% if host.id in chosen_data.hosts %}
+                                          <option value="{{ host.id }}" selected>{{ host}}</option>
+
+                                    {% endif %}
+                                {% endfor %}
+
+                            </select>
+
+                            <span class="btn-danger">{{ err.hosts }}</span>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div> <!--end controls-->
+
+        </div>
+
+      </div> <!--end control-group form-row field-host_group -->
+
+      <div class="control-group form-row field-host_group ">
+        <div>
+            <div class="control-label">
+            选择要绑定的主机组
+            </div>
+            <div class="controls">
+
+                <div class="related-widget-wrapper">
+
+                    <a class="related-widget-wrapper-link add-related" id="add_id_host_group" href="/admin/web/hostgroups/add/?_to_field=id&amp;_popup=1" title="Add another 主机组">
+                        <img src="/static/admin/img/icon_addlink.gif" width="10" height="10" alt="Add">
+                    </a>
+                    <div class="selector">
+                        <div class="selector-available">
+                            <h2>Available groups </h2>
+                            <p id="id_host_group_filter" class="selector-filter">
+                            <label for="id_host_group_input">
+                            <img src="/static/admin/img/selector-search.gif" class="help-tooltip" alt="" title="Type into this box to filter down the list of available host group.">
+                            </label> <input oninput="FilterItem(this,host_group_list)" type="text" placeholder="Filter" id="id_host_group_input"></p>
+
+                            <select multiple="multiple" data-set="host_group_list" class="filtered" id="id_host_group_from" name="">
+                                {% for host_group in host_groups %}
+                                    {% if not chosen_data.host_groups %}
+                                            <option value="{{ host_group.id }}">{{ host_group }} </option>
+
+                                    {% else %}
+                                        {% if host_group.id not in chosen_data.host_groups  %}
+                                            <option value="{{ host_group.id }}">{{ host_group }} </option>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <ul class="selector-chooser">
+                            <li><a title="Choose" href='#' id="id_host_group_add_link" class="selector-add">Choose</a></li>
+                            <li><a title="Remove" href='#' class="selector-remove">Remove</a></li>
+                        </ul>
+                        <div class="selector-chosen">
+                            <h2>Chosen groups  </h2>
+                            <select data-set="host_group_list" id="id_host_group_to" multiple="multiple" size="0" name="host_group" class="filtered" style="height: 110px;">
+                                {% for host_group in host_groups %}
+
+                                    {% if host_group.id in chosen_data.host_groups %}
+
+                                        <option value="{{ host_group.id }}" selected>{{ host_group }} </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+
+                            <span class="btn-danger">{{ err.host_groups }}</span>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div> <!--end controls-->
+
+        </div>
+
+      </div> <!--end control-group form-row field-host_group -->
+
+</fieldset>
+
+</form>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+
+
+
+        $(document).ready(function() {
+            host_group_list = [];
+            host_list = [];
+            InitFilterList('#id_host_group_from option',host_group_list)
+            InitFilterList('#id_hosts_from option',host_list)
+            //console.log(host_group_list);
+            //console.log(host_list);
+
+            $('.add-another').click(function(e) {
+                e.preventDefault();
+                showAddAnotherPopup(this);
+            });
+            $('.related-lookup').click(function(e) {
+                e.preventDefault();
+                showRelatedObjectLookupPopup(this);
+            });
+
+
+            $(".selector-add").click(function(e){
+                e.preventDefault();
+                var all_options = $(this).parent().parent().prev().children('select');
+                var chosen_select_container = $(this).parent().parent().next().children('select');
+                var chosen_option_vals = all_options.val();
+                if (chosen_option_vals ){
+                  $.each($(all_options).children(),function(index,ele){
+                        if (chosen_option_vals.indexOf(ele.value) != -1 ){
+                            $(chosen_select_container).append(ele);
+                            $(all_options).find("option[value='" + ele.value + "']").remove();
+                        }
+                    });//end each
+
+
+                  var data_list = window[$(all_options).attr("data-set")];
+                  $.each(chosen_option_vals,function(index,val){
+
+                      //console.log(index+'---'+val);
+
+                      $.each(data_list,function(i,v){
+                        if(typeof(v) != 'undefined'){
+
+                            if (v[0] == val){
+                                //console.log(v);
+                                //console.log('going to delete above');
+                                 data_list.splice(i,1)
+                                return ;
+                            }
+
+                        }
+                      });//end each data_list
+
+                  });//end each
+
+
+                }//end if
+            });//end selector-add
+
+
+
+            $(".selector-remove").click(function(e){
+                e.preventDefault();
+                var all_chosen_options = $(this).parent().parent().next().children('select');
+                var avaliable_select_container = $(this).parent().parent().prev().children('select');
+                var chosen_option_vals = all_chosen_options.val();
+                if (chosen_option_vals ){
+                  //update default data_list first
+                  var data_list = window[$(all_chosen_options).attr("data-set")];
+                  $.each($(all_chosen_options).children(),function(index,val){
+                      var exist_flag = false;
+                      $.each(data_list,function(i,v){
+                        if(typeof(v) != 'undefined'){
+                            if (v[0] == val.value){
+                                exist_flag = true;
+                            }
+
+                        }
+                      });//end each data_list
+                    if (exist_flag != true){ // item doesn't exist in default data list, push it back
+                        data_list.push([val.value, val.text])
+                    }
+                  });//end each
+
+                   //remove item from chosen box
+                   $.each($(all_chosen_options).children(),function(index,ele){
+                        if (chosen_option_vals.indexOf(ele.value) != -1 ){
+                            $(avaliable_select_container).append(ele);
+                            $(all_chosen_options).find("option[value='" + ele.value + "']").remove();
+                        }
+                    });
+
+                } //end if
+
+
+            });//end selector-remove
+
+
+
+        });
+
+
+    function InitFilterList(ele,list){
+        $(ele).each(function(){
+            list.push([$(this).val(),$(this).text()]);
+
+        });
+    }
+
+    function FilterItem(ele,list_str){
+        //var item_list = window[list_str];
+
+        var search_str = $(ele).val()
+        var item_list_html ='' ;
+
+        //console.log(search_str);
+
+        $.each(list_str,function(index,val){
+            if (val[1].indexOf(search_str) >-1){
+                //console.log(val);
+                var html_row = "<option value='" + val[0] + "'>"+ val[1] +"</option>";
+                item_list_html += html_row ;
+
+            }
+
+        });//end each
+
+        $(ele).parent().next().html(item_list_html);
+
+
+    }
+
+    function SelectAllChosenItems(){
+
+        $("#id_host_group_to option").prop("selected", true);
+        $("#id_hosts_to option").prop("selected", true);
+
+    }
+
+
+</script>
+
+
+
+
+      </div>
+
+  </div>
+
+
+            </div>
+            <!-- END Content -->
+          </div>
+
+
+{% endblock %}
+
+

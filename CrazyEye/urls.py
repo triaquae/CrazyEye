@@ -17,10 +17,11 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 from web import views,api_urls
-
+from web import cus_admin
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
+     #url(r'^myadmin/', include(cus_admin.admin_site.urls)),
     url(r'session_security/', include('session_security.urls')),
     url(r'^$',views.dashboard ),
     url(r'^hosts/$',views.hosts, name='host_list' ),
