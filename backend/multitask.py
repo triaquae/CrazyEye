@@ -149,5 +149,7 @@ if __name__ == '__main__':
         res_list.append(p)
 
     #get result
-    for res in res_list:
-        res.get()
+    Pool.close()
+    Pool.join()
+    #for res in res_list:
+    #    res.get()
