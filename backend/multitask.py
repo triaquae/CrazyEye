@@ -33,7 +33,10 @@ def cmd_exec(task_id,bind_host_id,user_id,cmd ):
                       timeout=5)
         stdin,stdout,stderr = s.exec_command(cmd)
         result = stdout.read(),stderr.read()
-        cmd_result = filter(lambda x:len(x.strip())>0,result)[0]
+        if any(result):
+            cmd_result = filter(lambda x:len(x.strip())>0,result)[0]
+        else:
+            cmd_result = 'execution has no output!'
         res_status = 'success'
         #print '----------- HOST:%s  IP:%s -------------' %(bind_host.host.hostname,bind_host.host.ip_addr)
 

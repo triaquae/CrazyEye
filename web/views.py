@@ -217,7 +217,7 @@ def user_audit(request,user_id):
     user_login_records = models.AuditLog.objects.filter(user_id=user_obj.id,action_type=1).order_by('-date')
     user_multi_task_records = models.TaskLog.objects.filter(user_id= user_obj.id).order_by('-start_time')
     paginator = Paginator(user_login_records,10)
-    paginator_multi = Paginator(user_multi_task_records,1)
+    paginator_multi = Paginator(user_multi_task_records,10)
     page = request.GET.get('page')
     data_type = request.GET.get('type')
 
