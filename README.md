@@ -24,8 +24,12 @@ CrazyEye是基于Python开发的一款简单易用的IT管理软件，目前主�
 `$ git clone https://github.com/triaquae/CrazyEye.git`
 
 Docker Version
+
 `docker pull alex3714/crazyeye`
-下载docker image后执行 `docker run -ti --name crazyeye -p 8000:8000 -p 8022:22 -p 4200:4200 alex3714/crazyeye /CrazyEye/crazyeye_run.sh` ，然后即可访问`http://your_host_addr:8000` 登录crayzye,  用户名密码均为`admin` 
+
+下载docker image后执行 `docker run -ti --name crazyeye -p 8000:8000 -p 8022:22 -p 4200:4200 alex3714/crazyeye /CrazyEye/crazyeye_run.sh` 
+
+然后即可访问`http://your_host_addr:8000` 登录crayzye,  用户名密码均为`admin` 
 
 安装
 ==================
