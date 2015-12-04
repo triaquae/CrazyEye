@@ -23,7 +23,11 @@ CrazyEye是基于Python开发的一款简单易用的IT管理软件，目前主�
 
 `$ git clone https://github.com/triaquae/CrazyEye.git`
 
+
 Docker Version
+================
+
+CrazyEye同时提供了Docker集成版本，直接执行下面步骤即可开始使用CrazyEye 
 
 `docker pull alex3714/crazyeye`
 
