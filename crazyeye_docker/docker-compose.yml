@@ -1,0 +1,40 @@
+nginx:
+  hostname: crazyeye_server
+  container_name: crazyeye_nginx
+  image: ubuntu_crazyeye:v3
+  ports:
+    - "8000:8000"
+  volumes:
+    - ./ngnix_logs:/var/log/nginx
+    - ./settings.py:/opt/CrazyEye/CrazyEye/settings.py
+    #- /opt/CrazyEye/
+  #command: /opt/CrazyEye/entrypoint_nginx.sh 
+  links:
+    - mysql
+    - shellinabox 
+  command: bash -c  "service nginx start && uwsgi --ini /opt/CrazyEye/crazyeye_uwsgi.ini"
+  
+mysql:
+  hostname: crazyeye_mysql
+  container_name: crazyeye_mysql
+  image: ubuntu_crazyeye:v3
+  ports:
+    - "3306:3306"
+  volumes:
+    - /var/lib/mysql
+    #- /opt/CrazyEye/
+  #command: /opt/CrazyEye/entrypoint_nginx.sh
+  command: bash -c "/usr/local/bin/supervisord -n" 
+
+shellinabox:
+  hostname: crazyeye_shell
+  container_name: crazyeye_shellinabox
+  image: ubuntu_crazyeye:v3
+  ports:
+    - "4200:4200"
+    - "8022:22"
+  links:
+    - mysql
+  volumes:
+    - ./settings.py:/opt/CrazyEye/CrazyEye/settings.py
+  command: bash -c "service ssh start && /opt/shellinabox/shellinaboxd  -t" 
