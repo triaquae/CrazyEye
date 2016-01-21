@@ -1,7 +1,7 @@
 nginx:
   hostname: crazyeye_server
   container_name: crazyeye_nginx
-  image: ubuntu_crazyeye:v3
+  image: registry.aliyuncs.com/alex3714/crazyeye:v3 
   ports:
     - "8000:8000"
   volumes:
@@ -17,7 +17,7 @@ nginx:
 mysql:
   hostname: crazyeye_mysql
   container_name: crazyeye_mysql
-  image: ubuntu_crazyeye:v3
+  image: registry.aliyuncs.com/alex3714/crazyeye:v3
   ports:
     - "3306:3306"
   volumes:
@@ -29,7 +29,7 @@ mysql:
 shellinabox:
   hostname: crazyeye_shell
   container_name: crazyeye_shellinabox
-  image: ubuntu_crazyeye:v3
+  image: registry.aliyuncs.com/alex3714/crazyeye:v3 
   ports:
     - "4200:4200"
     - "8022:22"
