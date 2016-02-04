@@ -29,8 +29,9 @@ Docker Version
 
 CrazyEye同时提供了Docker集成版本，直接执行下面步骤即可开始使用CrazyEye 
 
-`docker pull alex3714/crazyeye`
-
+`$ git clone https://github.com/triaquae/CrazyEye.git`
+`$ cd CrazyEye/crazyeye_docker `
+`$ docker-compose up -d` #启动crazyeye的docker container 
 下载docker image后执行 `docker run -ti --name crazyeye -p 8000:8000 -p 8022:22 -p 4200:4200 alex3714/crazyeye /CrazyEye/crazyeye_run.sh` 
 
 然后即可访问`http://your_host_addr:8000` 登录crayzye,  用户名密码均为`admin` 
