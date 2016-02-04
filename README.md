@@ -24,7 +24,7 @@ CrazyEye是基于Python开发的一款简单易用的IT管理软件，目前主�
 `$ git clone https://github.com/triaquae/CrazyEye.git`
 
 
-Docker Version
+Docker 版
 ================
 
 CrazyEye同时提供了Docker集成版本，直接执行下面步骤即可开始使用CrazyEye 
@@ -34,11 +34,17 @@ CrazyEye同时提供了Docker集成版本，直接执行下面步骤即可开始
 `$ cd CrazyEye/crazyeye_docker `
 
 `$ docker-compose up -d` #启动crazyeye的docker container 
-下载docker image后执行 `docker run -ti --name crazyeye -p 8000:8000 -p 8022:22 -p 4200:4200 alex3714/crazyeye /CrazyEye/crazyeye_run.sh` 
 
-然后即可访问`http://your_host_addr:8000` 登录crayzye,  用户名密码均为`admin` 
+`$ docker ps` #查看已启动的containers,找到crazyeye_nginx 对应的container id(输出内容的第一列)
 
-安装
+`$ docker exec -ti <上面的container id> /bin/bash ` #这条命令会带你进入一个已经启动的container
+
+`$ /opt/CrazyEye/manage.py createsuperuser` #这条命令是创建管理员账号，创建完成后，就可以通过浏览器访问`http://your_host_addr:8000/admin` 输入你刚创建的管理账户的用户名密码，就可以开始配置CrazyEye啦，详情看`http://crazyeyedoc.readthedocs.org/en/latest/#id3` 
+
+*注意：如果想通过SSH登录，则需要`ssh crazyeye@<你docker container所运行的机器> -p8022`, 密码是`crazyeye`, 连接上后会提示你输入token,这个可以直接按回车，然后会要求你输入username 和password, 这时输入你自己的管理员账号就可以啦。
+
+
+普通安装
 ==================
 
 请看详细安装文档: http://crazyeyedoc.readthedocs.org/en/latest/#
