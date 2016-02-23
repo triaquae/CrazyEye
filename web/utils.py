@@ -3,7 +3,8 @@ __author__ = 'jieli'
 from CrazyEye import settings
 import os, tempfile, zipfile
 from django.http import HttpResponse
-from django.core.servers.basehttp import FileWrapper
+#from django.core.servers.basehttp import FileWrapper
+from wsgiref.util import FileWrapper #from django.core.servers.basehttp import FileWrapper
 import models
 import django
 from django.db.models import Count
