@@ -47,7 +47,7 @@ CrazyEye同时提供了Docker集成版本，直接执行下面步骤即可开始
 普通安装
 ==================
 
-请看详细安装文档: http://crazyeyedoc.readthedocs.org/en/latest/#
+请看详细安装文档: http://crazyeye.readthedocs.org/zh/latest/
 
 
 Live Demo
