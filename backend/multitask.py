@@ -1,7 +1,8 @@
-#_*_coding:utf-8_*_
 __author__ = 'jieli'
+
 import global_settings
 import json
+import traceback
 import paramiko
 from CrazyEye import settings
 import django
@@ -34,19 +35,22 @@ def cmd_exec(task_id,bind_host_id,user_id,cmd ):
         stdin,stdout,stderr = s.exec_command(cmd)
         result = stdout.read(),stderr.read()
         if any(result):
-            cmd_result = filter(lambda x:len(x.strip())>0,result)[0]
+            #cmd_result = filter(lambda x:len(x.strip())>0,result)[0]
+            cmd_result = result[0] if result[0] else result[1]
         else:
-            cmd_result = 'execution has no output!'
+            cmd_result = b'execution has no output!'
         res_status = 'success'
-        #print '----------- HOST:%s  IP:%s -------------' %(bind_host.host.hostname,bind_host.host.ip_addr)
+        print('----------- HOST:%s  IP:%s -------------' %(bind_host.host.hostname,bind_host.host.ip_addr) )
 
-        #for line in cmd_result:
-        #    print line,
-
+        # for line in cmd_result.decode():
+        #     print(line)
+        print(cmd_result.decode())
         s.close()
-    except Exception,e:
-        #print '----------- HOST:%s  IP:%s -------------' %(bind_host.host.hostname,bind_host.host.ip_addr)
-        #print '\033[31;1mError:%s\033[0m' % e
+    except Exception as e:
+    #except ValueError as e:
+        print('----------- HOST:%s  IP:%s -------------' %(bind_host.host.hostname,bind_host.host.ip_addr))
+        print('\033[31;1mError:%s\033[0m' % e)
+        print(traceback.print_exc())
         cmd_result = e
         res_status = 'failed'
     log_obj = models.TaskLogDetail.objects.get(child_of_task_id= int(task_id), bind_host_id=bind_host.id)
@@ -83,7 +87,7 @@ def file_tranfer_exec(task_id,bind_host_id,user_id,content ):
                     remote_file_path = '%s%s' %(remote_path,filename)
                 else:
                     remote_file_path = '%s/%s' %(remote_path,filename)
-                print local_file_path,remote_file_path
+                print(local_file_path,remote_file_path)
 
                 sftp.put(local_file_path,remote_file_path)
                 cmd_result += '%s  ' %filename
@@ -96,13 +100,13 @@ def file_tranfer_exec(task_id,bind_host_id,user_id,content ):
 
             remote_filename = remote_path.split("/")[-1]
             local_file_path = "%s.%s" %(remote_filename,bind_host.host.ip_addr)
-            print '->',local_file_path,remote_filename
+            print('->',local_file_path,remote_filename)
             sftp.get(remote_path,'%s/%s' %(local_path,local_file_path) )
             cmd_result ='download remote file [%s] is completed!' % remote_path
 
         res_status = 'success'
-    except Exception,e:
-        print e
+    except Exception as e:
+        print(e)
         cmd_result = e
         res_status = 'failed'
     log_obj = models.TaskLogDetail.objects.get(child_of_task_id= int(task_id), bind_host_id=bind_host.id)

@@ -1,7 +1,8 @@
 #_*_coding:utf-8_*_
 __author__ = 'jieli'
 
-import models,json,subprocess
+import json,subprocess
+from web import models
 import paramiko,time,os,signal
 import multiprocessing
 from CrazyEye import settings
@@ -11,7 +12,6 @@ from backend.utils import json_date_handler
 
 
 def valid_host_groups_back(request): #deprecated
-    print request.user
     user_groups = models.UserProfile.objects.get(user_id= request.user.id).user_groups.select_related()
     host_groups = []
 
@@ -47,10 +47,9 @@ def valid_host_groups_back(request): #deprecated
 
 
 def valid_host_groups(request): #deprecated
-    print request.user
     host_group_dic = {-1:[]}
 
-    #for group in request.user.userprofile.host_groups.select_related():
+    #for group in request.user.host_groups.select_related():
 
     '''user_groups = models.UserProfile.objects.get(user_id= request.user.id).user_groups.select_related()
     host_groups = []
@@ -82,7 +81,6 @@ def valid_host_groups(request): #deprecated
             host_group_dic[h_group.id] = [h_group, host_nums]
 
     '''
-    print host_group_dic
     #if not selected_g_id: # first time open host page , set Recent visited hosts as active item
     #{host_id:[h_group,host_nums, hosts]}
     return [ host_group_dic, selected_g_id]
@@ -125,7 +123,7 @@ class MultiTask(object):
         try:
             os.killpg(task_obj.task_pid,signal.SIGTERM)
             res_msg = 'Task %s has terminated!' % task_id
-        except OSError,e:
+        except OSError as e:
             res_msg = "Error happened when tries to terminate task %s , err_msg[%s]" % (task_id,str(e))
         return  res_msg
     def run_cmd(self):
@@ -135,11 +133,12 @@ class MultiTask(object):
         exec_hosts = models.BindHosts.objects.filter(id__in=host_ids)
         task_obj= self.create_task_log('cmd',exec_hosts,task_expire_time,cmd)
         #'-task_type', 'cmd', '-task_id', '15', '-expire', '30', '-task', 'ifconfig', '-uid', '1']
-        p = subprocess.Popen(['python',
+        print("-->run cmd:",cmd,host_ids)
+        p = subprocess.Popen(['python3',
                              settings.MultiTaskScript,
                              '-task_type','cmd',
                              '-expire',task_expire_time,
-                             '-uid',str(self.request.user.userprofile.id) ,
+                             '-uid',str(self.request.user.id) ,
                              '-task',cmd ,
                              '-task_id', str(task_obj.id)
                              ],
@@ -153,7 +152,7 @@ class MultiTask(object):
     def create_task_log(self,task_type,hosts,expire_time,content,note=None):
         task_log_obj = models.TaskLog(
             task_type = task_type,
-            user = self.request.user.userprofile,
+            user = self.request.user,
             cmd = content,
             expire_time = int(expire_time),
             note = note
@@ -191,10 +190,10 @@ class MultiTask(object):
 
         task_obj= self.create_task_log(task_type,exec_hosts,task_expire_time,content)
         if task_type == 'file_get':
-            local_path = "%s/%s/%s/%s" %(settings.BASE_DIR,settings.FileUploadDir,self.request.user.userprofile.id,task_obj.id)
+            local_path = "%s/%s/%s/%s" %(settings.BASE_DIR,settings.FileUploadDir,self.request.user.id,task_obj.id)
             try:
                 os.mkdir(local_path)
-            except OSError,e:
+            except OSError as e:
                 pass
 
 
@@ -202,7 +201,7 @@ class MultiTask(object):
                              settings.MultiTaskScript,
                              '-task_type',task_type,
                              '-expire',task_expire_time,
-                             '-uid',str(self.request.user.userprofile.id) ,
+                             '-uid',str(self.request.user.id) ,
                              '-local',' '.join(local_file_list) ,
                              '-remote',params.get('remote_file_path') ,
                              '-task_id', str(task_obj.id)

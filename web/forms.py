@@ -1,7 +1,7 @@
 #_*_coding:utf-8_*_
 __author__ = 'jieli'
 
-import models
+from web import models
 from django.forms import ModelForm
 from django import forms
 

@@ -4,17 +4,18 @@ from django.contrib import auth
 
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-import host_mgr
+from web import host_mgr
 # Create your views here.
-import models,utils
+from web import models,utils
 import json,datetime
 from CrazyEye import settings
-import forms
+from  web import forms
 from backend.utils import json_date_to_stamp,json_date_handler
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import django.utils.timezone
 from django.core.exceptions import ObjectDoesNotExist
-
+from web import tables
+from web import admin
 @login_required
 def dashboard(request):
     if request.user.is_superuser:
@@ -52,13 +53,18 @@ def login(request):
         user = auth.authenticate(username=username,password=password)
         if user is not None:
             try:
-                if django.utils.timezone.now() > user.userprofile.valid_begin_time and django.utils.timezone.now()  < user.userprofile.valid_end_time:
-                    auth.login(request,user)
-                    request.session.set_expiry(60*30)
-                    #print 'session expires at :',request.session.get_expiry_date()
-                    return HttpResponseRedirect('/')
+                if user.valid_begin_time and user.valid_end_time:
+                    if django.utils.timezone.now() > user.valid_begin_time and django.utils.timezone.now()  < user.valid_end_time:
+                        auth.login(request,user)
+                        request.session.set_expiry(60*30)
+                        return HttpResponseRedirect(request.GET.get("next") if request.GET.get("next") else "/")
+                    else:
+                        return render(request,'login.html',{'login_err': 'User account is expired,please contact your IT guy for this!'})
                 else:
-                    return render(request,'login.html',{'login_err': 'User account is expired,please contact your IT guy for this!'})
+                    auth.login(request, user)
+                    request.session.set_expiry(60 * 30)
+                    return HttpResponseRedirect(request.GET.get("next") if request.GET.get("next") else "/")
+
             except ObjectDoesNotExist:
                     return render(request,'login.html',{'login_err': u'CrazyEye账户还未设定,请先登录后台管理界面创建CrazyEye账户!'})
 
@@ -70,7 +76,6 @@ def login(request):
 @login_required
 def personal(request):
     if request.method == 'POST':
-        print request.POST
         msg = {}
         old_passwd = request.POST.get('old_passwd')
 
@@ -133,13 +138,11 @@ def hosts_multi_filetrans(request):
 @csrf_exempt
 def multitask_file_upload(request):
     filename = request.FILES['filename']
-    print '-->',request.POST
     utils.handle_upload_file(request,filename)
 
     return HttpResponse(json.dumps({'text':'success'}))
 @login_required
 def multitask_file(request):
-    print 'multitask_file:',request.POST
     multi_task = host_mgr.MultiTask(request.POST.get('task_type'),request)
     task_result = multi_task.run()
     return  HttpResponse(task_result)
@@ -179,7 +182,6 @@ def dashboard_detail(request):
     if request.method == 'GET':
         detail_ins = utils.Dashboard(request)
         res = list(detail_ins.get())
-        print '-->',res
         return HttpResponse(json.dumps(res,default=json_date_handler))
 
 @login_required
@@ -192,6 +194,8 @@ def host_detail(request):
         host_id = int(host_id)
 
         access_records = models.AuditLog.objects.filter(host__host_id=host_id,action_type=1).order_by('-date')
+        print("acc records;",access_records)
+
         paginator = Paginator(access_records,10)
         page = request.GET.get('page')
         try:
@@ -200,7 +204,6 @@ def host_detail(request):
             access_records = paginator.page(1)
         except EmptyPage:
             access_records = paginator.page(paginator.num_pages)
-
 
 
     return  render(request, 'host_detail.html', {'all_hosts':all_hosts,
@@ -245,13 +248,40 @@ def user_audit(request,user_id):
         'data_type': data_type #for tab switch usage
     })
 
+
+@login_required
+def audit(request):
+
+    audit_log_list = tables.table_filter(request,admin.AuditLogAdmin,models.AuditLog)
+    order_res = tables.get_orderby(request, audit_log_list, admin.AuditLogAdmin)
+    paginator = Paginator(order_res[0], admin.AuditLogAdmin.list_per_page)
+
+    page = request.GET.get('page')
+    try:
+        audit_log_objs = paginator.page(page)
+    except PageNotAnInteger:
+        audit_log_objs = paginator.page(1)
+    except EmptyPage:
+        audit_log_objs = paginator.page(paginator.num_pages)
+
+    table_obj = tables.TableHandler(request,
+                                    models.AuditLog,
+                                    admin.AuditLogAdmin,
+                                    audit_log_objs,
+                                    order_res)
+
+    return render(request,"audit.html",{'table_obj':table_obj,
+                                        'paginator':paginator})
+
+
+
+
 @login_required
 def multitask_task_action(request):
     if request.method == 'POST':
         action = request.POST.get('action')
         m = host_mgr.MultiTask(action,request)
         res = m.run()
-        print '-->task res:',res
 
         return  HttpResponse(json.dumps(res))
 
@@ -286,6 +316,5 @@ def user_login_counts(request):
 
     user_login_records = models.AuditLog.objects.filter(action_type=1,date__range=[filter_date_begin,filter_date_end]).values('host','host__host_user__username','user','user__name','host__host__hostname','session','date')
 
-    print user_login_records
     return  HttpResponse(json.dumps(list(user_login_records),default=json_date_handler))
 

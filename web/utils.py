@@ -5,16 +5,16 @@ import os, tempfile, zipfile
 from django.http import HttpResponse
 #from django.core.servers.basehttp import FileWrapper
 from wsgiref.util import FileWrapper #from django.core.servers.basehttp import FileWrapper
-import models
+from web import models
 import django
 from django.db.models import Count
 from backend import utils
 import random,json,datetime,time
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 
 def handle_upload_file(request,file_obj):
-    upload_dir = '%s/%s/%s' %(settings.BASE_DIR,settings.FileUploadDir,request.user.userprofile.id)
+    upload_dir = '%s/%s/%s' %(settings.BASE_DIR,settings.FileUploadDir,request.user.id)
     if not os.path.isdir(upload_dir):
         os.mkdir(upload_dir)
     #if request.POST.get("random_batch_id"):
@@ -51,7 +51,7 @@ def send_zipfile(request,task_id,file_path):
     for filename in file_list:
         archive.write('%s/%s' %(file_path,filename))
     archive.close()
-    wrapper = FileWrapper(file(zip_file_name))
+    wrapper = FileWrapper(open(zip_file_name))
     response = HttpResponse(wrapper, content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename=%s.zip' % zip_file_name
     response['Content-Length'] = os.path.getsize(zip_file_name)
@@ -69,7 +69,7 @@ class Token(object):
     def host_token(self):
         bind_host_id = self.request.POST.get('bind_host_id')
         host_obj = models.BindHosts.objects.get(id=int(bind_host_id))
-        latest_token_obj = models.Token.objects.filter(host_id = int(bind_host_id),user_id=self.request.user.userprofile.id).last()
+        latest_token_obj = models.Token.objects.filter(host_id = int(bind_host_id),user_id=self.request.user.id).last()
         token_gen_flag = False
 
         if latest_token_obj:
@@ -84,7 +84,7 @@ class Token(object):
         if token_gen_flag:
             token = ''.join(random.sample('zyxwvutsrqponmlkjihgfedcba1234567890',6))
             models.Token.objects.create(
-                user = self.request.user.userprofile,
+                user = self.request.user,
                 host = host_obj,
                 token = token
             )
@@ -105,7 +105,7 @@ def get_all_logged_in_users():
         uid_list.append(data.get('_auth_user_id', None))
 
     # Query all logged in users based on id list
-    return User.objects.filter(id__in=uid_list)
+    return models.UserProfile.objects.filter(id__in=uid_list)
 
 class Dashboard(object):
     def __init__(self,request):
@@ -117,7 +117,7 @@ class Dashboard(object):
         func = getattr(self,data_type)
         return func()
     def get_online_users(self):
-        return  get_all_logged_in_users().values('userprofile__name','userprofile__department__name','last_login','userprofile__id')
+        return  get_all_logged_in_users().values('name','department__name','last_login','id')
 
     def get_online_hosts(self):
         return   models.SessionTrack.objects.filter(auditlog__action_type=1,closed=0).values('auditlog__host__host__hostname',
@@ -156,7 +156,7 @@ def dashboard_summary(request):
 
 def recent_accssed_hosts(request):
     days_before_14 = django.utils.timezone.now() +django.utils.timezone.timedelta(days=-14)
-    recent_logins = models.AuditLog.objects.filter(date__gt = days_before_14,user_id=request.user.userprofile.id,action_type=1).order_by('date')
+    recent_logins = models.AuditLog.objects.filter(date__gt = days_before_14,user_id=request.user.id,action_type=1).order_by('date')
     unique_bindhost_ids = set([i[0] for i in recent_logins.values_list('host_id')])
     recent_login_hosts = []
     for h_id in unique_bindhost_ids:

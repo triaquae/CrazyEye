@@ -83,21 +83,14 @@
                             {% endif %}
                         </div>
                     </div>
-                    <div class="row" >
-                        <label class="col-md-2 control-label">所在机房</label>
-                        <div  class="col-md-9 ">
-                            <b>{{ host.idc }}</b>
-                            <hr/>
-                        </div>
 
-                    </div>
 
                     <div class="row" >
                         <label class="col-md-2 control-label">已绑定远程用户信息</label>
                         <div  class="col-md-9 ">
                             {% for bind_host in host.bindhosts_set.select_related %}
                             <div><b>{{ bind_host.host_user.username }}
-                                -->属组:{% for group in  bind_host.host_group.select_related %}
+                                -->属组:{% for group in  bind_host.hostgroups_set.select_related %}
                                     <span class="badge badge-info">{{ group.name }}</span>{% endfor %}</b>
                                 {% if not bind_host.enabled %}<span class="badge badge-danger">此账户已禁用</span>{% endif %}
                             </div>

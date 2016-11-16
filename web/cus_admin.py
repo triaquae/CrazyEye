@@ -2,7 +2,7 @@
 __author__ = 'jieli'
 
 from django.contrib import admin
-import models
+from web import models
 
 class MyAdminSite(admin.AdminSite):
     site_header = 'TEST ADMIn site'

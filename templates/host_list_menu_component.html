@@ -31,12 +31,12 @@
                                     <li style="border:0px;padding:0px" class="list-group-item">
                                         <span class="badge badge-primary"><i class="fa fa-chevron-down " id="group_toggle_-2" onclick="ToggleGroup(-2)"></i></span>
                                         <span data_label="group" class="badge badge-primary">全选</span>
-                                        <b>未分类主机 [{{  request.user.userprofile.bind_hosts.select_related.count }}]</b>
+                                        <b>未分类主机 [{{  request.user.bind_hosts.select_related.count }}]</b>
                                     </li>
 
 								</ul>
 
-                                {% for host in  request.user.userprofile.bind_hosts.select_related %}
+                                {% for host in  request.user.bind_hosts.select_related %}
                                     <label input_label='host' style='display:none'  class="form-checkbox form-normal form-primary form-text active">
                                         <input type="checkbox" id="host_{{ host.id }}" >{{ host.host.hostname }}({{ host.host.ip_addr }}) @ {{ host.host_user.username }}
                                     </label>
@@ -51,7 +51,7 @@
 
                     <!--end未分类主机-->
 
-                    {% for g in request.user.userprofile.host_groups.select_related  %}
+                    {% for g in request.user.host_groups.select_related  %}
                         <div class="" style="padding-top:5px;pdding-bottom:0px;">
 
                             <!--Block level checkboxes-->
@@ -61,12 +61,12 @@
                                     <li style="border:0px;padding:0px" class="list-group-item">
                                         <span class="badge badge-primary"><i class="fa fa-chevron-down " id="group_toggle_{{ g.id }}" onclick="ToggleGroup({{ g.id }})"></i></span>
                                         <span data_label="group" class="badge badge-primary">全选</span>
-                                        <b>{{ g.name }} [{{  g.bindhosts_set.select_related.count}}]</b>
+                                        <b>{{ g.name }} [{{  g.bind_hosts.select_related.count}}]</b>
                                     </li>
 
 								</ul>
 
-                                {% for host in  g.bindhosts_set.select_related %}
+                                {% for host in  g.bind_hosts.select_related %}
                                     <label input_label='host' style='display:none'  class="form-checkbox form-normal form-primary form-text active">
                                         <input type="checkbox" id="host_{{ host.id }}" >{{ host.host.hostname }}({{ host.host.ip_addr }}) @ {{ host.host_user.username }}
                                     </label>

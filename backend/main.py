@@ -1,8 +1,9 @@
 #_*_coding:utf-8_*_
 __author__ = 'jieli'
 import sys
-import ssh_interactive
-import db_conn
+
+from backend import ssh_interactive
+from  backend import db_conn
 from CrazyEye import settings
 from web import models
 from django.contrib import auth
@@ -21,7 +22,7 @@ def call(sys_args):
             func = getattr(feature_ins,sys_args[0])
             func(sys_args)
         else:
-            print "\033[31;1mInvalid argument!\033[0m"
+            print("\033[31;1mInvalid argument!\033[0m")
             feature_list()
 def feature_list():
     features = '''
@@ -32,11 +33,12 @@ def feature_list():
 
 def print_msg(msg,msg_type,exit=False):
     if msg_type == 'err':
-        print  "\033[31;1m%s\033[0m" % msg
+        print("\033[31;1m%s\033[0m" % msg)
     elif msg_type == 'normal':
-        print  "\033[32;1m%s\033[0m" % msg
+        print("\033[32;1m%s\033[0m" % msg)
     elif msg_type == 'warning':
-        print  "\033[33;1m%s\033[0m" % msg
+        print( "\033[33;1m%s\033[0m" % msg)
+
     if exit:
         sys.exit()
 class Features(object):
@@ -56,13 +58,13 @@ class Features(object):
     def token_auth(self):
         count = 0
         while count <3:
-            token = raw_input("press ENTER if you don't have token, [input your token]:").strip()
+            token = input("press ENTER if you don't have token, [input your token]:").strip()
             if len(token) == 0:return None
             filter_date = datetime.timedelta(seconds=-300)
             token_list = models.Token.objects.filter(token=token,date__gt=django.utils.timezone.now() +filter_date)
             if len(token_list) >0:
                 if len(token_list) >1:
-                    print "Found more than 1 matched tokens,I cannot let you login,please contact your IT guy!"
+                    print("Found more than 1 matched tokens,I cannot let you login,please contact your IT guy!")
                 else: #auth correct
                     bind_host_obj = token_list[0].host
                     self.login_user = token_list[0].user.user
@@ -72,13 +74,13 @@ class Features(object):
                     try:
                         ssh_interactive.login(self,bind_host_obj)
                         print_msg('Bye!','warning',exit=True)
-                    except Exception,e:
-                        print e
+                    except Exception as e:
+                        print(e)
                     finally:
                         self.flush_audit_log(bind_host_obj)
             else:
                 count +=1
-                print "Invalid token,got %s times to try!" % (3-count)
+                print("Invalid token,got %s times to try!" % (3-count))
         else:
             sys.exit("Invalid token, too many attempts,exit.")
 
@@ -87,23 +89,27 @@ class Features(object):
        import getpass
        count = 0
        while count < 3:
-            user = raw_input("Username:").strip()
+            user = input("Username:").strip()
             passwd = getpass.getpass("Password:")
             if len(user) == 0 or len(passwd) == 0:
-                print "Username or password cannot be empty!"
+                print("Username or password cannot be empty!")
                 continue
 
             user = auth.authenticate(username=user, password=passwd)
             try:
                 if user is not None: #pass authentication
-                    if django.utils.timezone.now() > user.userprofile.valid_begin_time and django.utils.timezone.now() < user.userprofile.valid_end_time:
-                        self.login_user = user
-                        self.user_id = user.id
-                        return True
+                    if user.valid_begin_time and  user.valid_end_time:
+                        if django.utils.timezone.now() > user.valid_begin_time and django.utils.timezone.now() < user.valid_end_time:
+                            self.login_user = user
+                            self.user_id = user.id
+                            return True
+                        else:
+                            sys.exit("\033[31;1mYour account is expired,please contact your IT guy for this!\033[0m")
                     else:
                         sys.exit("\033[31;1mYour account is expired,please contact your IT guy for this!\033[0m")
+
                 else:
-                    print "\033[31;1mInvalid username or password!\033[0m"
+                    print("\033[31;1mInvalid username or password!\033[0m")
                     count +=1
             except ObjectDoesNotExist:
                 sys.exit("\033[31;1mhaven't set CrazyEye account yet ,please login http://localhost:8000/admin find 'CrazyEye账户' and create an account first!\033[0m")
@@ -113,39 +119,40 @@ class Features(object):
     #def fetch_hosts(self):
 
     def fetch_hosts(self):
-        host_groups = list(self.login_user.userprofile.host_groups.select_related())
+        host_groups = list(self.login_user.host_groups.select_related())
 
         while True:
             try:
 
-                print 'z. Ungrouped [%s]' % self.login_user.userprofile.bind_hosts.select_related().count()
+                print('z. Ungrouped [%s]' % self.login_user.bind_hosts.select_related().count())
                 for index,h_group in enumerate(host_groups):
                     #host_list = models.BindHosts.objects.filter(host_group__id=h_group.id)
-                    host_list = h_group.bindhosts_set.select_related()
-                    print '%s. %s [%s]' % (index, h_group.name,len(host_list))
+                    host_list = h_group.bind_hosts.select_related()
+                    print('%s. %s [%s]' % (index, h_group.name,len(host_list)) )
 
 
 
-                user_choice = raw_input("\033[32;1m>>:\033[0m").strip()
+                user_choice = input("\033[32;1m>>:\033[0m").strip()
 
                 if user_choice.isdigit():
                     user_choice = int(user_choice)
                     if user_choice < len(host_groups):
                         while True:
-                            hosts = models.BindHosts.objects.filter(host_group__id=host_groups[user_choice].id )
+                            #hosts = models.BindHosts.objects.filter(host_group__id=host_groups[user_choice].id )
+                            hosts = host_groups[user_choice].bind_hosts.select_related()
                             for index,h in enumerate(hosts):
-                                print "  %s.\t%s(%s)  %s" %(index,h.host.hostname,h.host.ip_addr,h.host_user.username)
-                            user_choice2 = raw_input("\033[32;1m['b'(back)]>>>:\033[0m").strip()
+                                print("  %s.\t%s(%s)  %s" %(index,h.host.hostname,h.host.ip_addr,h.host_user.username))
+                            user_choice2 = input("\033[32;1m['b'(back)]>>>:\033[0m").strip()
 
                             if user_choice2.isdigit():
                                 user_choice2 = int(user_choice2)
                                 if user_choice2 <len(hosts):
                                     h= hosts[user_choice2]
-                                    print '\033[32;1m-----connecting [%s] with user [%s]-----\033[0m' %(h.host.ip_addr,h.host_user.username)
+                                    print('\033[32;1m-----connecting [%s] with user [%s]-----\033[0m' %(h.host.ip_addr,h.host_user.username))
                                     try:
                                         ssh_interactive.login(self,h)
-                                    except Exception,e:
-                                        print "\033[31;1m%s\033[0m" %e
+                                    except Exception as e:
+                                        print("\033[31;1m%s\033[0m" %e)
                                     finally:
                                         self.flush_audit_log(h)
                                 else:
@@ -156,21 +163,21 @@ class Features(object):
                     else:
                         print_msg("No this option!", 'err')
                 elif user_choice == 'z': #for ungrouped hosts
-                    hosts = self.login_user.userprofile.bind_hosts.select_related()
+                    hosts = self.login_user.bind_hosts.select_related()
                     while True:
                         for index,h in enumerate(hosts):
-                            print "  %s.\t%s(%s)  %s" %(index,h.host.hostname,h.host.ip_addr,h.host_user.username)
-                        user_choice2 = raw_input("\033[32;1m['b'(back)]>>>:\033[0m").strip()
+                            print("  %s.\t%s(%s)  %s" %(index,h.host.hostname,h.host.ip_addr,h.host_user.username))
+                        user_choice2 = input("\033[32;1m['b'(back)]>>>:\033[0m").strip()
 
                         if user_choice2.isdigit():
                             user_choice2 = int(user_choice2)
                             if user_choice2 <len(hosts):
                                 h= hosts[user_choice2]
-                                print '\033[32;1m-----connecting [%s] with user [%s]-----\033[0m' %(h.host.ip_addr,h.host_user.username)
+                                print('\033[32;1m-----connecting [%s] with user [%s]-----\033[0m' %(h.host.ip_addr,h.host_user.username))
                                 try:
                                     ssh_interactive.login(self,h)
-                                except Exception,e:
-                                    print "\033[31;1m%s\033[0m" %e
+                                except Exception as e:
+                                    print("\033[31;1m%s\033[0m" %e)
                                 finally:
                                     self.flush_audit_log(h)
                             else:
@@ -183,7 +190,7 @@ class Features(object):
                     print_msg('Bye!','warning',exit=True)
             except (KeyboardInterrupt,EOFError):
                 print_msg("input 'exit' to logout!",'err')
-            except UnicodeEncodeError,e:
+            except UnicodeEncodeError as e:
                 print_msg("%s, make sure you terminal supports utf8 charset!" % str(e),'err',exit=True)
     def flush_cmd_input(self,log,host,action_type):
         current_time = django.utils.timezone.now()
@@ -204,7 +211,7 @@ class Features(object):
 
             row = models.AuditLog(
                     session = self.session_track,
-                    user = self.login_user.userprofile,
+                    user = self.login_user,
                     host = h,
                     action_type = log[2],
                     cmd = log[1],

@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os,datetime
-from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -72,7 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'django.core.context_processors.request',
+                #'django.core.context_processors.request',
 
             ],
         },
@@ -92,7 +91,7 @@ DATABASES = {
         'HOST': '',
         'PORT':3306,
         'USER':'root',
-        'PASSWORD': ''
+        'PASSWORD': 'alex3714'
     }
 }
 
@@ -119,6 +118,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     "%s/%s" %(BASE_DIR, "statics"),
 )
+
+AUTH_USER_MODEL = 'web.UserProfile'
 
 LOGIN_URL = '/login/'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

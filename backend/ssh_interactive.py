@@ -182,4 +182,4 @@ def get_terminal_size():
 
 if __name__ == '__main__':
     #login('192.168.2.250', 22,'alex','alex3714')
-    print get_terminal_size()
+    print(get_terminal_size())

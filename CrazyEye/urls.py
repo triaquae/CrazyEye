@@ -33,6 +33,8 @@ urlpatterns = [
     url(r'^api/',include(api_urls)),
     url(r'^personal/',views.personal,name='personal'),
     url(r'^user_audit/(\d+)/$',views.user_audit, name='user_audit'),
+    url(r'^audit/$',views.audit, name='audit'),
+
     url(r'^logout/',views.logout,name='logout'),
 
     url(r'^login/$',views.login,name='login'),

@@ -19,18 +19,18 @@
                              <a class="list-group-item" href="/hosts/?selected_group=-1">最近登录 [{{ recent_logins|length }}]</a>
                         {% endifequal %}
                         {% ifequal selected_g_id '-2' %}
-                            <a class="list-group-item active" href="/hosts/?selected_group=-2"><b>未分组主机 [{{ request.user.userprofile.bind_hosts.select_related.count }}]</b></a>
+                            <a class="list-group-item active" href="/hosts/?selected_group=-2"><b>未分组主机 [{{ request.user.bind_hosts.select_related.count }}]</b></a>
                         {% else %}
-                             <a class="list-group-item" href="/hosts/?selected_group=-2">未分组主机 [{{ request.user.userprofile.bind_hosts.select_related.count }}]</a>
+                             <a class="list-group-item" href="/hosts/?selected_group=-2">未分组主机 [{{ request.user.bind_hosts.select_related.count }}]</a>
                         {% endifequal %}
 
 
-                        {% for g in request.user.userprofile.host_groups.select_related %}
+                        {% for g in request.user.host_groups.select_related %}
                             {% ifequal g.id selected_g_id %}
 
-                                <a class="list-group-item active" href="{% url 'host_list'  %}?selected_group={{g.id}}"><b>{{g.name }} [{{ g.bindhosts_set.select_related.count }}]</b></a>
+                                <a class="list-group-item active" href="{% url 'host_list'  %}?selected_group={{g.id}}"><b>{{g.name }} [{{ g.bind_hosts.select_related.count }}]</b></a>
                             {% else %}
-                                <a class="list-group-item" href="{% url 'host_list'  %}?selected_group={{g.id}}"><b>{{g.name }} [{{  g.bindhosts_set.select_related.count}}]</b></a>
+                                <a class="list-group-item" href="{% url 'host_list'  %}?selected_group={{g.id}}"><b>{{g.name }} [{{  g.bind_hosts.select_related.count}}]</b></a>
                             {% endifequal %}
 
                         {% endfor %}
@@ -67,9 +67,9 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                            {% for g in request.user.userprofile.host_groups.select_related  %}
+                            {% for g in request.user.host_groups.select_related  %}
                                 {% ifequal selected_g_id g.id %}
-                                    {% for host in g.bindhosts_set.select_related %}
+                                    {% for host in g.bind_hosts.select_related %}
                                         <tr>
                                             <td class="text-center">{{ forloop.counter }}</td>
                                             <td><a href="#" class="btn-link">{{ host.host.hostname }}</a></td>
@@ -90,7 +90,7 @@
 
                            {% endfor %}
                             {% if selected_g_id == '-2' %} <!-- 未分组主机-->
-                                    {% for host in request.user.userprofile.bind_hosts.select_related %}
+                                    {% for host in request.user.bind_hosts.select_related %}
                                         <tr>
                                             <td class="text-center">{{ forloop.counter }}</td>
                                             <td><a href="#" class="btn-link">{{ host.host.hostname }}</a></td>

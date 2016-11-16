@@ -1,0 +1,101 @@
+{% extends 'index.html' %}
+{% load custom_tag %}
+
+{% block page-title %}
+用户审计
+{% endblock %}
+
+{% block page-content %}
+
+<div class="panel">
+    <div class="panel-heading">
+        <h3 class="panel-title">
+            ff
+        </h3>
+    </div>
+    <div class="panel-body">
+
+        <form >
+            <div class="row">
+                {% for filter_column in table_obj.list_filter %}
+                    <div class="col-md-3" style="margin-bottom: 15px">
+                        {{ filter_column.verbose_name }}
+                        <select name="{{ filter_column.column_name }}" class="form-control" >
+                            {% for choice in filter_column.choices %}
+                                {% if filter_column.selected == choice.0|to_string  %}
+                                    <option value="{{ choice.0 }}" selected>{{ choice.1 }}</option>
+                                {% else %}
+                                    <option value="{{ choice.0 }}" >{{ choice.1 }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endfor %}
+                <div class="col-md-3">
+                    <input type="submit" class="btn btn-success" value="开始过滤">
+                </div>
+            </div>
+        </form>
+
+        <table id="audit_log_list" class="table table-hover">
+            <thead>
+                <tr class="">
+
+                    {% for column in table_obj.list_display %}
+                        <th class="column-sorted">
+                            <a href="?page={{ table_obj.query_sets.number }}&orderby={% if table_obj.orderby_col_index == forloop.counter0 %}{{ table_obj.orderby_field}}{% else %}{{ column }}{% endif %}" >
+                                {% get_table_column column table_obj %}
+                                {% display_orderby_arrow table_obj forloop.counter0 %}
+
+                            </a>
+                        </th>
+
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in table_obj.query_sets %}
+                    <tr>
+{#                        {% build_table_row  row table_obj 'id'  'audit'  %}#}
+                        {% build_table_row  row table_obj    %}
+                    </tr>
+                {% endfor %}
+
+            </tbody>
+            <footer>
+              <tr>
+                    <td colspan="12" class="footable-visible">
+                        <div class="pagination">
+
+                            <nav>
+                                <p>共{{ paginator.count }}条数据</p>
+                                <ul class="pagination">
+                                    {% if table_obj.query_sets.has_previous %}
+                                    <li class="disabled">
+                                        <a href="{{ request.get_full_path }}?page={{ table_obj.query_sets.previous_page_number }}" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+                                    </li>
+                                    {% endif %}
+                                    {% for p_num in paginator.page_range %}
+                                        {% render_page_num request table_obj.query_sets p_num %}
+                                    {% endfor %}
+                                    {% if customer_list.has_next %}
+                                    <li>
+                                      <a href="{{ request.get_full_path }}?page={{ table_obj.query_sets.next_page_number }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                      </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+
+                        </div>    <!--end pagination-->
+
+                    </td>
+              </tr>
+            </footer>
+
+        </table>
+    </div>
+</div>
+
+{% endblock%}
