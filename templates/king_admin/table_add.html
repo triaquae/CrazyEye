@@ -1,0 +1,60 @@
+{% extends 'index.html' %}
+{% load custom_tag %}
+{% block breadcrumb %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'table_index' %}">配置中心</a></li>
+        <li><a href="{% url 'table_list' model_db_table %}">{{ model_name }}</a></li>
+        <li class="active"> 添加 {{ model_name }}</li>
+    </ol>
+ {% endblock %}
+
+{% block page-content %}
+
+<div class="panel">
+    <div class="panel-heading">
+        <h3 class="panel-title">Add {{ model_name }}</h3>
+    </div>
+
+    <form method="post" onsubmit="return CheckSelectedOptions()" class=" form-horizontal form-padding">{% csrf_token %}
+        <div class="panel-body">
+            {% for field in form_obj %}
+                <div class="form-group">
+                    {%if field.field.required%}
+                        <label class="col-md-2 control-label">
+                            <b>{{field.label}}</b>
+                        </label>
+                    {% else %}
+                        <label class="col-md-2 control-label">
+                           {{field.label}}
+                        </label>
+                    {% endif %}
+                    <div class="col-md-9">
+                        {% if field.name not in admin_class.filter_horizontal %}
+                            {{ field }}
+                            {% if field.errors %}
+                                <span style="color: red">{{ field.errors }}</span>
+                            {% endif %}
+                        {% else %}
+                            {% include 'king_admin/filter_horizontal_multi_select.html' %}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {{ form_obj.errors }}
+        </div> <!--end panel-body-->
+        <div class="panel-footer">
+            <div class="row">
+                <div class="col-sm-2 ">
+                    <button class="btn btn-danger " type="reset">Delete</button>
+                </div>
+                <div class="col-sm-4 ">
+                    <button class="btn btn-info pull-right " type="submit">Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
+<script src="/static/js/king_admin/filter_horizontal.js"></script>
+
+{% endblock %}

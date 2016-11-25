@@ -2,7 +2,7 @@
 
 from django.utils import timezone
 from django.db.models import Count
-
+import time
 
 def get_orderby(request, model_objs, admin_form):
     orderby_field = request.GET.get('orderby')
@@ -25,13 +25,17 @@ class TableHandler(object):
     def __init__(self, request, model_class, admin_class, query_sets, order_res):
         self.request = request
         self.model_class = model_class
+        self.model_verbose_name =  self.model_class._meta.verbose_name
+        self.model_db_table = self.model_class._meta.db_table
         # self.admin_class = admin_class
         self.query_sets = query_sets
         self.choice_fields = admin_class.choice_fields
         self.fk_fields = admin_class.fk_fields
 
         self.list_display = admin_class.list_display
-        self.list_filter = self.get_list_filter(admin_class.list_filter)
+        print("hasattr(admin_class,'list_filter')",hasattr(admin_class,'list_filter'))
+        self.list_filter = self.get_list_filter(admin_class.list_filter) if hasattr(admin_class,'list_filter') \
+            else ()
 
         # for order by
         self.orderby_field = order_res[1]
@@ -79,6 +83,7 @@ class TableHandler(object):
                     ((today_obj - timezone.timedelta(days=90)).strftime("%Y-%m-%d"), '过去3个月'),
                     ((today_obj - timezone.timedelta(days=180)).strftime("%Y-%m-%d"), '过去6个月'),
                     ((today_obj - timezone.timedelta(days=365)).strftime("%Y-%m-%d"), '过去1年'),
+                    ((today_obj - timezone.timedelta(seconds=time.time())).strftime("%Y-%m-%d"), 'ALL'),
                 ]
                 print(choices)
             data['choices'] = choices
@@ -95,18 +100,22 @@ class TableHandler(object):
 def table_filter(request, model_admin, models_class):
     '''根据过滤条件查找数据'''
 
-    print(model_admin.list_filter)
+    #print(model_admin.list_filter)
     filter_conditions = {}
-    for condition in model_admin.list_filter:
-        if request.GET.get(condition):
-            filed_type_name = models_class._meta.get_field(condition).__repr__()
-            print("filed_type_name",filed_type_name)
-            if 'ForeignKey' in filed_type_name:
-                filter_conditions['%s_id' % condition] = request.GET.get(condition)
-            elif 'DateField' in filed_type_name or 'DateTimeField' in filed_type_name:
-                filter_conditions['%s__gt' % condition] = request.GET.get(condition)
-            else:
-                filter_conditions[condition] = request.GET.get(condition)
+    if hasattr(model_admin,'list_filter'):
+        for condition in model_admin.list_filter:
+            if request.GET.get(condition):
+                filed_type_name = models_class._meta.get_field(condition).__repr__()
+                print("filed_type_name",filed_type_name)
+                if 'ForeignKey' in filed_type_name:
+                    filter_conditions['%s_id' % condition] = request.GET.get(condition)
+                elif 'DateField' in filed_type_name or 'DateTimeField' in filed_type_name:
+                    filter_conditions['%s__gt' % condition] = request.GET.get(condition)
+                else:
+                    filter_conditions[condition] = request.GET.get(condition)
 
     print("filter conditons", filter_conditions)
     return models_class.objects.filter(**filter_conditions)
+
+
+

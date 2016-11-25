@@ -62,8 +62,12 @@ def build_table_row(row_obj,table_obj,onclick_column=None,target_link=None):
         if column_name in table_obj.fk_fields:
             column_data = getattr(row_obj,column_name).__str__()
         if onclick_column == column_name:
-            column = ''' <td><a href=%s>%s</a></td> '''% (url_reverse(target_link,args=(column_data, )),column_data)
-        if column_name in table_obj.colored_fields: #特定字段需要显示color
+            column = ''' <td><a class='btn-link' href=%s>%s</a></td> '''% (url_reverse(target_link,args=(column_data, )),column_data)
+        elif index == 0:#首列可点击进入更改页
+            column = '''<td><a class='btn-link'  href='%schange/%s/' >%s</a> </td> ''' %(table_obj.request.path,
+                                                                       row_obj.id,
+                                                                       column_data)
+        elif column_name in table_obj.colored_fields: #特定字段需要显示color
 
             color_dic = table_obj.colored_fields[column_name]
             if column_data in color_dic:
@@ -194,3 +198,45 @@ def int_to_str(value):
 @register.filter
 def to_string(value):
     return '%s' %value
+
+
+@register.simple_tag
+def get_db_table_name(table_admin_class):
+    print("table_admin_class",table_admin_class.model)
+
+    return table_admin_class.model._meta.verbose_name
+
+
+@register.simple_tag
+def get_attr(obj):
+    print("get attr:",dir(obj))
+
+
+@register.simple_tag
+def get_m2m_objs(rel_field_name, model_obj):
+    print("get_m2m_objs", [rel_field_name,model_obj], model_obj._meta.label)
+    #print("has attr m2m",hasattr(model_obj,rel_field_name))
+    try:
+
+        m2m_objs = getattr(model_obj,rel_field_name)
+        print("m2m objs:",m2m_objs)
+        return m2m_objs.model.objects.all()
+    except ValueError as e :
+        #print(e)
+        return model_obj._meta.model.bind_hosts.through.bindhosts.get_queryset()
+        #return  # to deal ValueError: "<UserProfile: >" needs to have a value for field "userprofile" before this many-to-many relationship can be used.
+
+
+
+@register.simple_tag
+def get_chosen_m2m_objs(form_field_obj, model_obj):
+    '''return chosen m2m objs'''
+    selected_pks = form_field_obj.value()
+    try :
+        m2m_objs = getattr(model_obj,form_field_obj.name)
+        selected_objs = m2m_objs.select_related().filter(id__in=selected_pks)
+        #print("get_chosen_m2m_objs", form_field_obj.value(), selected_objs)
+        #print(selected_objs.values())
+        return selected_objs
+    except ValueError as e :
+        return []

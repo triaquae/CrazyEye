@@ -1,0 +1,7 @@
+cryptography==1.5.2
+Django==1.10.2
+django-session-security==2.4.0
+djangorestframework==3.5.3
+paramiko==2.0.2
+pycparser==2.16
+PyMySQL==0.7.9

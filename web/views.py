@@ -1,5 +1,6 @@
 #_*_coding:utf-8_*_
 from django.shortcuts import render,HttpResponseRedirect,HttpResponse
+from django.http import HttpResponseNotFound,Http404
 from django.contrib import auth
 
 from django.views.decorators.csrf import csrf_exempt
@@ -16,6 +17,8 @@ import django.utils.timezone
 from django.core.exceptions import ObjectDoesNotExist
 from web import tables
 from web import admin
+from web.king_admin import enabled_admins
+
 @login_required
 def dashboard(request):
     if request.user.is_superuser:
@@ -318,3 +321,110 @@ def user_login_counts(request):
 
     return  HttpResponse(json.dumps(list(user_login_records),default=json_date_handler))
 
+
+
+
+#@login_required
+def configure_url_dispatch(request,url):
+    print('---url dispatch',url)
+    print(enabled_admins)
+    if url in enabled_admins:
+        print(enabled_admins[url])
+
+        querysets = tables.table_filter(request, enabled_admins[url],
+                                        enabled_admins[url].model)
+        order_res = tables.get_orderby(request, querysets, enabled_admins[url])
+
+        paginator = Paginator(order_res[0], enabled_admins[url].list_per_page)
+
+        page = request.GET.get('page')
+        try:
+            table_obj_list = paginator.page(page)
+        except PageNotAnInteger:
+            table_obj_list = paginator.page(1)
+        except EmptyPage:
+            table_obj_list = paginator.page(paginator.num_pages)
+
+        table_obj = tables.TableHandler(request,
+                                        enabled_admins[url].model,
+                                        enabled_admins[url],
+                                        table_obj_list,
+                                        order_res)
+
+
+        return render(request,'king_admin/model_obj_list.html',
+                                                {'table_obj':table_obj,
+                                                 'active_node': '/configure/index/',
+                                                'paginator':paginator})
+    else:
+        raise Http404("url %s not found" % url )
+
+def table_change(request,table_name,obj_id):
+    print("table change:",table_name ,obj_id)
+    if table_name in enabled_admins:
+        print(enabled_admins[table_name])
+        obj = enabled_admins[table_name].model.objects.get(id=obj_id)
+        print("obj....change",obj)
+        fields = []
+        for field_obj in enabled_admins[table_name].model._meta.fields:
+            if field_obj.editable :
+                fields.append(field_obj.name)
+
+        for field_obj in enabled_admins[table_name].model._meta.many_to_many:
+            fields.append(field_obj.name)
+        print('fields', fields)
+        model_form = forms.create_form(enabled_admins[table_name].model, fields)
+
+        if request.method == "GET":
+            form_obj = model_form(instance=obj)
+
+        elif request.method == "POST":
+            print("post:",request.POST)
+            form_obj = model_form(request.POST,instance=obj)
+            if form_obj.is_valid():
+                form_obj.save()
+
+        return render(request,'king_admin/table_change.html',
+                      {'form_obj':form_obj,
+                      'active_node': '/configure/index/',
+                      'model_name':enabled_admins[table_name].model._meta.verbose_name,
+                      'model_db_table': enabled_admins[table_name].model._meta.db_table,
+                       'admin_class':enabled_admins[table_name]
+
+                        })
+    else:
+        raise Http404("url %s not found" % table_name )
+
+
+def configure_index(request):
+
+
+    return render(request,'king_admin/index.html', {'enabled_admins':enabled_admins})
+
+def table_add(request,table_name):
+    if table_name in enabled_admins:
+        fields = []
+        for field_obj in enabled_admins[table_name].model._meta.fields:
+            if field_obj.editable:
+                fields.append(field_obj.name)
+        for field_obj in enabled_admins[table_name].model._meta.many_to_many:
+            fields.append(field_obj.name)
+
+        model_form = forms.create_form(enabled_admins[table_name].model, fields)
+        if request.method == "GET":
+            form_obj = model_form()
+        elif request.method == "POST":
+            form_obj = model_form(request.POST)
+            if form_obj.is_valid():
+                form_obj.save()
+
+        return render(request, 'king_admin/table_add.html',
+                      {'form_obj': form_obj,
+                       'active_node': '/configure/index/',
+                       'model_name': enabled_admins[table_name].model._meta.verbose_name,
+                       'model_db_table':enabled_admins[table_name].model._meta.db_table,
+                       'admin_class': enabled_admins[table_name]
+                       })
+
+    else:
+        raise Http404("url %s not found" % table_name)

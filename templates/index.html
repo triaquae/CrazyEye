@@ -38,7 +38,7 @@
 	<script src="/static/js/pace.min.js"></script>
 
     {% endblock %}
-
+    {% block extra_head_resources %}{% endblock %}
 
 </head>
 
@@ -153,9 +153,10 @@
 				<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 				<!--End page title-->
 
-
+                {% block breadcrumb %} {% endblock %}
 				<!--Breadcrumb-->
 				<!--
+
 				<ol class="breadcrumb">
 					<li><a href="#">Home</a></li>
 					<li><a href="#">Library</a></li>
@@ -461,7 +462,7 @@
 									{% endif %}
 
 									<li>
-										<a href="/admin/" target="_blank">
+										<a href="{% url 'table_index' %}" >
 											<i class="fa fa-cog"></i>
 											<span class="menu-title">
 												配置
@@ -597,7 +598,7 @@
 
         function SetActiveMenu(active_node){
 
-            //console.log("activ---enode:: " + active_node);
+            //console.log("active node:: " + active_node);
             if (active_node == ''){
                 active_node = '/';
             }
@@ -607,6 +608,8 @@
                 node_ele.parent().addClass("in");
             }
 
+            //根本不需要上面这么麻烦，还需要后端返回 个当前menu,太low了
+            $("#mainnav-menu li").find("a[href='{{ request.path }}']").parent().addClass("active-link");
         }
 
         //for chart

@@ -1,0 +1,39 @@
+{% extends 'index.html' %}
+{% load custom_tag %}
+{% block breadcrumb %}
+    <ol class="breadcrumb">
+        <li class="active">配置中心</li>
+
+    </ol>
+ {% endblock %}
+{% block page-content %}
+
+
+<div class="row">
+
+    <div class="panel col-md-7">
+        <div class="panel-heading">
+            <h3 class="panel-title">配置中心</h3>
+        </div>
+
+        <div class="panel-body">
+            <table class="table table-hover table-vcenter">
+                {% for k,admin_class in enabled_admins.items %}
+
+                    <tr>
+                        <td><a style="font-weight:bold ;color: #447e9b" href="{% url 'table_list' k  %}">{% get_db_table_name admin_class %}</a></td>
+                        <td><a href="{% url 'table_add' k  %}"><i style="color: green" class="fa fa-plus-square-o pull-right" aria-hidden="true">增加</i></a></td>
+                        <td><a href="{% url 'table_list' k  %}"><i style="color: red"  class="fa fa-edit " aria-hidden="true">修改</i></a></td>
+
+                    </tr>
+
+
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+
+</div>
+
+{% endblock %}

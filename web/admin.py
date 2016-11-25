@@ -95,7 +95,7 @@ class UserProfileAdmin(UserAdmin):
     )
     search_fields = ('email',)
     ordering = ('email',)
-    filter_horizontal = ('host_groups','bind_hosts')
+    filter_horizontal = ('bind_hosts',)
 
 
 class HostAdmin(admin.ModelAdmin):
@@ -166,7 +166,7 @@ class HostGroupAdmin(admin.ModelAdmin):
     # inlines = [
     #     BindHostInline,
     # ]
-
+    filter_horizontal = ('bind_hosts',)
 # class UserProfileAdmin(admin.ModelAdmin):
 #     list_display = ('email','name','department','valid_begin_time','valid_end_time')
 #     filter_horizontal = ('host_groups','bind_hosts')

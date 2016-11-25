@@ -39,5 +39,9 @@ urlpatterns = [
 
     url(r'^login/$',views.login,name='login'),
     url(r'^accounts/profile/$',views.personal),
+    url(r'^configure/index/$',views.configure_index,name="table_index"),#显示所有注册的表
+    url(r'^configure/(\w+)/$',views.configure_url_dispatch,name="table_list"), #显示每个表的数据
+    url(r'^configure/(\w+)/change/(\d+)/$',views.table_change,name="table_change"),
+    url(r'^configure/(\w+)/add/$',views.table_add,name="table_add"),
 
 ]

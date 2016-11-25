@@ -1,0 +1,74 @@
+{% extends 'index.html' %}
+{% load custom_tag %}
+{% block breadcrumb %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'table_index' %}">配置中心</a></li>
+        <li class="active"> {{ table_obj.model_verbose_name }}</li>
+    </ol>
+ {% endblock %}
+{% block page-content %}
+
+<div class="panel">
+    <div class="panel-heading">
+        <h3 class="panel-title">Select {{ table_obj.model_verbose_name }} to change</h3>
+    </div>
+    <div class="panel-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    {% if  table_obj.list_display %}
+                        {% for column in table_obj.list_display %}
+                            <th>{{ column }}</th>
+                        {% endfor %}
+                    {% else %}
+                        <th>{{ table_obj }}</th>
+                    {% endif %}
+                </tr>
+                </thead>
+                <tbody>
+                    {% for row in table_obj.query_sets %}
+                    <tr>
+                        {% build_table_row  row table_obj    %}
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            <footer>
+              <tr>
+                    <td colspan="12" class="footable-visible">
+                        <div class="pagination">
+
+                            <nav>
+                                <p>共{{ paginator.count }}条数据</p>
+                                <ul class="pagination">
+                                    {% if table_obj.query_sets.has_previous %}
+                                    <li class="disabled">
+                                        <a href="{{ request.get_full_path }}?page={{ table_obj.query_sets.previous_page_number }}" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+                                    </li>
+                                    {% endif %}
+                                    {% for p_num in paginator.page_range %}
+                                        {% render_page_num request table_obj.query_sets p_num %}
+                                    {% endfor %}
+                                    {% if customer_list.has_next %}
+                                    <li>
+                                      <a href="{{ request.get_full_path }}?page={{ table_obj.query_sets.next_page_number }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                      </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+
+                        </div>    <!--end pagination-->
+
+                    </td>
+              </tr>
+            </footer>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

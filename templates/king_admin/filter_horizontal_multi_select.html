@@ -1,0 +1,69 @@
+
+{% load custom_tag %}
+
+<div class="col-md-5">
+{#                         {% get_attr field %}#}
+     <p>可选 </p>
+     {% get_m2m_objs field.name form_obj.instance as m2m_objs %}
+     {% get_chosen_m2m_objs field form_obj.instance as chosen_m2m_objs %}
+
+
+     <select style="height: 200px" id="available_{{ field.name }}"  multiple class="form-control  ">
+         {% for obj in m2m_objs %}
+             {% if obj not in  chosen_m2m_objs%}
+                <option value="{{ obj.id }}">{{ obj }}</option>
+             {% endif %}
+         {% endfor %}
+     </select>
+     <p class="btn-link" onclick="ChoseAllOptions('available_{{ field.name }}','id_{{ field.name }}')" align="center" style="cursor:pointer;font-weight:bold;margin-top:10px">
+         Choose all <i class="fa fa-chevron-circle-right" aria-hidden="true"></i>
+     </p>
+ </div>
+ <div class="col-md-1" align="center" style="margin-top: 35px">
+     <i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+     <br>
+     <i class="fa fa-arrow-circle-right" style="margin-left: -3px" aria-hidden="true"></i>
+
+ </div>
+ <div class="col-md-5">
+     <p>已选 </p>
+     <select data-type="m2m_chosen" style="height: 200px" multiple class="form-control" id="id_{{ field.name }}" name="{{ field.name }}" >
+         {% for obj in chosen_m2m_objs %}
+         <option value="{{ obj.id }}" selected>{{ obj }}</option>
+         {% endfor %}
+
+     </select>
+     <p class="btn-link" onclick="ChoseAllOptions('id_{{ field.name }}','available_{{ field.name }}')" align="center" style="cursor:pointer;font-weight:bold;margin-top:10px">
+         <i class="fa fa-chevron-circle-left" aria-hidden="true"></i>Remove all
+     </p>
+ </div>
+ <script>
+    document.getElementById("available_{{ field.name }}").addEventListener("dblclick", function (ele) {
+        moveClickedOption(ele,"id_{{ field.name }}");
+
+    });
+    document.getElementById("id_{{ field.name }}").addEventListener("dblclick", function (ele) {
+        moveClickedOption(ele,"available_{{ field.name }}");
+
+    });
+    document.getElementById("id_{{ field.name }}").addEventListener("click", function (ele) {
+        $(ele).preventDefault;
+
+    });
+    function moveClickedOption(ele,target_select_ele_id){
+        console.log("to target_select_ele: "+target_select_ele_id);
+        console.log(ele);
+        console.log(ele.srcElement.type);
+        if (ele.srcElement.type != 'select-multiple'){ //为避免当select里无option时，再点击会把select自己删除 掉
+
+            var clone_ele = $(ele)[0].srcElement;
+            $(ele)[0].srcElement.remove();
+            $("#" +target_select_ele_id ).append(clone_ele);
+            console.log(ele.srcElement.firstChild +ele.srcElement.value );
+
+            $("#id_{{ field.name }} option").prop("selected",true); //设定右边select的全为选 中状态
+            console.log($("#id_{{ field.name }} option")); //设定右边select的全为选 中状态
+        }
+
+    }
+</script>
