@@ -8,17 +8,16 @@
 
 <div class="row">
      <div class="col-sm-6 col-lg-3">
-        <div class="panel">
+        <div class="panel" style="height: 492px">
             <div class="panel-heading">
                 <h3 class="panel-title">主机列表</h3>
             </div>
             <div  class="panel-body " >
 
-                      <input type="text" oninput="SearchHost(this)" id="host_search" class="form-control" placeholder="查找主机...">
+                      <input style="margin-bottom: 5px" type="text" oninput="SearchHost(this)" id="host_search" class="form-control" placeholder="查找主机...">
 
 
-
-                <div id="host_list">
+                <div id="host_list" style="height: 90%">
                     <div style="margin-bottom:0;" class="list-group bg-trans">
                      {% for host in all_hosts %}
 
@@ -106,28 +105,29 @@
 
                         <table class="table table-hover">
                             <tr>
-                                <th>#</th>
+                                <th>会话ID</th>
                                 <th>操作用户</th>
                                 <th>远程用户</th>
                                 <th>登录日期</th>
-                                <th>登出日期</th>
+                                <th>停留时长</th>
                                 <th>命令数</th>
                                 <th>状态</th>
 
                             </tr>
                             {% for log in access_records %}
                             <tr>
-                                <td>{{ forloop.counter }}</td>
+                                <td>{{ log.id }}</td>
                                 <td data-label="hostname" class="hide" >{{ log.host.host.hostname }}</td>
                                 <td>{{ log.user.name }}</td>
-                                <td data-label="username">{{ log.host.host_user.username }}</td>
+                                <td data-label="username">{{ log.bind_host.host_user.username }}</td>
                                 <td data-label="login-date">{{ log.date |date:"Y-m-d H:i:s" }}</td>
-                                <td data-label="logout-date">{% query_logout_date  log.session.auditlog_set.select_related 'action_type' 2 %}</td>
-                                <td ><a href="#" onclick="ShowRecordDetail(this,'{{ log.session.id }}')" class="btn-link">{{ log.session.auditlog_set.select_related.count }}</a></td>
-                                {% if log.session.closed %}
+                                <td data-label="stay-time">{% get_time_humanize_display log.stay_time %}</td>
+{#                                <td data-label="logout-date">{% query_logout_date  log.session.auditlog_set.select_related 'action_type' 2 %}</td>#}
+                                <td ><a href="#" onclick="ShowRecordDetail(this,'{{ log.session.id }}')" class="btn-link">{{ log.cmd_count }}</a></td>
+                                {% if log.closed %}
                                     <td ><span class="badge badge-info">已结束</span></td>
                                 {% else %}
-                                    <td><span class="badge badge-warning">连接中</span></td>
+                                    <td><span class="badge badge-success">连接中</span></td>
                                 {% endif %}
                             </tr>
                             {% endfor %}

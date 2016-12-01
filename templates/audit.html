@@ -14,7 +14,7 @@
         </h3>
     </div>
     <div class="panel-body">
-
+        {% if  table_obj.list_filter%}
         <form >
             <div class="row">
                 {% for filter_column in table_obj.list_filter %}
@@ -36,6 +36,7 @@
                 </div>
             </div>
         </form>
+        {% endif %}
 
         <table id="audit_log_list" class="table table-hover">
             <thead>

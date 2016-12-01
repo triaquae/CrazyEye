@@ -22,9 +22,10 @@
 
                     <tr>
                         <td><a style="font-weight:bold ;color: #447e9b" href="{% url 'table_list' k  %}">{% get_db_table_name admin_class %}</a></td>
+                        {% if not admin_class.readable_table %}
                         <td><a href="{% url 'table_add' k  %}"><i style="color: green" class="fa fa-plus-square-o pull-right" aria-hidden="true">增加</i></a></td>
                         <td><a href="{% url 'table_list' k  %}"><i style="color: red"  class="fa fa-edit " aria-hidden="true">修改</i></a></td>
-
+                        {% endif %}
                     </tr>
 
 

@@ -13,6 +13,30 @@
         <h3 class="panel-title">Select {{ table_obj.model_verbose_name }} to change</h3>
     </div>
     <div class="panel-body">
+           {% if  table_obj.list_filter%}
+
+            <form >
+                <div class="row">
+                    {% for filter_column in table_obj.list_filter %}
+                        <div class="col-md-3" style="margin-bottom: 15px">
+                            {{ filter_column.verbose_name }}
+                            <select name="{{ filter_column.column_name }}" class="form-control" >
+                                {% for choice in filter_column.choices %}
+                                    {% if filter_column.selected == choice.0|to_string  %}
+                                        <option value="{{ choice.0 }}" selected>{{ choice.1 }}</option>
+                                    {% else %}
+                                        <option value="{{ choice.0 }}" >{{ choice.1 }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endfor %}
+                    <div class="col-md-3">
+                        <input type="submit" class="btn btn-success" value="开始过滤">
+                    </div>
+                </div>
+            </form>
+        {% endif %}
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>

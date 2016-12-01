@@ -186,10 +186,25 @@ class UserProfile(auth.AbstractBaseUser):
 
 class SessionTrack(models.Model):
 
-    date = models.DateTimeField(default=django.utils.timezone.now)
+    date = models.DateTimeField(auto_now_add=True)
     closed = models.BooleanField(default=False)
     def __str__(self):
         return '%s' %self.id
+
+
+class Session(models.Model):
+    '''生成用户操作session id '''
+    user = models.ForeignKey('UserProfile')
+    bind_host = models.ForeignKey('BindHosts')
+    tag = models.CharField(max_length=128,default='n/a')
+    closed = models.BooleanField(default=False)
+    cmd_count = models.IntegerField(default=0) #命令执行数量
+    stay_time = models.IntegerField(default=0, help_text="每次刷新自动计算停留时间",verbose_name="停留时长(seconds)")
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return '<id:%s user:%s bind_host:%s' % (self.id,self.user.email,self.bind_host.host)
+
 
 class AuditLog(models.Model):
     session = models.ForeignKey(SessionTrack)
@@ -204,7 +219,7 @@ class AuditLog(models.Model):
         (5,'exception'),
     )
     action_type = models.IntegerField(choices=action_choices,default=0)
-    cmd = models.TextField()
+    cmd = models.TextField(blank=True,null=True)
     memo = models.CharField(max_length=128,blank=True,null=True)
     date = models.DateTimeField()
 
@@ -262,11 +277,3 @@ class Token(models.Model):
         return '%s : %s' %(self.host.host.ip_addr,self.token)
 
 
-
-#test
-class Test(models.Model):
-    test = models.CharField(max_length=32)
-    num = models.IntegerField()
-
-    def __str__(self):
-        return self.test

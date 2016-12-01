@@ -8,16 +8,18 @@
      {% get_chosen_m2m_objs field form_obj.instance as chosen_m2m_objs %}
 
 
-     <select style="height: 200px" id="available_{{ field.name }}"  multiple class="form-control  ">
+     <select style="height: 200px" id="available_{{ field.name }}"  multiple class="form-control  " {% check_disabled_attr field.name form_obj %}>
          {% for obj in m2m_objs %}
              {% if obj not in  chosen_m2m_objs%}
                 <option value="{{ obj.id }}">{{ obj }}</option>
              {% endif %}
          {% endfor %}
      </select>
+     {% if field.name not in form_obj.Meta.admin.readonly_fields %}
      <p class="btn-link" onclick="ChoseAllOptions('available_{{ field.name }}','id_{{ field.name }}')" align="center" style="cursor:pointer;font-weight:bold;margin-top:10px">
          Choose all <i class="fa fa-chevron-circle-right" aria-hidden="true"></i>
      </p>
+    {% endif %}
  </div>
  <div class="col-md-1" align="center" style="margin-top: 35px">
      <i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
@@ -27,15 +29,17 @@
  </div>
  <div class="col-md-5">
      <p>已选 </p>
-     <select data-type="m2m_chosen" style="height: 200px" multiple class="form-control" id="id_{{ field.name }}" name="{{ field.name }}" >
+     <select data-type="m2m_chosen" style="height: 200px" multiple class="form-control" id="id_{{ field.name }}" name="{{ field.name }}" {% check_disabled_attr field.name form_obj %} >
          {% for obj in chosen_m2m_objs %}
          <option value="{{ obj.id }}" selected>{{ obj }}</option>
          {% endfor %}
 
      </select>
+    {% if field.name not in form_obj.Meta.admin.readonly_fields %}
      <p class="btn-link" onclick="ChoseAllOptions('id_{{ field.name }}','available_{{ field.name }}')" align="center" style="cursor:pointer;font-weight:bold;margin-top:10px">
          <i class="fa fa-chevron-circle-left" aria-hidden="true"></i>Remove all
      </p>
+    {% endif %}
  </div>
  <script>
     document.getElementById("available_{{ field.name }}").addEventListener("dblclick", function (ele) {

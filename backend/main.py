@@ -45,6 +45,7 @@ class Features(object):
 
     def __init__(self):
         self.cmd_logs = []
+        self.models = models
         self.django_settings = settings
 
     def run(self,argv):
@@ -67,12 +68,13 @@ class Features(object):
                     print("Found more than 1 matched tokens,I cannot let you login,please contact your IT guy!")
                 else: #auth correct
                     bind_host_obj = token_list[0].host
-                    self.login_user = token_list[0].user.user
-                    self.user_id = token_list[0].user.user.id
+                    self.login_user = token_list[0].user
+                    self.user_id = token_list[0].user.id
 
                     print_msg("--- logging host[%s@%s(%s)], be patient,it may takes a minute --- " %(bind_host_obj.host_user.username,bind_host_obj.host.hostname,bind_host_obj.host.ip_addr),'normal')
                     try:
-                        ssh_interactive.login(self,bind_host_obj)
+                        #ssh_interactive.login(self,bind_host_obj)
+                        ssh_interactive.login_raw(self,bind_host_obj)
                         print_msg('Bye!','warning',exit=True)
                     except Exception as e:
                         print(e)
@@ -131,7 +133,6 @@ class Features(object):
                     print('%s. %s [%s]' % (index, h_group.name,len(host_list)) )
 
 
-
                 user_choice = input("\033[32;1m>>:\033[0m").strip()
 
                 if user_choice.isdigit():
@@ -150,7 +151,7 @@ class Features(object):
                                     h= hosts[user_choice2]
                                     print('\033[32;1m-----connecting [%s] with user [%s]-----\033[0m' %(h.host.ip_addr,h.host_user.username))
                                     try:
-                                        ssh_interactive.login(self,h)
+                                        ssh_interactive.login_raw(self,h)
                                     except Exception as e:
                                         print("\033[31;1m%s\033[0m" %e)
                                     finally:
@@ -175,7 +176,7 @@ class Features(object):
                                 h= hosts[user_choice2]
                                 print('\033[32;1m-----connecting [%s] with user [%s]-----\033[0m' %(h.host.ip_addr,h.host_user.username))
                                 try:
-                                    ssh_interactive.login(self,h)
+                                    ssh_interactive.login_raw(self,h)
                                 except Exception as e:
                                     print("\033[31;1m%s\033[0m" %e)
                                 finally:

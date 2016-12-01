@@ -56,19 +56,25 @@ def display_orderby_arrow(table_obj,loop_counter):
 def build_table_row(row_obj,table_obj,onclick_column=None,target_link=None):
     row_ele = "<tr>"
     for index,column_name in enumerate(table_obj.list_display):
-        column_data = row_obj._meta.get_field(column_name)._get_val_from_obj(row_obj)
+        field_obj = row_obj._meta.get_field(column_name)
+        column_data = field_obj._get_val_from_obj(row_obj)
         if column_name in table_obj.choice_fields:
             column_data = getattr(row_obj,'get_%s_display'%column_name)()
         if column_name in table_obj.fk_fields:
             column_data = getattr(row_obj,column_name).__str__()
+        if 'DateTimeField' in field_obj.__repr__():
+            column_data = getattr(row_obj,column_name).strftime( "%Y-%m-%d %H:%M:%S")
         if onclick_column == column_name:
             column = ''' <td><a class='btn-link' href=%s>%s</a></td> '''% (url_reverse(target_link,args=(column_data, )),column_data)
+        if column_name in table_obj.onclick_fields:
+            column = '''<td><a class='btn-link' href='%s' target='_blank'>%s</a></td>''' % \
+                     (url_reverse(table_obj.onclick_fields[column_name],args=(row_obj.id, )), column_data)
+
         elif index == 0:#首列可点击进入更改页
             column = '''<td><a class='btn-link'  href='%schange/%s/' >%s</a> </td> ''' %(table_obj.request.path,
                                                                        row_obj.id,
                                                                        column_data)
         elif column_name in table_obj.colored_fields: #特定字段需要显示color
-
             color_dic = table_obj.colored_fields[column_name]
             if column_data in color_dic:
                 column = "<td style='background-color:%s'>%s</td>" % (color_dic[column_data],
@@ -77,6 +83,8 @@ def build_table_row(row_obj,table_obj,onclick_column=None,target_link=None):
                 column = "<td>%s</td>" % column_data
         else:
             column = "<td>%s</td>" % column_data
+
+
         row_ele +=column
     #for dynamic display
     if table_obj.dynamic_fk :
@@ -226,6 +234,21 @@ def get_m2m_objs(rel_field_name, model_obj):
         return model_obj._meta.model.bind_hosts.through.bindhosts.get_queryset()
         #return  # to deal ValueError: "<UserProfile: >" needs to have a value for field "userprofile" before this many-to-many relationship can be used.
 
+
+@register.simple_tag
+def check_disabled_attr(field_name,form_obj):
+    if field_name in form_obj.Meta.admin.readonly_fields:
+        return 'disabled'
+
+@register.simple_tag
+def get_time_humanize_display(time_seconds):
+    if time_seconds < 60:
+        return '%s秒'%time_seconds
+    elif time_seconds < 60*60:
+        return '%s分' % (time_seconds/60)
+
+    elif time_seconds < 60 * 60 * 24:
+        return '%s小时' % (time_seconds /60/60)
 
 
 @register.simple_tag

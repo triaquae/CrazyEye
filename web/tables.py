@@ -31,9 +31,11 @@ class TableHandler(object):
         self.query_sets = query_sets
         self.choice_fields = admin_class.choice_fields
         self.fk_fields = admin_class.fk_fields
-
+        self.onclick_fields = admin_class.onclick_fields
+        self.readable_table = admin_class.readable_table
+        self.readonly_fields = admin_class.readonly_fields
         self.list_display = admin_class.list_display
-        print("hasattr(admin_class,'list_filter')",hasattr(admin_class,'list_filter'))
+        #print("hasattr(admin_class,'list_filter')",hasattr(admin_class,'list_filter'))
         self.list_filter = self.get_list_filter(admin_class.list_filter) if hasattr(admin_class,'list_filter') \
             else ()
 

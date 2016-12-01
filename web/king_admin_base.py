@@ -8,10 +8,11 @@ class ModelAdminBase(object):
     fk_fields = ()
     filter_horizontal = ()
     model = None
+    onclick_fields = {}
 
+    readable_table = False
 
-
-
+    readonly_fields = []
 
 def register(admin_dic,model,admin_class):
     '''注册admin'''

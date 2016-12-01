@@ -11,15 +11,21 @@ class UserAdmin(ModelAdminBase):
     model  = models.UserProfile
     list_display = ('id','name','email','is_admin')
     filter_horizontal = ('host_groups','bind_hosts')
+    readonly_fields = ['name','host_groups','memo']
 
 class HostAdmin(ModelAdminBase):
     model = models.Hosts
     list_display = ('id','hostname','ip_addr','port','idc','system_type','enabled','created_at')
     list_per_page = 1
+    readonly_fields = ['ip_addr',]
+
+
 class HostGroupAdmin(ModelAdminBase):
     model = models.HostGroups
     list_display = ('name','memo','bind_hosts')
     filter_horizontal = ('bind_hosts',)
+
+
 class AuditLogAdmin(ModelAdminBase):
     model = models.AuditLog
     list_display = ('id','session','user','host','action_type','cmd','date')
@@ -29,12 +35,27 @@ class AuditLogAdmin(ModelAdminBase):
     choice_fields = ('action_type',)
     fk_fields = ('user','host')
 
+
 class HostUsersAdmin(ModelAdminBase):
     model = models.HostUsers
     list_display = ['auth_method','username','password']
+
+
+class SessionAdmin(ModelAdminBase):
+    model = models.Session
+    list_display = ['id','user', 'bind_host','stay_time','cmd_count','date','closed']
+    fk_fields = ['user','bind_host']
+    list_filter = ['user','bind_host']
+    onclick_fields = {
+        'id': 'session_record'
+    }
+
+
+    readable_table = True
 
 register(enabled_admins,models.UserProfile,UserAdmin)
 register(enabled_admins,models.Hosts,HostAdmin)
 register(enabled_admins,models.HostGroups,HostGroupAdmin)
 register(enabled_admins,models.AuditLog,AuditLogAdmin)
 register(enabled_admins,models.HostUsers,HostUsersAdmin)
+register(enabled_admins,models.Session,SessionAdmin)

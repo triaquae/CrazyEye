@@ -6,8 +6,14 @@
 //run this script before submit,to make sure all chosen options all selected
 function CheckSelectedOptions() {
     $("select[data-type='m2m_chosen'] option").prop("selected",true);
+    RemoveDisabledAttrs();
 }
 
+
+function RemoveDisabledAttrs() {
+    $("input").removeAttr("disabled");
+    $("select").removeAttr("disabled");
+}
 
 function ChoseAllOptions(from_select_ele_id,target_select_ele_id) {
     console.log(from_select_ele_id +'--' +  target_select_ele_id);

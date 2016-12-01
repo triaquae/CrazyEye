@@ -28,7 +28,6 @@
 
     <form method="post" onsubmit="return CheckSelectedOptions()" class=" form-horizontal form-padding">{% csrf_token %}
         <div class="panel-body">
-            {{ form_obj.instance }}
             {% for field in form_obj %}
                 <div class="form-group">
                     {%if field.field.required%}
@@ -38,13 +37,13 @@
                     {% else %}
                         <label class="col-md-2 control-label">
                            {{field.label}}
-
                         </label>
                     {% endif %}
 
                     <div class="col-md-9">
                         {% if field.name not in admin_class.filter_horizontal %}
                             {{ field }}
+
                             {% if field.errors %}
                                 <span style="color: red">{{ field.errors }}</span>
                             {% endif %}

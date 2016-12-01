@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from web import host_mgr
 # Create your views here.
 from web import models,utils
-import json,datetime
+import json,datetime,os,time
 from CrazyEye import settings
 from  web import forms
 from backend.utils import json_date_to_stamp,json_date_handler
@@ -18,6 +18,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from web import tables
 from web import admin
 from web.king_admin import enabled_admins
+from backend import audit as session_audit
+
 
 @login_required
 def dashboard(request):
@@ -196,8 +198,9 @@ def host_detail(request):
     if host_id:
         host_id = int(host_id)
 
-        access_records = models.AuditLog.objects.filter(host__host_id=host_id,action_type=1).order_by('-date')
-        print("acc records;",access_records)
+        #access_records = models.AuditLog.objects.filter(host__host_id=host_id,action_type=1).order_by('-date')
+        access_records = models.Session.objects.filter(bind_host__host_id=host_id).order_by('-date')
+        #print("acc records;",access_records)
 
         paginator = Paginator(access_records,10)
         page = request.GET.get('page')
@@ -323,8 +326,44 @@ def user_login_counts(request):
 
 
 
+@login_required
+def session_reccord(request,session_id):
+    try:
 
-#@login_required
+        session_obj = models.Session.objects.get(id=session_id)
+        print("session obj:",session_obj)
+        session_log_file = "%s/%s/session_%s.log" %(settings.SESSION_AUDIT_LOG_DIR,
+                                                    session_obj.date.strftime( "%Y_%m_%d"),
+                                                    session_obj.id)
+
+        if os.path.isfile(session_log_file):
+            log_wash = session_audit.AuditLogHandler(session_log_file)
+            log_data = log_wash.parse()
+            #update session stay time and cmd count
+            session_obj.cmd_count = len(log_data)
+            if len(log_data ) >1:
+                last_cmd_time = log_data[-1][0]
+                last_cmd_datetime_str = "%s %s"%(session_obj.date.strftime( "%Y_%m_%d"), last_cmd_time)
+                #print("last_cmd_datetime_str",last_cmd_datetime_str)
+                last_cmd_struct_time = time.strptime(last_cmd_datetime_str,"%Y_%m_%d %H:%M:%S")
+                last_cmd_timestamp = time.mktime(last_cmd_struct_time)
+                #print('last cmd timestamp:',last_cmd_timestamp)
+                session_obj.stay_time = last_cmd_timestamp - session_obj.date.timestamp()
+                session_obj.save()
+        else:
+            log_data = [['n/a','---no session log---']]
+        # if os.path.isfile(session_log_file):
+        #     session_log = open(session_log_file).read()
+        # else:
+        #     print('file not exist ',session_log_file)
+        #     session_log = '---no session log---'
+
+        return render(request,"session_log.html",{'session_data':log_data,'session_obj':session_obj})
+    except ObjectDoesNotExist as e:
+        return HttpResponse(e)
+
+
+@login_required
 def configure_url_dispatch(request,url):
     print('---url dispatch',url)
     print(enabled_admins)
@@ -373,7 +412,7 @@ def table_change(request,table_name,obj_id):
         for field_obj in enabled_admins[table_name].model._meta.many_to_many:
             fields.append(field_obj.name)
         print('fields', fields)
-        model_form = forms.create_form(enabled_admins[table_name].model, fields)
+        model_form = forms.create_form(enabled_admins[table_name].model, fields,enabled_admins[table_name])
 
         if request.method == "GET":
             form_obj = model_form(instance=obj)
@@ -410,7 +449,7 @@ def table_add(request,table_name):
         for field_obj in enabled_admins[table_name].model._meta.many_to_many:
             fields.append(field_obj.name)
 
-        model_form = forms.create_form(enabled_admins[table_name].model, fields)
+        model_form = forms.create_form(enabled_admins[table_name].model, fields,enabled_admins[table_name])
         if request.method == "GET":
             form_obj = model_form()
         elif request.method == "POST":

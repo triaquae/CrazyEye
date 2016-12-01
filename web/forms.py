@@ -52,17 +52,21 @@ def __new__(cls, *args, **kwargs):
                         'placeholder': field.help_text,
                         }
             #print("-->field",field)
-            # if field_name in disabled_fields:
-            #     attr_dic['disabled'] = True
+            if field_name in cls.Meta.admin.readonly_fields:
+                attr_dic['disabled'] = True
+                print('----read only:',field_name)
             field.widget.attrs.update(attr_dic)
+    print("modelf form admin class:",dir(cls))
+
     return ModelForm.__new__(cls)
 
 
-def create_form(model,fields):
+def create_form(model,fields,admin_class):
     class Meta:
         pass
     setattr(Meta,'model',model)
     setattr(Meta,'fields',fields)
+    setattr(Meta,'admin',admin_class)
 
     attrs = {'Meta':Meta}
 
@@ -70,4 +74,5 @@ def create_form(model,fields):
     baseclasess = (forms.ModelForm,)
     model_form = type(name, baseclasess,attrs)
     setattr(model_form,'__new__',__new__)
+    print(model_form)
     return model_form

@@ -1,0 +1,31 @@
+{% extends 'index.html' %}
+{% load custom_tag %}
+
+{% block page-title %}
+会话审计
+{% endblock %}
+{% block page-content %}
+<div class="row" >
+        <div class="panel">
+            <div class="panel-heading">
+                <h3 class="panel-title">用户列表</h3>
+            </div>
+            <div class="panel-body" >
+                <div class="row">
+                    <div class="col-md-2">用户:{{ session_obj.user.name }} </div>
+                    <div class="col-md-2">主机:{{ session_obj.bind_host.host.hostname }} </div>
+                    <div class="col-md-2">远程用户:{{ session_obj.bind_host.host_user.username }} </div>
+                    <div class="col-md-3">会话开始日期:{{ session_obj.date }} </div>
+                </div>
+                <hr>
+                {% for row in session_data %}
+                <div class="row">
+                    <div class="col-md-1">[{{ row.0}}]</div>
+                    <div class="col-md-11">$ {{ row.1}}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+</div>
+
+{% endblock  %}

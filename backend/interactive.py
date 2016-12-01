@@ -93,7 +93,6 @@ def posix_shell(chan,self,host_ip,username,host_ins):
                 chan.send(x)
 
         #f.close()
-        #print cmd_list
     finally:
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
 
