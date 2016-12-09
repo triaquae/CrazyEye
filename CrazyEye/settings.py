@@ -187,3 +187,7 @@ SUIT_CONFIG = {
 SSH_CLIENT_PATH = '/usr/local/openssh7/bin/ssh'
 
 SESSION_AUDIT_LOG_DIR = '%s/logs/audit' % BASE_DIR
+
+
+#用户权限列表
+PERMISSION_DIC = {}

@@ -19,6 +19,7 @@
 {% block page-content %}
 
 
+{% include 'king_admin/filter_search_box.html' %}
 
 
 <div class="panel">
@@ -42,8 +43,9 @@
 
                     <div class="col-md-9">
                         {% if field.name not in admin_class.filter_horizontal %}
-                            {{ field }}
-
+                            {{ field }} {% add_fk_search_btn form_obj field %}
+                            {% add_onclick_link form_obj field %}
+{#                            {% decorate_date_field form_obj field %}#}
                             {% if field.errors %}
                                 <span style="color: red">{{ field.errors }}</span>
                             {% endif %}
@@ -56,12 +58,15 @@
         </div> <!--end panel-body-->
         <div class="panel-footer">
             <div class="row">
+                {% if  not admin_class.readable_table  %}
                 <div class="col-sm-2 ">
-                    <button class="btn btn-danger " type="reset">Delete</button>
+                    <a href="{% url 'table_del' model_db_table form_obj.instance.id %}" class="btn btn-danger " type="reset">Delete</a>
                 </div>
+
                 <div class="col-sm-4 ">
                     <button class="btn btn-info pull-right "  type="submit">Save</button>
                 </div>
+                {% endif %}
             </div>
         </div>
     </form>

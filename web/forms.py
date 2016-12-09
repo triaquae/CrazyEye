@@ -46,27 +46,33 @@ def __new__(cls, *args, **kwargs):
     #disabled_fields = ['qq', 'consultant']
     for field_name in cls.base_fields:
         field = cls.base_fields[field_name]
-        #print(field.__repr__())
+        #print("field repr",field_name,field.__repr__())
+        attr_dic = {'placeholder': field.help_text}
         if 'BooleanField' not in field.__repr__():
-            attr_dic = {'class': 'form-control',
-                        'placeholder': field.help_text,
-                        }
+            attr_dic.update({'class': 'form-control'})
             #print("-->field",field)
+            if 'ModelChoiceField' in field.__repr__(): #fk field
+                attr_dic.update({'data-tag':field_name})
+            # if 'DateTimeField' in field.__repr__():
+            #     attr_dic.update({'placeholder': field_name})
+        if cls.Meta.form_create is False:
             if field_name in cls.Meta.admin.readonly_fields:
                 attr_dic['disabled'] = True
-                print('----read only:',field_name)
-            field.widget.attrs.update(attr_dic)
-    print("modelf form admin class:",dir(cls))
+                #print('----read only:',field_name)
+        field.widget.attrs.update(attr_dic)
+
+    print("modelf form admin class:",dir(cls.Meta))
 
     return ModelForm.__new__(cls)
 
 
-def create_form(model,fields,admin_class):
+def create_form(model,fields,admin_class,form_create=False):
     class Meta:
         pass
     setattr(Meta,'model',model)
     setattr(Meta,'fields',fields)
     setattr(Meta,'admin',admin_class)
+    setattr(Meta,'form_create',form_create)
 
     attrs = {'Meta':Meta}
 

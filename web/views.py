@@ -1,5 +1,5 @@
 #_*_coding:utf-8_*_
-from django.shortcuts import render,HttpResponseRedirect,HttpResponse
+from django.shortcuts import render,HttpResponseRedirect,HttpResponse,redirect
 from django.http import HttpResponseNotFound,Http404
 from django.contrib import auth
 
@@ -19,8 +19,11 @@ from web import tables
 from web import admin
 from web.king_admin import enabled_admins
 from backend import audit as session_audit
+from web import permissions
 
 
+
+@permissions.check_permission
 @login_required
 def dashboard(request):
     if request.user.is_superuser:
@@ -85,7 +88,7 @@ def personal(request):
         old_passwd = request.POST.get('old_passwd')
 
         new_password = request.POST.get('new_passwd')
-        user = auth.authenticate(username=request.user.username,password=old_passwd)
+        user = auth.authenticate(username=request.user.email,password=old_passwd)
         if user is not None:
             request.user.set_password(new_password)
             request.user.save()
@@ -105,6 +108,24 @@ def logout(request):
     return HttpResponseRedirect("/")
 
 
+
+@login_required
+def password_reset_form(request,table_db_name,user_id):
+    user_obj = models.UserProfile.objects.get(id=user_id)
+    if request.method == "GET":
+        change_form = enabled_admins[table_db_name].add_form(instance=user_obj)
+    else:
+        change_form = enabled_admins[table_db_name].add_form(request.POST,instance=user_obj)
+        if change_form.is_valid():
+            change_form.save()
+            url = "/%s/" %request.path.strip("/password/")
+            return redirect(url)
+
+    return render(request,'password_change.html',{'user_obj':user_obj,
+                                                  'form':change_form})
+
+
+@permissions.check_permission
 @login_required
 def hosts_multi(request):
     #valid_hosts = host_mgr.valid_host_list(request) #dict
@@ -130,6 +151,8 @@ def multitask_cmd(request):
 def crontab(request):
     return  render(request,'crontab.html',{'active_node':'/hosts/crontab/'})
 
+
+@permissions.check_permission
 @login_required
 def hosts_multi_filetrans(request):
     recent_tasks = models.TaskLog.objects.filter(user_id=1).order_by('-id')[:10]
@@ -363,6 +386,7 @@ def session_reccord(request,session_id):
         return HttpResponse(e)
 
 
+@permissions.check_permission
 @login_required
 def configure_url_dispatch(request,url):
     print('---url dispatch',url)
@@ -372,7 +396,8 @@ def configure_url_dispatch(request,url):
 
         querysets = tables.table_filter(request, enabled_admins[url],
                                         enabled_admins[url].model)
-        order_res = tables.get_orderby(request, querysets, enabled_admins[url])
+        searched_querysets = tables.search_by(request,querysets,enabled_admins[url])
+        order_res = tables.get_orderby(request, searched_querysets, enabled_admins[url])
 
         paginator = Paginator(order_res[0], enabled_admins[url].list_per_page)
 
@@ -398,12 +423,14 @@ def configure_url_dispatch(request,url):
     else:
         raise Http404("url %s not found" % url )
 
+@permissions.check_permission
+@login_required
 def table_change(request,table_name,obj_id):
     print("table change:",table_name ,obj_id)
     if table_name in enabled_admins:
-        print(enabled_admins[table_name])
+        #print(enabled_admins[table_name])
         obj = enabled_admins[table_name].model.objects.get(id=obj_id)
-        print("obj....change",obj)
+        #print("obj....change",obj)
         fields = []
         for field_obj in enabled_admins[table_name].model._meta.fields:
             if field_obj.editable :
@@ -411,7 +438,7 @@ def table_change(request,table_name,obj_id):
 
         for field_obj in enabled_admins[table_name].model._meta.many_to_many:
             fields.append(field_obj.name)
-        print('fields', fields)
+        #print('fields', fields)
         model_form = forms.create_form(enabled_admins[table_name].model, fields,enabled_admins[table_name])
 
         if request.method == "GET":
@@ -435,12 +462,14 @@ def table_change(request,table_name,obj_id):
         raise Http404("url %s not found" % table_name )
 
 
+@permissions.check_permission
+@login_required
 def configure_index(request):
-
 
     return render(request,'king_admin/index.html', {'enabled_admins':enabled_admins})
 
 def table_add(request,table_name):
+    print("request path:",request.path)
     if table_name in enabled_admins:
         fields = []
         for field_obj in enabled_admins[table_name].model._meta.fields:
@@ -448,14 +477,22 @@ def table_add(request,table_name):
                 fields.append(field_obj.name)
         for field_obj in enabled_admins[table_name].model._meta.many_to_many:
             fields.append(field_obj.name)
+        if enabled_admins[table_name].add_form == None:
+            model_form = forms.create_form(enabled_admins[table_name].model, fields,enabled_admins[table_name],form_create=True)
+        else: #this admin has customized  creation form defined
+            model_form = enabled_admins[table_name].add_form
 
-        model_form = forms.create_form(enabled_admins[table_name].model, fields,enabled_admins[table_name])
         if request.method == "GET":
             form_obj = model_form()
         elif request.method == "POST":
             form_obj = model_form(request.POST)
             if form_obj.is_valid():
                 form_obj.save()
+                print("form obj:",form_obj.cleaned_data,form_obj.instance.id)
+                redirect_url = '/%s/change/%s' %(request.path.strip("/add"), form_obj.instance.id)
+                return redirect(redirect_url)
+            if request.POST.get('_continue') is not None: #save and add another button
+                form_obj = model_form()
 
         return render(request, 'king_admin/table_add.html',
                       {'form_obj': form_obj,
@@ -467,3 +504,17 @@ def table_add(request,table_name):
 
     else:
         raise Http404("url %s not found" % table_name)
+
+
+def table_del(request,table_name,obj_id):
+
+    if table_name in enabled_admins:
+        obj = enabled_admins[table_name].model.objects.get(id=obj_id)
+
+        return render(request,'king_admin/table_delete.html',{
+            'model_name': enabled_admins[table_name].model._meta.verbose_name,
+            'model_table_name':enabled_admins[table_name].model._meta.model_name,
+            'model_db_table':enabled_admins[table_name].model._meta.db_table,
+            'obj':obj,
+            'app_label':obj._meta.app_label
+                                })

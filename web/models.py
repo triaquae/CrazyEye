@@ -66,7 +66,7 @@ class HostUsers(models.Model):
 
 class BindHosts(models.Model):
     host = models.ForeignKey('Hosts')
-    host_user = models.ForeignKey('HostUsers')
+    host_user = models.ForeignKey('HostUsers',verbose_name="远程用户")
 
     enabled = models.BooleanField(default=True)
 
@@ -93,7 +93,7 @@ class HostGroups(models.Model):
 
 
 #class UserProfile(AbstractBaseUser):
-class UserProfile(auth.AbstractBaseUser):
+class UserProfile(auth.AbstractBaseUser,auth.PermissionsMixin):
     email = models.EmailField(
         verbose_name='email address',
         max_length=255,
@@ -101,7 +101,11 @@ class UserProfile(auth.AbstractBaseUser):
     )
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
-
+    is_staff = models.BooleanField(
+        verbose_name='staff status',
+        default=False,
+        help_text='Designates whether the user can log into this admin site.',
+    )
     name = models.CharField(max_length=32)
     #token = models.CharField('token', max_length=128,default=None,blank=True,null=True)
     department = models.ForeignKey('Department',verbose_name='部门',blank=True,null=True)
@@ -111,8 +115,8 @@ class UserProfile(auth.AbstractBaseUser):
 
     memo = models.TextField('备注', blank=True,null=True,default=None)
     date_joined = models.DateTimeField(blank=True,null=True, auto_now_add=True)
-    valid_begin_time = models.DateTimeField(default=django.utils.timezone.now)
-    valid_end_time = models.DateTimeField(blank=True,null=True)
+    valid_begin_time = models.DateTimeField(default=django.utils.timezone.now,help_text="yyyy-mm-dd HH:MM:SS")
+    valid_end_time = models.DateTimeField(blank=True,null=True,help_text="yyyy-mm-dd HH:MM:SS")
 
 
     USERNAME_FIELD = 'email'
@@ -130,10 +134,10 @@ class UserProfile(auth.AbstractBaseUser):
     def __str__(self):              # __str__ on Python 2
         return self.email
 
-    def has_perm(self, perm, obj=None):
-        "Does the user have a specific permission?"
-        # Simplest possible answer: Yes, always
-        return True
+    # def has_perm(self, perm, obj=None):
+    #     "Does the user have a specific permission?"
+    #     # Simplest possible answer: Yes, always
+    #     return True
     def has_perms(self, perm, obj=None):
         "Does the user have a specific permission?"
         # Simplest possible answer: Yes, always
@@ -143,11 +147,11 @@ class UserProfile(auth.AbstractBaseUser):
         # Simplest possible answer: Yes, always
         return True
 
-    @property
-    def is_staff(self):
-        "Is the user a member of staff?"
-        # Simplest possible answer: All admins are staff
-        return self.is_admin
+    # @property
+    # def is_staff(self):
+    #     "Is the user a member of staff?"
+    #     # Simplest possible answer: All admins are staff
+    #     return self.is_admin
     @property
     def is_superuser(self):
         "Is the user a member of staff?"
@@ -167,6 +171,17 @@ class UserProfile(auth.AbstractBaseUser):
     class Meta:
         verbose_name = 'CrazyEye账户'
         verbose_name_plural = 'CrazyEye账户'
+
+        permissions = (
+            ('web_access_dashboard', '可以访问 审计主页'),
+            ('web_batch_cmd_exec', '可以访问 批量命令执行页面'),
+            ('web_batch_batch_file_transfer', '可以访问 批量文件分发页面'),
+            ('web_config_center', '可以访问 堡垒机配置中心'),
+            ('web_config_items', '可以访问 堡垒机各配置列表'),
+            ('web_table_change_page', '可以访问 堡垒机各配置项修改页'),
+            ('web_table_change', '可以修改 堡垒机各配置项'),
+        )
+
 #
 # class UserProfile(models.Model):
 #     user = models.OneToOneField(User)
@@ -204,8 +219,12 @@ class Session(models.Model):
 
     def __str__(self):
         return '<id:%s user:%s bind_host:%s' % (self.id,self.user.email,self.bind_host.host)
+    class Meta:
+        verbose_name = '审计日志'
+        verbose_name_plural = '审计日志'
 
 
+#Deprecated
 class AuditLog(models.Model):
     session = models.ForeignKey(SessionTrack)
     user = models.ForeignKey('UserProfile')

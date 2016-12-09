@@ -1,9 +1,23 @@
 # _*_coding:utf-8_*_
 
 from django.utils import timezone
-from django.db.models import Count
+from django.db.models import Count,Q
 import time
 
+
+
+
+def search_by(request,querysets,admin_form):
+    search_str = request.GET.get("q")
+    if search_str:
+        q_objs = []
+        for q_field in admin_form.search_fields:
+            q_objs.append("Q(%s__contains='%s')" %(q_field,search_str) )
+        print(" | ".join(q_objs) )
+        return  querysets.filter(eval("|".join(q_objs)))
+
+    #models.Hosts.objects.filter(Q(ip_addr__contains='22') | Q(hostname__contains='22'))
+    return querysets
 def get_orderby(request, model_objs, admin_form):
     orderby_field = request.GET.get('orderby')
     if orderby_field:
@@ -35,6 +49,7 @@ class TableHandler(object):
         self.readable_table = admin_class.readable_table
         self.readonly_fields = admin_class.readonly_fields
         self.list_display = admin_class.list_display
+        self.search_fields  = admin_class.search_fields
         #print("hasattr(admin_class,'list_filter')",hasattr(admin_class,'list_filter'))
         self.list_filter = self.get_list_filter(admin_class.list_filter) if hasattr(admin_class,'list_filter') \
             else ()

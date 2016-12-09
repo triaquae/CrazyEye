@@ -2,6 +2,7 @@
 
 
 class ModelAdminBase(object):
+    add_form = None
     list_display = ()
     list_per_page = 20
     choice_fields = ()
@@ -9,9 +10,10 @@ class ModelAdminBase(object):
     filter_horizontal = ()
     model = None
     onclick_fields = {}
+    change_page_onclick_fields = {}
 
     readable_table = False
-
+    search_fields = []
     readonly_fields = []
 
 def register(admin_dic,model,admin_class):

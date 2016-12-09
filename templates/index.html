@@ -30,6 +30,14 @@
 	<link href="/static/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet">
 	<link href="/static/plugins/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet">
 
+    <!--Bootstrap Timepicker [ OPTIONAL ]-->
+    <link href="/static/plugins/bootstrap-timepicker/bootstrap-timepicker.min.css" rel="stylesheet">
+
+
+    <!--Bootstrap Datepicker [ OPTIONAL ]-->
+    <link href="/static/plugins/bootstrap-datepicker/bootstrap-datepicker.css" rel="stylesheet">
+
+
 	<!--SCRIPT-->
 	<!--=================================================-->
 
@@ -435,7 +443,7 @@
 										<ul class="collapse">
 											<li><a href="/hosts/multi">批量命令</a></li>
 											<li><a href="/hosts/multi/filetrans">文件分发</a></li>
-											<li><a href="/hosts/crontab/">计划任务</a></li>
+{#											<li><a href="/hosts/crontab/">计划任务</a></li>#}
 											<!--li class="list-divider"></li>
 											<li><a href="#">Separate link</a></li-->
 
@@ -452,7 +460,7 @@
 											</span>
 										</a>
 										<ul class="collapse">
-											<li><a href="/audit/">审计日志</a></li>
+{#											<li><a href="/audit/">审计日志</a></li>#}
 											<li><a href="/host/detail/">按主机</a></li>
 											<!--li class="list-divider"></li>
 											<li><a href="#">Separate link</a></li-->
@@ -569,7 +577,10 @@
     <script src="/static/plugins/highstock/js/highstock.js"></script>
     <script src="/static/plugins/highstock/js/modules/exporting.js"></script>
 
-
+	<!--Bootstrap Timepicker [ OPTIONAL ]-->
+	<script src="/static/plugins/bootstrap-timepicker/bootstrap-timepicker.min.js"></script>
+	<!--Bootstrap Datepicker [ OPTIONAL ]-->
+	<script src="/static/plugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
 
 
     <script type="text/javascript">
@@ -776,6 +787,15 @@
     <div></div>
     {% endblock %}
 
+
+    <script>
+        $(document).ready(function () {
+            $('.dp-component .input-group.date').datepicker({autoclose:true});
+        	$('.tp-textinput').timepicker();
+
+
+        })
+    </script>
 
 {% include 'session_security/all.html' %}
 </body>

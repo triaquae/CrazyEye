@@ -13,14 +13,16 @@
         <h3 class="panel-title">Select {{ table_obj.model_verbose_name }} to change</h3>
     </div>
     <div class="panel-body">
-           {% if  table_obj.list_filter%}
 
+           {% if  table_obj.list_filter%}
             <form >
                 <div class="row">
+                    {% include 'king_admin/filter_search_box.html' %}
                     {% for filter_column in table_obj.list_filter %}
                         <div class="col-md-3" style="margin-bottom: 15px">
-                            {{ filter_column.verbose_name }}
-                            <select name="{{ filter_column.column_name }}" class="form-control" >
+                            {{ filter_column.verbose_name }} &nbsp;
+                            <i style="cursor: pointer" data-target="#modal-dialog" data-toggle="modal" class="fa fa-search" aria-hidden="true" onclick="PrepareFilterSearch('{{ filter_column.column_name }}')"></i>
+                            <select data-tag="{{ filter_column.column_name }}" name="{{ filter_column.column_name }}" class="form-control" >
                                 {% for choice in filter_column.choices %}
                                     {% if filter_column.selected == choice.0|to_string  %}
                                         <option value="{{ choice.0 }}" selected>{{ choice.1 }}</option>
@@ -29,6 +31,9 @@
                                     {% endif %}
                                 {% endfor %}
                             </select>
+
+
+
                         </div>
                     {% endfor %}
                     <div class="col-md-3">
@@ -37,13 +42,24 @@
                 </div>
             </form>
         {% endif %}
+
+                  {% load_search_element table_obj  %}
+
+
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
                 <tr>
                     {% if  table_obj.list_display %}
                         {% for column in table_obj.list_display %}
-                            <th>{{ column }}</th>
+                            <th class="column-sorted">
+                                <a href="?page={{ table_obj.query_sets.number }}&orderby={% if table_obj.orderby_col_index == forloop.counter0 %}{{ table_obj.orderby_field}}{% else %}{{ column }}{% endif %}{% for k,v in request.GET.items %}{% if k != 'page' and  k != 'orderby' %}&{{ k }}={{ v }}{% endif %}{% endfor %}" >
+                                    {% get_table_column column table_obj %}
+                                    {% display_orderby_arrow table_obj forloop.counter0 %}
+
+                                </a>
+                            </th>
+
                         {% endfor %}
                     {% else %}
                         <th>{{ table_obj }}</th>

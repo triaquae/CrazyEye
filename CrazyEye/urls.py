@@ -23,12 +23,12 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
      #url(r'^myadmin/', include(cus_admin.admin_site.urls)),
     url(r'session_security/', include('session_security.urls')),
-    url(r'^$',views.dashboard ),
+    url(r'^$',views.dashboard ,name='dashboard'),
     url(r'^hosts/$',views.hosts, name='host_list' ),
-    url(r'^hosts/multi/$',views.hosts_multi),
+    url(r'^hosts/multi/$',views.hosts_multi,name="batch_cmd_exec"),
     url(r'^hosts/crontab/$',views.crontab),
     url(r'^multi_task/log/deatail/(\d+)/$',views.multi_task_log_detail,name='multi_task_log_detail'),
-    url(r'^hosts/multi/filetrans$',views.hosts_multi_filetrans),
+    url(r'^hosts/multi/filetrans$',views.hosts_multi_filetrans,name="batch_file_transfer"),
     url(r'^host/detail/', views.host_detail),
     url(r'^api/',include(api_urls)),
     url(r'^personal/',views.personal,name='personal'),
@@ -40,9 +40,12 @@ urlpatterns = [
 
     url(r'^login/$',views.login,name='login'),
     url(r'^accounts/profile/$',views.personal),
+    #url(r'^account/(\d+)/password/change/$',views.password_reset_form, name="password_change_form"),
     url(r'^configure/index/$',views.configure_index,name="table_index"),#显示所有注册的表
     url(r'^configure/(\w+)/$',views.configure_url_dispatch,name="table_list"), #显示每个表的数据
     url(r'^configure/(\w+)/change/(\d+)/$',views.table_change,name="table_change"),
+    url(r'^configure/(\w+)/change/(\d+)/password/$',views.password_reset_form),
     url(r'^configure/(\w+)/add/$',views.table_add,name="table_add"),
+    url(r'^configure/(\w+)/delete/(\d+)/$',views.table_del,name="table_del"),
 
 ]

@@ -19,7 +19,6 @@
         <div class="panel-body">
             <table class="table table-hover table-vcenter">
                 {% for k,admin_class in enabled_admins.items %}
-
                     <tr>
                         <td><a style="font-weight:bold ;color: #447e9b" href="{% url 'table_list' k  %}">{% get_db_table_name admin_class %}</a></td>
                         {% if not admin_class.readable_table %}

@@ -9,11 +9,15 @@
  {% endblock %}
 
 {% block page-content %}
+{% include 'king_admin/filter_search_box.html' %}
 
 <div class="panel">
     <div class="panel-heading">
         <h3 class="panel-title">Add {{ model_name }}</h3>
     </div>
+
+
+
 
     <form method="post" onsubmit="return CheckSelectedOptions()" class=" form-horizontal form-padding">{% csrf_token %}
         <div class="panel-body">
@@ -30,7 +34,8 @@
                     {% endif %}
                     <div class="col-md-9">
                         {% if field.name not in admin_class.filter_horizontal %}
-                            {{ field }}
+                            {{ field }}{% add_fk_search_btn form_obj field %}
+{#                            {% decorate_date_field form_obj field %}#}
                             {% if field.errors %}
                                 <span style="color: red">{{ field.errors }}</span>
                             {% endif %}
@@ -40,15 +45,17 @@
                     </div>
                 </div>
             {% endfor %}
-        {{ form_obj.errors }}
+
+        <span style="color: red">{{ form_obj.errors }}</span>
         </div> <!--end panel-body-->
         <div class="panel-footer">
             <div class="row">
-                <div class="col-sm-2 ">
-                    <button class="btn btn-danger " type="reset">Delete</button>
+
+                <div class="col-sm-4 ">
+                    <button class="btn btn-info pull-right " type="submit">Add</button>
                 </div>
                 <div class="col-sm-4 ">
-                    <button class="btn btn-info pull-right " type="submit">Save</button>
+                    <button class="btn btn-success pull-right " name="_continue" type="submit">Save and add another</button>
                 </div>
             </div>
         </div>
