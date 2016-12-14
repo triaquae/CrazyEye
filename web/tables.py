@@ -38,10 +38,12 @@ def get_orderby(request, model_objs, admin_form):
 class TableHandler(object):
     def __init__(self, request, model_class, admin_class, query_sets, order_res):
         self.request = request
+        self.admin_class = admin_class
         self.model_class = model_class
         self.model_verbose_name =  self.model_class._meta.verbose_name
         self.model_db_table = self.model_class._meta.db_table
         # self.admin_class = admin_class
+        self.default_actions = admin_class.default_actions
         self.query_sets = query_sets
         self.choice_fields = admin_class.choice_fields
         self.fk_fields = admin_class.fk_fields

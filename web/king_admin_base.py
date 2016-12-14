@@ -1,5 +1,6 @@
 
-
+from django.http import HttpResponse
+from django.shortcuts import render
 
 class ModelAdminBase(object):
     add_form = None
@@ -15,6 +16,24 @@ class ModelAdminBase(object):
     readable_table = False
     search_fields = []
     readonly_fields = []
+
+    default_actions = ['delete_selected','ddd']
+
+
+    def delete_selected(self,request):
+        print('delete  selected----',self,request)
+        selected_ids = request.POST.get("selected_ids")
+        if selected_ids:
+            selected_ids = selected_ids.split(',')
+        else:
+            raise ValueError("no object got selected")
+
+        objs = self.model.objects.filter(id__in=selected_ids)
+
+
+        return render(request,'king_admin/table_objs_delete.html',{'objs':objs})
+
+    delete_selected.short_description = "删除选中的数据"
 
 def register(admin_dic,model,admin_class):
     '''注册admin'''

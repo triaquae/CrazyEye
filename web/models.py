@@ -178,6 +178,7 @@ class UserProfile(auth.AbstractBaseUser,auth.PermissionsMixin):
             ('web_batch_batch_file_transfer', '可以访问 批量文件分发页面'),
             ('web_config_center', '可以访问 堡垒机配置中心'),
             ('web_config_items', '可以访问 堡垒机各配置列表'),
+            ('web_invoke_admin_action', '可以进行admin action执行动作'),
             ('web_table_change_page', '可以访问 堡垒机各配置项修改页'),
             ('web_table_change', '可以修改 堡垒机各配置项'),
         )
@@ -218,7 +219,7 @@ class Session(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return '<id:%s user:%s bind_host:%s' % (self.id,self.user.email,self.bind_host.host)
+        return '<id:%s user:%s bind_host:%s>' % (self.id,self.user.email,self.bind_host.host)
     class Meta:
         verbose_name = '审计日志'
         verbose_name_plural = '审计日志'

@@ -4,7 +4,7 @@ import datetime
 import re
 from django import template
 from web import models
-from django.utils.safestring import mark_safe
+from django.utils.safestring import mark_safe,mark_for_escaping
 from  django.core.urlresolvers import reverse as url_reverse
 
 register = template.Library()
@@ -84,6 +84,9 @@ def display_orderby_arrow(table_obj,loop_counter):
 @register.simple_tag
 def build_table_row(row_obj,table_obj,onclick_column=None,target_link=None):
     row_ele = "<tr>"
+
+    row_ele += "<td><input type='checkbox' tag='row-check' value='%s' > </td>" % row_obj.id
+
     for index,column_name in enumerate(table_obj.list_display):
 
 
@@ -269,6 +272,22 @@ def get_m2m_objs(rel_field_name, model_obj):
         #return  # to deal ValueError: "<UserProfile: >" needs to have a value for field "userprofile" before this many-to-many relationship can be used.
 
 
+
+@register.simple_tag
+def load_admin_actions(table_obj):
+    print('---acitons',table_obj.default_actions)
+    select_ele = "<select id='admin_action' name='admin_action' class='form-control' ><option value=''>----</option>"
+    for option in table_obj.default_actions:
+        action_display_name = option
+        if hasattr(table_obj.admin_class, option):
+            action_func = getattr(table_obj.admin_class,option)
+            if hasattr(action_func,'short_description'):
+                action_display_name = action_func.short_description
+        select_ele += ("<option value='%s'>" % option) + action_display_name + "</options>"
+    select_ele += "</select>"
+
+    return mark_safe(select_ele)
+
 @register.simple_tag
 def check_disabled_attr(field_name,form_obj):
     if form_obj.Meta.form_create is True:
@@ -337,6 +356,53 @@ def add_onclick_link(form_obj,field_obj):
                         (form_obj.Meta.admin.change_page_onclick_fields[field_obj.name][1])
         return mark_safe(link_ele)
     return ''
+
+
+def recursive_related_objs_lookup(objs,model_name):
+    model_name = objs[0]._meta.model_name
+    ul_ele = "<ul>"
+    for obj in objs:
+        # li_ele = '''<li>
+        #     <a href="/configure/web_hosts/change/%s/" >%s</a> </li>''' % (obj.id,obj.__repr__().strip("<>"))
+        # ul_ele += li_ele
+        # print("-----li",li_ele)
+        li_ele = '''<li> %s: %s </li>'''%(obj._meta.verbose_name,obj.__str__().strip("<>"))
+        ul_ele +=li_ele
+        for related_obj in obj._meta.related_objects:
+            if 'ManyToOneRel' not in related_obj.__repr__():
+                continue
+            if hasattr(obj,related_obj.get_accessor_name()):
+                accessor_obj = getattr(obj,related_obj.get_accessor_name())
+
+                if hasattr(accessor_obj,'select_related'):
+                    target_objs = accessor_obj.select_related() #.filter(**filter_coditions)
+
+                else:
+                    #print("one to one i guess:",accessor_obj)
+                    target_objs = accessor_obj
+                if len(target_objs) >0:
+                    #print("\033[31;1mdeeper layer lookup -------\033[0m")
+                    nodes = recursive_related_objs_lookup(target_objs,model_name)
+                    ul_ele += nodes
+    ul_ele +="</ul>"
+    return ul_ele
+
+@register.simple_tag
+def display_obj_related(objs):
+    '''把对象及所有相关联的数据取出来'''
+    model_class = objs[0]._meta.model
+    mode_name = objs[0]._meta.model_name
+    return mark_safe(recursive_related_objs_lookup(objs,mode_name))
+    # for obj in objs:
+    #     for related_obj in obj._meta.related_objects:
+    #         if hasattr(obj,related_obj.get_accessor_name()):
+    #             accessor_obj = getattr(obj,related_obj.get_accessor_name())
+    #             if hasattr(accessor_obj,'select_related'):
+    #                 target_objs = accessor_obj.select_related()
+    #                 print(related_obj.get_accessor_name(), target_objs)
+    #             else:
+    #                 print("one to one i guess:",accessor_obj)
+
 # @register.simple_tag
 # def decorate_date_field(form_obj,field_obj):
 #     print("repr...",field_obj)

@@ -390,9 +390,30 @@ def session_reccord(request,session_id):
 @login_required
 def configure_url_dispatch(request,url):
     print('---url dispatch',url)
-    print(enabled_admins)
+    #print(enabled_admins)
     if url in enabled_admins:
-        print(enabled_admins[url])
+        #print(enabled_admins[url])
+
+        if request.method == "POST":
+            print('post-->', request.POST)
+
+            delete_tag = request.POST.get("_delete_confirm")
+            if delete_tag == "yes":
+                del_ids = request.POST.getlist("deleted_objs")
+
+                enabled_admins[url].model.objects.filter(id__in=del_ids).delete()
+
+            else:
+
+                admin_action = request.POST.get('admin_action')
+
+                admin_obj = enabled_admins[url]()
+                if hasattr(admin_obj, admin_action):
+                    admin_action_func = getattr(admin_obj, admin_action)
+                    return admin_action_func(request)
+                else:
+                    raise NotImplementedError("admin_action %s cannot find" % admin_action)
+
 
         querysets = tables.table_filter(request, enabled_admins[url],
                                         enabled_admins[url].model)
@@ -416,10 +437,12 @@ def configure_url_dispatch(request,url):
                                         order_res)
 
 
+
         return render(request,'king_admin/model_obj_list.html',
                                                 {'table_obj':table_obj,
                                                  'active_node': '/configure/index/',
-                                                'paginator':paginator})
+                                                 'paginator':paginator})
+
     else:
         raise Http404("url %s not found" % url )
 

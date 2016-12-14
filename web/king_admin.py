@@ -59,7 +59,7 @@ class UserAdmin(ModelAdminBase):
 class HostAdmin(ModelAdminBase):
     model = models.Hosts
     list_display = ('id','hostname','ip_addr','port','idc','system_type','enabled','created_at')
-    list_per_page = 5
+    list_per_page = 50
     fk_fields = ['idc',]
     readonly_fields = ['ip_addr',]
     search_fields = ['ip_addr','hostname','idc__name']

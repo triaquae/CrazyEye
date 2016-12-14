@@ -1,0 +1,60 @@
+{% extends 'index.html' %}
+{% load custom_tag %}
+
+
+{% block extra_head_resources %}
+
+
+{% endblock %}
+
+
+{% block breadcrumb %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'table_index' %}">配置中心</a></li>
+{#        <li><a href="{% url 'table_list' model_db_table %}">{{ model_name }}</a></li>#}
+        <li class="active"> 删除 {{ model_name }}</li>
+    </ol>
+ {% endblock %}
+
+{% block page-content %}
+
+
+{% include 'king_admin/filter_search_box.html' %}
+
+
+<div class="panel">
+    <div class="panel-heading">
+        <h3 class="panel-title"><b style="color: red">确定要删除么?</b></h3>
+    </div>
+
+    <form method="post"  class=" form-horizontal form-padding">{% csrf_token %}
+        <div class="panel-body">
+        <div class="alert alert-danger media fade in">
+            <strong>警告!</strong> 以下关联的数据均将被删除！
+        </div>
+
+            {% display_obj_related objs %}
+            <select name="deleted_objs" multiple hidden>
+                {% for obj in objs %}
+                <option value="{{ obj.id }}" selected>{{ obj }}</option>
+                {% endfor %}
+            </select>
+            <a class="btn-link" style="color: red" href="/admin/{{ app_label }}/{{ model_table_name }}/{{ obj.id }}/delete/">请点击此处前往后台页面删除数据，应确保只有管理员有权操作！</a>
+        </div> <!--end panel-body-->
+        <div class="panel-footer">
+            <div class="row">
+
+                <div class="col-sm-12 col-sm-offset-5">
+                    <input type="hidden" name="_delete_confirm" value="yes">
+                    <button class="btn btn-danger " type="submit">删除</button>
+{#                    <button class="btn btn-info" type="reset">不删除了,回退</button>#}
+                     <a href="{{ request.path }}" class="btn btn-info "  type="submit">不删除了,回退</a>
+
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+</div>
+{% endblock %}
