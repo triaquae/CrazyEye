@@ -35,10 +35,12 @@ class ModelAdminBase(object):
 
     delete_selected.short_description = "删除选中的数据"
 
-def register(admin_dic,model,admin_class):
+
+
+def register(admin_dic,admin_class):
     '''注册admin'''
-    if model._meta.db_table not in admin_dic:
-        admin_dic[model._meta.db_table] = admin_class
+    if admin_class.model._meta.db_table not in admin_dic:
+        admin_dic[admin_class.model._meta.db_table] = admin_class()
     else:
         raise Exception
 

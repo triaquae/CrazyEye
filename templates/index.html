@@ -44,6 +44,8 @@
 	<!--Page Load Progress Bar [ OPTIONAL ]-->
 	<link href="/static/css/pace.min.css" rel="stylesheet">
 	<script src="/static/js/pace.min.js"></script>
+    <link href="/static/plugins/dropzone/dropzone.css" rel="stylesheet">
+
 
     {% endblock %}
     {% block extra_head_resources %}{% endblock %}
@@ -64,7 +66,7 @@
 				<!--Brand logo & name-->
 				<!--================================-->
 				<div class="navbar-header">
-					<a href="index.html" class="navbar-brand">
+					<a href="/" class="navbar-brand">
 						<img src="/static/img/eye_logo.png" alt="Nifty Logo" class="brand-icon">
 						<div class="brand-title">
 							<span class="brand-text"> &nbsp;&nbsp;CrazyEye</span>
@@ -262,7 +264,7 @@
 
                             <div class="panel">
                                 <div class="panel-heading">
-									<div class="panel-control">
+									<!--div class="panel-control">
 										<button id="demo-panel-network-refresh" data-toggle="panel-overlay" data-target="#demo-panel-network" class="btn"><i class="fa fa-rotate-right"></i></button>
 										<div class="btn-group">
 											<button class="dropdown-toggle btn" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-gear"></i></button>
@@ -274,7 +276,7 @@
 												<li><a href="#">Separated link</a></li>
 											</ul>
 										</div>
-									</div>
+									</div-->
 									<h3 class="panel-title">用户登录量统计</h3>
 								</div>
                             <div id="chart-container" style="height: 300px; min-width: 310px;">
@@ -288,7 +290,7 @@
                             <div class="panel">
                                 <div class="panel-heading">
 
-									<h3 class="panel-title">最近一周活跃用户</h3>
+									<h3 class="panel-title">最近活跃用户统计</h3>
 								</div>
 
                                 <div  class="panel-body" style="height: 300px">
@@ -316,7 +318,7 @@
 
                             <div class="panel">
                                 <div class="panel-heading">
-									<h3 class="panel-title">批量任务纪录</h3>
+									<h3 class="panel-title">最近10条批量任务纪录</h3>
 								</div>
                                 <div class="table-responsive">
 								<table class="table table-striped">
@@ -338,11 +340,11 @@
 
 									{% for task in recent_tasks %}
                                     <tr>
-                                        <td><a class="btn-link" href="#" >#{{ task.id }}</a></td>
+                                        <td><a class="btn-link" href="/configure/web_tasklogdetail/?child_of_task={{ task.id }}" target="_blank">#{{ task.id }}</a></td>
                                         <td>{{ task.start_time }}</td>
                                         <td>{{ task.user }}</td>
                                          <td>{{ task.hosts.select_related.count }}</td>
-                                        <td>{{ task.task_type }}</td>
+                                        <td>{{ task.get_task_type_display }}</td>
 
                                         <td>{{ task.cmd }}</td>
                                         <td>{% query_set task.tasklogdetail_set "result" "success" %}</td>
@@ -356,7 +358,7 @@
 
                             </div>
                         </div>
-                        <div class="col-lg-6">
+                        <!--div class="col-lg-6">
 
                             <div class="panel">
                                 <div class="panel-heading">
@@ -365,7 +367,7 @@
 								</div>
 
                             </div>
-                        </div>
+                        </div-->
                     </div>
 
                 {% endblock %}
@@ -443,6 +445,7 @@
 										<ul class="collapse">
 											<li><a href="/hosts/multi">批量命令</a></li>
 											<li><a href="/hosts/multi/filetrans">文件分发</a></li>
+											<li><a href="/configure/web_tasklog/">任务日志</a></li>
 {#											<li><a href="/hosts/crontab/">计划任务</a></li>#}
 											<!--li class="list-divider"></li>
 											<li><a href="#">Separate link</a></li-->
@@ -583,6 +586,9 @@
 	<script src="/static/plugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
 
 
+    <script src="/static/plugins/dropzone/dropzone_latest.js"></script>
+
+
     <script type="text/javascript">
         // using jQuery
         $(document).ready(function(){
@@ -694,10 +700,10 @@
 
             $.each(callback, function(index,item){
                 var row = "<tr><td>" + index +
-                        "</td><td data-label='hostname'><a class='btn-link' href='/host/detail/?host_id=" + item.auditlog__host__host__id + "' >" + item.auditlog__host__host__hostname +
-                        "</a></td><td data-label='ip_addr' >" + item.auditlog__host__host__ip_addr +
-                        "</td><td data-label='username' >" + item.auditlog__host__host_user__username +
-                        "</td><td>" + item.auditlog__user__name +
+                        "</td><td data-label='hostname'><a class='btn-link' href='/host/detail/?host_id=" + item.bind_host__host__id + "' >" + item.bind_host__host__hostname +
+                        "</a></td><td data-label='ip_addr' >" + item.bind_host__host__ip_addr +
+                        "</td><td data-label='username' >" + item.bind_host__host_user__username +
+                        "</td><td>" + item.user__name +
                         "</td><td>" + item.date +
                         "</td><td><a href='#' class='badge badge-success' onclick='ShowRecordDetail(this," + item.auditlog__session + ")'>查看详细</a></td></tr>";
                 table_html += row;
@@ -715,12 +721,12 @@
 
         $.getJSON("{% url 'dashboard_detail' %}", {'data_type':'get_online_users'},function(callback){
 
-
+            console.log(callback);
             var table_html = "<table class='table table-hover'><tr><th>#</th><th>在线用户</th><th>部门</th><th>登录时间</th></tr>";
             $.each(callback,function(index,item){
                 var row = "<tr><td>" + index +
-                            "</td><td><a class='btn-link' href='/user_audit/" + item.userprofile__id +"/' >"+ item.userprofile__name +
-                            "</a></td><td>" + item.userprofile__department +
+                            "</td><td><a class='btn-link' href='/user_audit/" + item.id +"/' >"+ item.name +
+                            "</a></td><td>" + item.department__name +
                             "</td><td>" + item.last_login +"</td></tr>";
                 table_html += row;
 
@@ -742,8 +748,8 @@
             var row = "<tr><td>" + index +
                       "</td><td data-label='login_date'>" + item.date +
                       "</td><td data-label='username'><a class='btn-link' href='/user_audit/" + item.user + "/'>" + item.user__name +
-                      "</a></td><td data-label='hostname'>" + item.host__host__hostname +
-                      "</td><td>" + item.host__host_user__username +
+                      "</a></td><td data-label='hostname'>" + item.bind_host__host__hostname +
+                      "</td><td>" + item.bind_host__host_user__username +
                       "</td><td> <a onclick='ShowRecordDetail(this," + item.session + ")' class='badge badge-success'>查看详细</a> </td>" +
                       "</td></tr>";
             html_ele += row;
@@ -759,12 +765,12 @@
     function recent_active_users(data){
         var html_ele = '';
         $.each(data.recent_active_users,function(key,val){
-           var item_ele = "<tr><td><a class='btn-link' href='/user_audit/" + val.user +"/' >" +val.user__name + "</a><td>" + val.user__count +"</td><td>" + active_user_cmd_count(data,val.user) +"</td><tr>";
+           var item_ele = "<tr><td><a class='btn-link' href='/user_audit/" + val.user +"/' >" +val.user__name + "</a><td>" + val.id__count +"</td><td>" + val.cmd_count__sum +"</td><tr>";
            html_ele += item_ele;
         });
         $("#recent_active_users").html(html_ele);
     };
-    function active_user_cmd_count(data,user_id){
+    function active_user_cmd_count(data,user_id){//deprecated
         var cmd_count;
         $.each(data.recent_active_users_cmd_count,function(key,val){
             if (val.user == user_id){

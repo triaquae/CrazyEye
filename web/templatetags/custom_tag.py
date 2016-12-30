@@ -37,8 +37,21 @@ def query_logout_date(obj, query_field, string):
 
 @register.simple_tag
 def get_table_column(column, table_obj):
-    print(table_obj.model_class)
-    return  table_obj.model_class._meta.get_field(column).verbose_name
+
+    if hasattr(table_obj.model_class, column):
+        return table_obj.model_class._meta.get_field(column).verbose_name
+    else:  # might be customized field,which is not exist in model class
+        # check if this field exist in admin class
+        if hasattr(table_obj.admin_class, column):
+            field_func = getattr(table_obj.admin_class, column)
+            if hasattr(field_func, 'display_name'):
+                return field_func.display_name
+            return field_func.__name__
+
+
+@register.simple_tag
+def  check_model_has_column( table_obj, column):
+    return hasattr(table_obj.model_class,column)
 
 
 @register.simple_tag
@@ -89,38 +102,42 @@ def build_table_row(row_obj,table_obj,onclick_column=None,target_link=None):
 
     for index,column_name in enumerate(table_obj.list_display):
 
+        if hasattr(row_obj,column_name):
+            field_obj = row_obj._meta.get_field(column_name)
+            column_data = field_obj._get_val_from_obj(row_obj)
+            if column_name in table_obj.choice_fields:
+                column_data = getattr(row_obj,'get_%s_display'%column_name)()
+            if column_name in table_obj.fk_fields:
+                column_data = getattr(row_obj,column_name).__str__()
+            if 'DateTimeField' in field_obj.__repr__():
+                column_data = getattr(row_obj,column_name).strftime( "%Y-%m-%d %H:%M:%S") \
+                        if getattr(row_obj,column_name) else None
+            if 'ManyToManyField' in field_obj.__repr__():
+                column_data = getattr(row_obj, column_name).select_related().count()
+            if onclick_column == column_name:
+                column = ''' <td><a class='btn-link' href=%s>%s</a></td> '''% (url_reverse(target_link,args=(column_data, )),column_data)
+            if column_name in table_obj.onclick_fields:
+                column = '''<td><a class='btn-link' href='%s' target='_blank'>%s</a></td>''' % \
+                         (url_reverse(table_obj.onclick_fields[column_name],args=(row_obj.id, )), column_data)
 
-        field_obj = row_obj._meta.get_field(column_name)
-        column_data = field_obj._get_val_from_obj(row_obj)
-        if column_name in table_obj.choice_fields:
-            column_data = getattr(row_obj,'get_%s_display'%column_name)()
-        if column_name in table_obj.fk_fields:
-            column_data = getattr(row_obj,column_name).__str__()
-        if 'DateTimeField' in field_obj.__repr__():
-            column_data = getattr(row_obj,column_name).strftime( "%Y-%m-%d %H:%M:%S") \
-                    if getattr(row_obj,column_name) else None
-        if 'ManyToManyField' in field_obj.__repr__():
-            column_data = getattr(row_obj, column_name).select_related().count()
-        if onclick_column == column_name:
-            column = ''' <td><a class='btn-link' href=%s>%s</a></td> '''% (url_reverse(target_link,args=(column_data, )),column_data)
-        if column_name in table_obj.onclick_fields:
-            column = '''<td><a class='btn-link' href='%s' target='_blank'>%s</a></td>''' % \
-                     (url_reverse(table_obj.onclick_fields[column_name],args=(row_obj.id, )), column_data)
-
-        elif index == 0:#首列可点击进入更改页
-            column = '''<td><a class='btn-link'  href='%schange/%s/' >%s</a> </td> ''' %(table_obj.request.path,
-                                                                       row_obj.id,
-                                                                       column_data)
-        elif column_name in table_obj.colored_fields: #特定字段需要显示color
-            color_dic = table_obj.colored_fields[column_name]
-            if column_data in color_dic:
-                column = "<td style='background-color:%s'>%s</td>" % (color_dic[column_data],
-                                                           column_data)
+            elif index == 0:#首列可点击进入更改页
+                column = '''<td><a class='btn-link'  href='%schange/%s/' >%s</a> </td> ''' %(table_obj.request.path,
+                                                                           row_obj.id,
+                                                                           column_data)
+            elif column_name in table_obj.colored_fields: #特定字段需要显示color
+                color_dic = table_obj.colored_fields[column_name]
+                if column_data in color_dic:
+                    column = "<td style='background-color:%s'>%s</td>" % (color_dic[column_data],
+                                                               column_data)
+                else:
+                    column = "<td>%s</td>" % column_data
             else:
                 column = "<td>%s</td>" % column_data
-        else:
-            column = "<td>%s</td>" % column_data
 
+        elif hasattr(table_obj.admin_class, column_name): #customized field
+            field_func = getattr(table_obj.admin_class, column_name)
+            table_obj.admin_class.instance = row_obj
+            column = "<td>%s</td>" % field_func()
 
         row_ele +=column
     #for dynamic display

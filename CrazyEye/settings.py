@@ -83,15 +83,23 @@ WSGI_APPLICATION = 'CrazyEye.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
+#
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'CrazyEyes',
+#         'HOST': '',
+#         'PORT':3306,
+#         'USER':'root',
+#         'PASSWORD': 'alex3714'
+#     }
+# }
+
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'CrazyEyes',
-        'HOST': '',
-        'PORT':3306,
-        'USER':'root',
-        'PASSWORD': 'alex3714'
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'crazyeye_db',
     }
 }
 
@@ -138,7 +146,9 @@ Welcome_msg = '''
 |----------------------------------------------------|\n\n'''
 
 
-FileUploadDir = 'uploads'
+FileUploadDir = '%s/uploads' %BASE_DIR
+
+MaxUploadFiles = 6 #max files number allowed by one single task
 
 #WebSSH = ['localhost',4200] #deprecated
 

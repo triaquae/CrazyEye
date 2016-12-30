@@ -20,14 +20,14 @@ from web import admin
 from web.king_admin import enabled_admins
 from backend import audit as session_audit
 from web import permissions
-
+import random,string
 
 
 @permissions.check_permission
 @login_required
 def dashboard(request):
     if request.user.is_superuser:
-        recent_tasks= models.TaskLog.objects.all()[:10]
+        recent_tasks= models.TaskLog.objects.all().order_by('-id')[:10]
         return render(request,'index.html',{
             'login_user':request.user,
             'recent_tasks':recent_tasks
@@ -155,25 +155,62 @@ def crontab(request):
 @permissions.check_permission
 @login_required
 def hosts_multi_filetrans(request):
+
+    random_str = ''.join(random.sample(string.ascii_lowercase,8))
     recent_tasks = models.TaskLog.objects.filter(user_id=1).order_by('-id')[:10]
 
 
     return render(request,'hosts_multi_files.html',{'login_user':request.user,
                                               'recent_tasks': recent_tasks,
+                                              'random_str': random_str,
                                               'active_node':'/hosts/multi/filetrans'})
+
+
+
+def get_uploaded_fileinfo(file_dic,upload_dir):
+    for filename in os.listdir(upload_dir):
+        abs_file = '%s/%s' % (upload_dir, filename)
+        file_create_time = time.strftime("%Y-%m-%d %H:%M:%S",
+                                         time.gmtime(os.path.getctime(abs_file)))
+        file_dic['files'][filename] = {'size': os.path.getsize(abs_file) / 1000,
+                                           'ctime': file_create_time}
+
 
 @login_required
 @csrf_exempt
-def multitask_file_upload(request):
-    filename = request.FILES['filename']
-    utils.handle_upload_file(request,filename)
+def multitask_file_upload(request,random_str):
+    print('---random str:',random_str,request.FILES)
+    upload_dir = "%s/task_data/tmp/%s" %(settings.FileUploadDir,random_str)
+    response_dic = {'files':{}}
+    utils.handle_upload_file(request,random_str,response_dic)
+    get_uploaded_fileinfo(response_dic, upload_dir)
 
-    return HttpResponse(json.dumps({'text':'success'}))
+    return HttpResponse(json.dumps(response_dic))
 @login_required
 def multitask_file(request):
     multi_task = host_mgr.MultiTask(request.POST.get('task_type'),request)
     task_result = multi_task.run()
     return  HttpResponse(task_result)
+
+
+
+
+@login_required
+def delete_file(request,random_str):
+    response = {}
+    if request.method == "POST":
+        upload_dir = "%s/task_data/tmp/%s" % (settings.FileUploadDir,random_str)
+        filename = request.POST.get('filename')
+        file_abs = "%s/%s" %(upload_dir,filename.strip())
+        if os.path.isfile(file_abs):
+            os.remove(file_abs)
+            response['msg'] = "file '%s' got deleted " % filename
+        else:
+            response["error"] = "file '%s' does not exist on server"% filename
+    else:
+        response['error'] = "only supoort POST method..."
+    return HttpResponse(json.dumps(response))
+
 
 @login_required
 def multitask_res(request):
@@ -184,7 +221,7 @@ def multitask_res(request):
 @login_required
 def file_download(request,task_id):
 
-    file_path = "%s/%s/%s/%s" %(settings.BASE_DIR,settings.FileUploadDir,request.user.userprofile.id,task_id)
+    file_path = "%s/task_data/%s" %(settings.FileUploadDir,task_id)
     return utils.send_zipfile(request, task_id,file_path)
 
 
@@ -343,7 +380,13 @@ def user_login_counts(request):
     filter_date_begin = datetime.datetime.fromtimestamp(filter_time_stamp)
     filter_date_end = filter_date_begin + datetime.timedelta(days=1)
 
-    user_login_records = models.AuditLog.objects.filter(action_type=1,date__range=[filter_date_begin,filter_date_end]).values('host','host__host_user__username','user','user__name','host__host__hostname','session','date')
+    user_login_records = models.Session.objects.filter(date__range=[filter_date_begin,filter_date_end]).\
+        values('bind_host',
+               'bind_host__host_user__username',
+               'user',
+               'user__name',
+               'bind_host__host__hostname',
+               'date')
 
     return  HttpResponse(json.dumps(list(user_login_records),default=json_date_handler))
 
@@ -407,7 +450,7 @@ def configure_url_dispatch(request,url):
 
                 admin_action = request.POST.get('admin_action')
 
-                admin_obj = enabled_admins[url]()
+                admin_obj = enabled_admins[url]
                 if hasattr(admin_obj, admin_action):
                     admin_action_func = getattr(admin_obj, admin_action)
                     return admin_action_func(request)
@@ -508,13 +551,16 @@ def table_add(request,table_name):
         if request.method == "GET":
             form_obj = model_form()
         elif request.method == "POST":
+            print(request.POST)
             form_obj = model_form(request.POST)
             if form_obj.is_valid():
                 form_obj.save()
                 print("form obj:",form_obj.cleaned_data,form_obj.instance.id)
                 redirect_url = '/%s/change/%s' %(request.path.strip("/add"), form_obj.instance.id)
-                return redirect(redirect_url)
-            if request.POST.get('_continue') is not None: #save and add another button
+                if request.POST.get('_continue') is  None:#save and add another button
+                    return redirect(redirect_url)
+
+                #print("----continue....",request.POST)
                 form_obj = model_form()
 
         return render(request, 'king_admin/table_add.html',

@@ -7,23 +7,24 @@ from django.http import HttpResponse
 from wsgiref.util import FileWrapper #from django.core.servers.basehttp import FileWrapper
 from web import models
 import django
-from django.db.models import Count
+from django.db.models import Count,Sum
 from backend import utils
 import random,json,datetime,time
 # from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 
-def handle_upload_file(request,file_obj):
-    upload_dir = '%s/%s/%s' %(settings.BASE_DIR,settings.FileUploadDir,request.user.id)
+def handle_upload_file(request,random_str,response_dic):
+    upload_dir = '%s/task_data/tmp/%s' %(settings.FileUploadDir,random_str)
     if not os.path.isdir(upload_dir):
-        os.mkdir(upload_dir)
-    #if request.POST.get("random_batch_id"):
-    #    upload_dir = '%s/%s/%s/%s' %(settings.BASE_DIR,settings.FileUploadDir,request.user.userprofile.id,request.POST.get("random_batch_id"))
-    #if not os.path.isdir(upload_dir):
-    #    os.mkdir(upload_dir)
-    with open('%s/%s' %(upload_dir,file_obj.name),'wb') as destination :
-        for chunk in file_obj.chunks():
-            destination.write(chunk)
+        os.makedirs(upload_dir,exist_ok=True)
+
+    for k,file_obj in request.FILES.items():
+        if len(os.listdir(upload_dir)) <= settings.MaxUploadFiles:
+            with open('%s/%s' %(upload_dir,file_obj.name),'wb') as destination :
+                for chunk in file_obj.chunks():
+                    destination.write(chunk)
+        else:
+            response_dic['error'] = "can only upload no more than %s files." % (settings.MaxUploadFiles)
 
 
 def send_file(request):
@@ -49,9 +50,9 @@ def send_zipfile(request,task_id,file_path):
     archive = zipfile.ZipFile(zip_file_name , 'w', zipfile.ZIP_DEFLATED)
     file_list = os.listdir(file_path)
     for filename in file_list:
-        archive.write('%s/%s' %(file_path,filename))
+        archive.write('%s/%s' %(file_path,filename),arcname=filename)
     archive.close()
-    wrapper = FileWrapper(open(zip_file_name))
+    wrapper = FileWrapper(open(zip_file_name,'rb'))
     response = HttpResponse(wrapper, content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename=%s.zip' % zip_file_name
     response['Content-Length'] = os.path.getsize(zip_file_name)
@@ -120,13 +121,15 @@ class Dashboard(object):
         return  get_all_logged_in_users().values('name','department__name','last_login','id')
 
     def get_online_hosts(self):
-        return   models.SessionTrack.objects.filter(auditlog__action_type=1,closed=0).values('auditlog__host__host__hostname',
-                                                                                             'auditlog__user__name',
-                                                                                             'auditlog__host__host__ip_addr',
-                                                                                             'auditlog__host__host__id',
-                                                                                             'auditlog__host__host_user__username',
-                                                                                             'auditlog__session',
-                                                                                             'id','date')
+        return   models.Session.objects.filter(closed=0).values('bind_host__host__hostname',
+                                                                 'user__name',
+                                                                 'bind_host__host__ip_addr',
+                                                                 'bind_host__host__id',
+                                                                 'bind_host__host_user__username',
+                                                                 'tag',
+                                                                 'cmd_count',
+                                                                'stay_time',
+                                                                 'id','date')
 def dashboard_summary(request):
     data_dic = {
         'user_login_statistics' :[],
@@ -134,9 +137,12 @@ def dashboard_summary(request):
         'recent_active_users_cmd_count':[],
         'summary':{}
     }
-    data_dic['user_login_statistics'] = list(models.AuditLog.objects.filter(action_type=1).extra({"login_date":"date(date)"}).values_list('login_date').annotate(count=Count('pk')))
+    days_before_30 = django.utils.timezone.now() +django.utils.timezone.timedelta(days=-30)
+    #data_dic['user_login_statistics'] = list(models.AuditLog.objects.filter(action_type=1).extra({"login_date":"date(date)"}).values_list('login_date').annotate(count=Count('pk')))
+    data_dic['user_login_statistics'] = list(models.Session.objects.filter(date__gt=days_before_30).extra({'login_date':'date(date)'}).values_list('login_date').annotate(count=Count('pk')))
     days_before_7 = django.utils.timezone.now() +django.utils.timezone.timedelta(days=-7)
-    recent_active_users= models.AuditLog.objects.filter(date__gt = days_before_7,action_type=1).values('user','user__name').annotate(Count('user'))
+    #recent_active_users= models.Session.objects.all()[0:10].values('user','user__name','cmd_count').annotate(Count('user'))
+    recent_active_users= models.Session.objects.all()[0:10].values("user",'user__name').annotate(Sum('cmd_count'),Count('id'))
     recent_active_users_cmd_count= models.AuditLog.objects.filter(date__gt = days_before_7,action_type=0).values('user','user__name').annotate(Count('cmd'))
     data_dic['recent_active_users'] = list(recent_active_users)
     data_dic['recent_active_users_cmd_count'] = list(recent_active_users_cmd_count)
@@ -145,7 +151,7 @@ def dashboard_summary(request):
     data_dic['summary']['current_logging_users'] = get_all_logged_in_users().count()
 
     #current_connection servers
-    current_connected_hosts = models.SessionTrack.objects.filter(closed=0).count()
+    current_connected_hosts = models.Session.objects.filter(closed=0).count()
 
     #current_connected_hosts = login_times - logout_times
     data_dic['summary']['current_connected_hosts'] = current_connected_hosts

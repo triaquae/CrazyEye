@@ -64,8 +64,8 @@ def file_tranfer_exec(task_id,bind_host_id,user_id,content ):
     task_type = content[content.index('-task_type') +1]
     remote_path = content[content.index('-remote') +1]
     bind_host = models.BindHosts.objects.get(id=bind_host_id)
-
-
+    task_obj = models.TaskLog.objects.get(id=task_id)
+    print("task obj:",task_obj)
     try:
         t = paramiko.Transport((bind_host.host.ip_addr,int(bind_host.host.port) ))
         if bind_host.host_user.auth_method == 'ssh-password':
@@ -79,28 +79,29 @@ def file_tranfer_exec(task_id,bind_host_id,user_id,content ):
 
         cmd_result = ''
         if task_type == 'file_send':
-            local_file_list =content[content.index('-local') +1].split()
-            for filename in local_file_list:
-                local_file_path = "%s/%s/%s/%s" %(settings.BASE_DIR,settings.FileUploadDir,user_id,filename)
+            #local_file_list =content[content.index('-local') +1].split()
+            local_file_path = "%s/task_data/tmp/%s" %(settings.FileUploadDir, task_obj.files_dir)
+            #print("local_file_path",local_file_path)
+            if os.path.isdir(local_file_path):
+                for filename in os.listdir(local_file_path):
+                    local_file = "%s/%s" %(local_file_path,filename)
 
-                if remote_path.endswith('/'):
-                    remote_file_path = '%s%s' %(remote_path,filename)
-                else:
+
                     remote_file_path = '%s/%s' %(remote_path,filename)
-                print(local_file_path,remote_file_path)
+                    #print(local_file,remote_file_path)
 
-                sftp.put(local_file_path,remote_file_path)
-                cmd_result += '%s  ' %filename
-            cmd_result += " sent to remote path [%s] is completed" % remote_path
-
+                    sftp.put(local_file,remote_file_path)
+                    #cmd_result += '%s  ' %filename
+                    cmd_result += "file [%s] sent to remote path [%s] is completed\n" % (filename,remote_path)
+            #print("----->cmd result:",cmd_result)
         else:
 
-            local_path = "%s/%s/%s/%s" %(settings.BASE_DIR,settings.FileUploadDir,user_id,task_id)
+            local_path = "%s/task_data/%s/" %(settings.FileUploadDir,task_id)
 
 
             remote_filename = remote_path.split("/")[-1]
             local_file_path = "%s.%s" %(remote_filename,bind_host.host.ip_addr)
-            print('->',local_file_path,remote_filename)
+            print('->file get:',local_file_path,remote_filename)
             sftp.get(remote_path,'%s/%s' %(local_path,local_file_path) )
             cmd_result ='download remote file [%s] is completed!' % remote_path
 
@@ -122,8 +123,8 @@ if __name__ == '__main__':
     task_type = sys.argv[sys.argv.index('-task_type')+1]
     if task_type =='cmd':
         require_args= ['-task',]
-    elif task_type == 'file_send':
-        require_args = ['-local','-remote']
+    # elif task_type == 'file_send':
+    #     require_args = ['-local','-remote']
     elif task_type == 'file_get':
         require_args = ['-remote',]
 

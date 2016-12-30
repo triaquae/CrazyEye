@@ -30,8 +30,53 @@
                             <option value="180">180分钟</option>
                           </select>
 
-                        <input id="file_upload" name="filename" type="file" multiple class="file-loading">
+                        <!--input id="file_upload" name="filename" type="file" multiple class="file-loading" -->
                             <!--Send button-->
+                        <div id="file-send-container">
+                        <p>已上传文件列表:</p>
+
+                        <table id="uploaded-list" class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>文件名</th>
+                                <th>大小(kb)</th>
+                                <th>上传时间</th>
+                                <th>删除</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                {% for filename, fileinfo in uploaded_files.files.items %}
+                                    <tr>
+                                        <td>{{ filename }}</td>
+                                        <td>{{ fileinfo.size }}</td>
+                                        <td>{{ fileinfo.ctime }}</td>
+                                        <td ><i style='color:red;cursor: pointer' class='fa fa-times' aria-hidden='true' onclick="DeleteFileOnServer('{{ filename }}',this)"></i></td>
+                                    </tr>
+                                {% endfor %}
+
+                            </tbody>
+                            <tfoot>
+
+                            </tfoot>
+                        </table>
+
+                        <form id="filedropzone" method="post" action="{{ request.path }}" class="dropzone dz-clickable">{% csrf_token %}
+                            <div class="dz-default dz-message">
+                                <div class="dz-icon icon-wrap icon-circle icon-wrap-md">
+                                    <i class="fa fa-cloud-upload fa-3x"></i>
+                                </div>
+                                <div>
+                                    <p class="dz-text">把要传到远程的文件拖到这里</p>
+                                    <p class="text-muted">如果文件数量多,建议上传前请将代码打包成.zip格式</p>
+                                </div>
+                            </div>
+
+                        </form>
+
+
+                        </div>
+
+
                         <form id="file_form">
                           <div class="form-group">
                             <label for="exampleInputName2">远程文件路径</label>

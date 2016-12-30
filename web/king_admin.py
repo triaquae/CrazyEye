@@ -93,6 +93,9 @@ class HostUsersAdmin(ModelAdminBase):
     model = models.HostUsers
     list_display = ['auth_method','username','password']
 
+class IDCAdmin(ModelAdminBase):
+    model = models.IDC
+    list_display = ('id','name')
 
 class SessionAdmin(ModelAdminBase):
     model = models.Session
@@ -109,16 +112,53 @@ class SessionAdmin(ModelAdminBase):
 
 class TaskLogAdmin(ModelAdminBase):
     model = models.TaskLog
-    list_display = ['start_time','end_time','task_type','user','hosts','cmd']
+    list_display = ['id','start_time','end_time','task_type','user','cmd','host_nums','success_nums','failed_nums','log_details']
     list_filter = ['user','task_type','start_time']
     fk_fields = ['user']
     readable_table = True
 
-register(enabled_admins,models.UserProfile,UserAdmin)
-register(enabled_admins,models.Hosts,HostAdmin)
-register(enabled_admins,models.HostGroups,HostGroupAdmin)
+    def log_details(self):
+        '''日志详情'''
+        ele = '''<a class='btn-link' href='/configure/web_tasklogdetail/?child_of_task=%s'>详情</a> ''' % self.instance.id
+        return ele
+
+
+
+    def host_nums(self):
+        '''主机数量'''
+        #print("customize field enroll",self.instance.hosts.select_related())
+        return '''%s ''' % (self.instance.hosts.select_related().count())
+    host_nums.display_name = "主机数量"
+
+
+    def success_nums(self):
+        return "%s" % self.instance.tasklogdetail_set.select_related().filter(result='success').count()
+    success_nums.display_name = "成功数"
+
+
+    def failed_nums(self):
+        return "%s" % self.instance.tasklogdetail_set.select_related().filter(result='failed').count()
+    failed_nums.display_name = '失败数'
+
+class TaskLogDetailAdmin(ModelAdminBase):
+    model = models.TaskLogDetail
+    list_display =  ('child_of_task','bind_host','pretty_event_log','result','date','note')
+    fk_fields = ('bind_host')
+    choice_fields = ('result')
+    list_filter = ('child_of_task','result','date')
+
+    readable_table = True
+    def pretty_event_log(self):
+
+        return "<pre>%s</pre>" % self.instance.event_log
+    pretty_event_log.display_name = "任务结果"
+register(enabled_admins,UserAdmin)
+register(enabled_admins,HostAdmin)
+register(enabled_admins,HostGroupAdmin)
 # register(enabled_admins,models.AuditLog,AuditLogAdmin)
-register(enabled_admins,models.HostUsers,HostUsersAdmin)
-register(enabled_admins,models.Session,SessionAdmin)
-register(enabled_admins,models.BindHosts,BindHostAdmin)
-register(enabled_admins,models.TaskLog,TaskLogAdmin)
+register(enabled_admins,HostUsersAdmin)
+register(enabled_admins,SessionAdmin)
+register(enabled_admins,BindHostAdmin)
+register(enabled_admins,TaskLogAdmin)
+register(enabled_admins,TaskLogDetailAdmin)
+register(enabled_admins,IDCAdmin)

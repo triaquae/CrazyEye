@@ -50,7 +50,7 @@ class Hosts(models.Model):
         verbose_name_plural = '主机'
 
 class HostUsers(models.Model):
-    auth_method_choices = (('ssh-password',"SSH/Password"),('ssh-key',"SSH/KEY"))
+    auth_method_choices = (('ssh-password',"SSH/ Password"),('ssh-key',"SSH/KEY"))
     auth_method = models.CharField(choices=auth_method_choices,max_length=16,help_text='如果选择SSH/KEY，请确保你的私钥文件已在settings.py中指定')
     username = models.CharField(max_length=32)
     password = models.CharField(max_length=64,blank=True,null=True,help_text='如果auth_method选择的是SSH/KEY,那此处不需要填写..')
@@ -200,7 +200,7 @@ class UserProfile(auth.AbstractBaseUser,auth.PermissionsMixin):
 #         verbose_name = 'CrazyEye账户'
 #         verbose_name_plural = 'CrazyEye账户'
 
-class SessionTrack(models.Model):
+class SessionTrack(models.Model): #没用了的表
 
     date = models.DateTimeField(auto_now_add=True)
     closed = models.BooleanField(default=False)
@@ -247,8 +247,8 @@ class AuditLog(models.Model):
     def __str__(self):
         return '%s-->%s@%s:%s' %(self.user.email,self.host.host_user.username,self.host.host.ip_addr,self.cmd)
     class Meta:
-        verbose_name = '审计日志'
-        verbose_name_plural = '审计日志'
+        verbose_name = '审计日志old'
+        verbose_name_plural = '审计日志old'
 
 
 
@@ -257,6 +257,7 @@ class TaskLog(models.Model):
     end_time = models.DateTimeField(null=True,blank=True)
     task_type_choices = (('cmd',"CMD"),('file_send',"批量发送文件"),('file_get',"批量下载文件"))
     task_type = models.CharField(choices=task_type_choices,max_length=50)
+    files_dir = models.CharField("文件上传临时目录",blank=True,null=True,max_length=32)
     user = models.ForeignKey('UserProfile')
     hosts = models.ManyToManyField('BindHosts')
     cmd = models.TextField()

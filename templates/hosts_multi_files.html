@@ -38,7 +38,91 @@
 
     //console.log(token());
 
+    $(document).ready(function () {
 
+        Dropzone.options.filedropzone = {
+          url:"{% url 'file_upload' random_str %}",
+          paramName: "file", // The name that will be used to transfer the file
+          maxFilesize: 2, // MB,
+          addRemoveLinks:true,
+          maxFiles:6,
+          uploadMultiple:true,
+
+          accept: function(file, done) {
+            if (file.name == "justinbieber.jpg") {
+              done("Naha, you don't.");
+            }
+            else { done(); }
+          }
+        };
+
+
+        Dropzone.autoDiscover = false;
+        // or disable for specific dropzone:
+        // Dropzone.options.myDropzone = false;
+
+        myDropzone = new Dropzone("#filedropzone");
+          myDropzone.on("addedfile", function(file) {
+            /* Maybe display some more file information on your page */
+            console.log(file)
+          });
+
+
+        myDropzone.on("maxfilesreached", function(file) {
+            /* Maybe display some more file information on your page */
+            console.log('filex ecxx')
+          });
+        myDropzone.on("success", function(file,response) {
+            /* Maybe display some more file information on your page */
+            console.log('filex upload done...',response);
+
+            var response_dic = JSON.parse(response);
+
+            if (response_dic.error){
+                console.log("error happpend...");
+                var err_ele = "<span style='color:red' >" + response_dic.error +"</span>";
+                $("#uploaded-list tfoot").html(err_ele);
+            }else {
+                var eles = '';
+                $.each(response_dic.files,function (k,v) {
+                    console.log(k +v );
+                    var onclick_attr = 'onclick="DeleteFileOnServer(' + "'" + k  + "',this)'";
+
+                    eles += "<tr><td>" + k +"</td><td>" + v.size + "</td><td>" + v.ctime +"</td><td><i style='color:red;cursor: pointer' class='fa fa-times' aria-hidden='true' onclick='DeleteFileOnServer(\" "+ k +" \",this)'></i></td></tr>";
+
+
+                });//end each
+                $("#uploaded-list tbody").html(eles);
+            }
+
+
+          });
+    });//end doc ready
+
+    function DeleteFileOnServer(filename,ele) {
+
+        var csrftoken = $("input[name='csrfmiddlewaretoken']").val();
+
+        $.post("{% url 'delete_file' random_str %}", {"filename":filename,'csrfmiddlewaretoken':csrftoken},function (callback) {
+            console.log(callback);
+            var response = JSON.parse(callback);
+            if (response.msg ){
+                //means file got removed
+                console.log("file got removed.")
+                $(ele).parent().parent().remove();
+
+                //remove file from dropzone too if it exist
+                $.each(myDropzone.files,function (index,file_obj) {
+                    console.log(file_obj.name + "--" + filename.trim())
+                    if (file_obj.name ==  filename.trim()){
+                        console.log("remove it from dropzone as well" + filename);
+                        myDropzone.removeFile(file_obj);
+
+                    }
+                })
+            }
+        });//end post
+    }
     $(document).ready(function(){
         var page_url = "{% url 'multitask_file' %}";
         $("#submit_task_confirm").attr("onclick","submit_task(this,'" + page_url + "')");
@@ -47,10 +131,11 @@
 
         $("#task_type").on("change",function(){
             if (this.value == 'file_send'){
-                $(".file-input").removeClass("hide");
+                $("#file-send-container").removeClass("hide");
+
                 $("#file-download-to-local").addClass("hide")
             }else{
-                $(".file-input").addClass("hide");
+                $("#file-send-container").addClass("hide");
                 $("#file-download-to-local").removeClass("hide")
             }
 
@@ -77,13 +162,13 @@
 
 
            if (task_type=='file_send'){ //for file upload
-               var file_list = [];
-               $(".file-upload-indicator[title='上传']").parent().parent().children().filter(".file-footer-caption").each(function(){
+               //var file_list = [];
+               /*$(".file-upload-indicator[title='上传']").parent().parent().children().filter(".file-footer-caption").each(function(){
                    console.log($(this).html());
                    file_list.push($(this).html());
-               });
+               });*/
                //console.log(file_list);
-               if (file_list.length ==0){
+               if ($("#uploaded-list tbody").find("tr").length ==0){
                    err_msg_list.push("未选择要上传的文件！");
                }
 
@@ -92,7 +177,7 @@
                }
 
                params['remote_file_path'] = remote_file_path;
-               params['local_file_list'] = file_list;
+               params['local_file_path'] = "{{ random_str }}";
            }else{
 
                if (remote_file_path.trim().length == 0 ){
@@ -122,7 +207,7 @@
 
         }
 
-        $("#file_upload").fileinput({
+        /*$("#file_upload").fileinput({
             uploadUrl: "/api/multitask/file_upload/", // server upload action
             uploadAsync: true,
             language:'zh',
@@ -134,7 +219,7 @@
             var form = data.form, files = data.files, extra = data.extra,
                 response = data.response, reader = data.reader;
         });
-
+        */
         $("#file-download-to-local").click(function (){
                 var task_id = $(this).attr("task_id");
                 console.log('==task_id:' +task_id );
