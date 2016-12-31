@@ -1,4 +1,5 @@
 .idea
 uploads/task_data/tmp/*
+uploads/task_data/*
 *.pyc
 web/migrations/
