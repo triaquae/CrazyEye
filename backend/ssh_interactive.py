@@ -113,7 +113,7 @@ def login_raw(instance,h):
         stdout=subprocess.PIPE,
         stderr= subprocess.PIPE
     )
-    cmd_str = "sshpass -p %s %s %s@%s -p%s -Z %s" %(password,ssh_path,username,ip,port , rand_tag_id)
+    cmd_str = "sshpass -p %s %s %s@%s -p%s -Z %s -o StrictHostKeyChecking=no" %(password,ssh_path,username,ip,port , rand_tag_id)
 
     subprocess.run(cmd_str,shell=True)
 

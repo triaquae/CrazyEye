@@ -1,4 +1,4 @@
 .idea
-#uploads/task_data/tmp
+uploads/task_data/tmp
 *.pyc
 web/migrations/
