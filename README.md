@@ -95,8 +95,6 @@ CrazyEye是基于Python开发的一款简单易用的IT审计堡垒机,通过对
 ###6.登录
 *   管理用户登录通过浏览器打开`http://your_ip_addr:9000/`
     
-    ![image](https://github.com/triaquae/CrazyEye/blob/master/share/screeshots/login_page.png)
-    
         用户名:alex@126.com
         密码: alex3714 
 
