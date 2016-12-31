@@ -8,6 +8,8 @@ CrazyEye介绍
 CrazyEye是基于Python开发的一款简单易用的IT审计堡垒机,通过对原生ssh代码进行了部分修改，从而实现用户在登录堡垒机后，他所有的命令操作都将被实时抓取并写入审计日志，以供后期审计，目前CrazyEye主要实现了以下功能：
 
 - 用户行为审计
+
+   - 底层使用原生ssh,不牺牲ssh使用体验,对用户操作无任何影响
    - 支持对主机进行分组管理
    - 可为运维人员分配指定服务器、指定账号的操作权限，即一个用户可以登录多少生产服务器，以及登录后有什么权限，都可以自如的控制
    - 用户登录堡垒后的所有操作均可被记录下来以供日后审计.
@@ -93,6 +95,8 @@ CrazyEye是基于Python开发的一款简单易用的IT审计堡垒机,通过对
 ###6.登录
 *   管理用户登录通过浏览器打开`http://your_ip_addr:9000/`
     
+    [!image](https://github.com/triaquae/CrazyEye/blob/master/share/screeshots/login_page.png)
+    
         用户名:alex@126.com
         密码: alex3714 
 
@@ -120,7 +124,6 @@ CrazyEye是基于Python开发的一款简单易用的IT审计堡垒机,通过对
           2.	oldboy web server(101.200.195.98)  Alex
         ['b'(back)]>>>:0 #选中一台机器登录
         -----connecting [10.211.55.5] with user [alex]-----
-        sshpass -p alex3714 /usr/local/openssh7v2/bin/ssh alex@10.211.55.5 -p22 -Z hrqdan3soljbux6t -o StrictHostKeyChecking=no
         session_tag: hrqdan3soljbux6t
         Welcome to Ubuntu 16.04 LTS (GNU/Linux 4.4.0-53-generic x86_64)
         
@@ -176,9 +179,9 @@ CrazyEye是基于Python开发的一款简单易用的IT审计堡垒机,通过对
 作者介绍
 =============
 
-Alex,多年IT自动化开发经验,国内PYTHON语言知名推广者，曾任职公安部、飞信、Nokia中国、中金公司、Advent软件、汽车之家等公司,目前任老男孩教育Python教学总监，热爱抽烟、喝酒、烫头！
+Alex(金角大王),多年IT自动化开发经验,国内PYTHON语言知名推广者，曾任职公安部、飞信、Nokia中国、中金公司、Advent软件、汽车之家等公司,目前任老男孩教育Python教学总监，热爱抽烟、喝酒、烫头！
 
-他的Python教学视频 http://study.163.com/course/courseMain.htm?courseId=1003245008
+他的Python基础视频 http://study.163.com/course/courseMain.htm?courseId=1003245008
 
 
 技术支持
