@@ -505,7 +505,7 @@ def table_change(request,table_name,obj_id):
         for field_obj in enabled_admins[table_name].model._meta.many_to_many:
             fields.append(field_obj.name)
         #print('fields', fields)
-        model_form = forms.create_form(enabled_admins[table_name].model, fields,enabled_admins[table_name])
+        model_form = forms.create_form(enabled_admins[table_name].model, fields,enabled_admins[table_name],request=request)
 
         if request.method == "GET":
             form_obj = model_form(instance=obj)
@@ -544,7 +544,7 @@ def table_add(request,table_name):
         for field_obj in enabled_admins[table_name].model._meta.many_to_many:
             fields.append(field_obj.name)
         if enabled_admins[table_name].add_form == None:
-            model_form = forms.create_form(enabled_admins[table_name].model, fields,enabled_admins[table_name],form_create=True)
+            model_form = forms.create_form(enabled_admins[table_name].model, fields,enabled_admins[table_name],form_create=True,request=request)
         else: #this admin has customized  creation form defined
             model_form = enabled_admins[table_name].add_form
 

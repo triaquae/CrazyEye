@@ -11,6 +11,9 @@
 <div class="panel">
     <div class="panel-heading">
         <h3 class="panel-title">Select {{ table_obj.model_verbose_name }} to change</h3>
+        <button class="btn btn-success btn-labeled fa fa-plus-circle pull-right">
+            <a href="{% url 'table_add' table_obj.model_db_table %}">Add {{ table_obj.model_verbose_name }}</a>
+        </button>
     </div>
     <div class="panel-body">
 

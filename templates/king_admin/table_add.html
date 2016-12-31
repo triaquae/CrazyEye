@@ -13,7 +13,12 @@
 
 <div class="panel">
     <div class="panel-heading">
-        <h3 class="panel-title">Add {{ model_name }}</h3>
+        <h3 class="panel-title">Add {{ model_name }}
+            <button class="btn btn-sm btn-info btn-labeled fa fa-mail-reply pull-right">
+                <a href="{% url 'table_list' model_db_table %}">返回 {{ table_obj.model_verbose_name }}</a>
+            </button>
+        </h3>
+
     </div>
 
 

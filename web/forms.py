@@ -39,6 +39,26 @@ class RegistrationForm(forms.Form):
 #         model = self.model
 #         #print(s)
 
+def default_clean(self):
+    '''form defautl clean method'''
+    # print("\033[41;1mrun form defautl clean method...\033[0m",dir(self))
+    # print(self.Meta.admin.readonly_fields)
+    # print("cleaned_dtat:",self.cleaned_data)
+    # print("form instance",self.instance)
+    # print("form instance",self.instance.id)
+    # print("validataion errors:",self.errors)
+    if self.Meta.admin.readable_table is True:
+        raise forms.ValidationError(("This is a readonly table!"))
+    if self.errors:
+        raise forms.ValidationError(("Please fix errors before re-submit."))
+    if self.instance.id is not None :#means this is a change form ,should check the readonly fields
+        for field in self.Meta.admin.readonly_fields:
+            old_field_val = getattr(self.instance,field)
+            form_val = self.cleaned_data[field]
+            print("filed differ compare:",old_field_val,form_val)
+            if old_field_val != form_val:
+                self.add_error(field,"Readonly Field: field should be '{value}' ,not '{new_value}' ".\
+                                     format(**{'value':old_field_val,'new_value':form_val}))
 
 def __new__(cls, *args, **kwargs):
     # super(CustomerForm, self).__new__(*args, **kwargs)
@@ -60,13 +80,23 @@ def __new__(cls, *args, **kwargs):
                 attr_dic['disabled'] = True
                 #print('----read only:',field_name)
         field.widget.attrs.update(attr_dic)
+        #for validators
+        if hasattr(cls.Meta.model,"clean_%s" % field_name):
+            clean_field_func = getattr(cls.Meta.model,"clean_%s" % field_name)
+            setattr(cls,"clean_%s" % field_name,clean_field_func)
+    else:
+        if hasattr(cls.Meta.model, "clean2"): #clean2 is kingadmin's own clean method
+            clean_func = getattr(cls.Meta.model, "clean")
+            setattr(cls, "clean" , clean_func)
+        else:# use default clean method
+            setattr(cls, "clean", default_clean)
 
-    print("modelf form admin class:",dir(cls.Meta))
+    #print("modelf form admin class:",dir(cls.Meta))
 
     return ModelForm.__new__(cls)
 
 
-def create_form(model,fields,admin_class,form_create=False):
+def create_form(model,fields,admin_class,form_create=False,**kwargs):
     class Meta:
         pass
     setattr(Meta,'model',model)
@@ -80,5 +110,7 @@ def create_form(model,fields,admin_class,form_create=False):
     baseclasess = (forms.ModelForm,)
     model_form = type(name, baseclasess,attrs)
     setattr(model_form,'__new__',__new__)
+    if kwargs.get("request"): #for form validator
+        setattr(model_form,'_request',kwargs.get("request"))
     print(model_form)
     return model_form

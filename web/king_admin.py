@@ -48,7 +48,7 @@ class UserAdmin(ModelAdminBase):
 
     list_display = ('id','name','email','is_admin')
     filter_horizontal = ('host_groups','bind_hosts')
-    readonly_fields = ['password',"bind_hosts"]
+    readonly_fields = ['password']
     change_page_onclick_fields = {
         'password':['password_change_form','重置密码']
     }
@@ -139,6 +139,8 @@ class TaskLogAdmin(ModelAdminBase):
     def failed_nums(self):
         return "%s" % self.instance.tasklogdetail_set.select_related().filter(result='failed').count()
     failed_nums.display_name = '失败数'
+
+    readable_table = True
 
 class TaskLogDetailAdmin(ModelAdminBase):
     model = models.TaskLogDetail

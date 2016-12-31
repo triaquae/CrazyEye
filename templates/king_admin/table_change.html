@@ -24,11 +24,17 @@
 
 <div class="panel">
     <div class="panel-heading">
-        <h3 class="panel-title">Change {{ model_name }}</h3>
+        <h3 class="panel-title">Change {{ model_name }}
+        <button class="btn btn-sm btn-info btn-labeled fa fa-mail-reply pull-right">
+            <a href="{% url 'table_list' model_db_table %}">返回 {{ table_obj.model_verbose_name }}</a>
+        </button>
+        </h3>
     </div>
 
     <form method="post" onsubmit="return CheckSelectedOptions()" class=" form-horizontal form-padding">{% csrf_token %}
         <div class="panel-body">
+            <span style="color: red">{{ form_obj.errors  }}</span>
+
             {% for field in form_obj %}
                 <div class="form-group">
                     {%if field.field.required%}
@@ -58,7 +64,7 @@
         </div> <!--end panel-body-->
         <div class="panel-footer">
             <div class="row">
-                {% if  not admin_class.readable_table  %}
+                {% if  not admin_class.readable_table3  %}
                 <div class="col-sm-2 ">
                     <a href="{% url 'table_del' model_db_table form_obj.instance.id %}" class="btn btn-danger " type="reset">Delete</a>
                 </div>
