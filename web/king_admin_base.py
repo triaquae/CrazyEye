@@ -17,7 +17,7 @@ class ModelAdminBase(object):
     search_fields = []
     readonly_fields = []
 
-    default_actions = ['delete_selected','ddd']
+    default_actions = ['delete_selected',]
 
 
     def delete_selected(self,request):
