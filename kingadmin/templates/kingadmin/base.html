@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>KingAdmin|老男孩教育</title>
+
+
+	<!--STYLESHEET-->
+	<!--=================================================-->
+
+	<!--Open Sans Font [ OPTIONAL ] -->
+ 	<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&amp;subset=latin" rel="stylesheet">
+
+
+	<!--Bootstrap Stylesheet [ REQUIRED ]-->
+	<link href="/static/kingadmin/css/bootstrap.min.css" rel="stylesheet">
+
+
+	<!--Nifty Stylesheet [ REQUIRED ]-->
+	<link href="/static/kingadmin/css/nifty.min.css" rel="stylesheet">
+	<link href="/static/kingadmin/css/custom.css" rel="stylesheet">
+
+
+	<!--Font Awesome [ OPTIONAL ]-->
+	<link href="/static/kingadmin/css/font-awesome.min.css" rel="stylesheet">
+
+	<link href="/static/kingadmin/plugins/dropzone/dropzone.css" rel="stylesheet">
+
+
+	{% block header-extra-recourses %}{% endblock %}
+
+	<!--SCRIPT-->
+	<!--=================================================-->
+
+	<!--Page Load Progress Bar [ OPTIONAL ]-->
+	<link href="/static/kingadmin/css/pace.min.css" rel="stylesheet">
+	<script src="/static/kingadmin/js/pace.min.js"></script>
+
+
+
+</head>
+
+
+<body>
+{% block body  %}
+
+you own body data....
+{% endblock %}
+	<!--JAVASCRIPT-->
+	<!--=================================================-->
+
+	<!--jQuery [ REQUIRED ]-->
+	<script src="/static/kingadmin/js/jquery-2.1.1.min.js"></script>
+
+
+	<!--BootstrapJS [ RECOMMENDED ]-->
+	<script src="/static/kingadmin/js/bootstrap.min.js"></script>
+
+
+	<!--Fast Click [ OPTIONAL ]-->
+	<script src="/static/kingadmin/js/fastclick.min.js"></script>
+
+	
+	<!--Nifty Admin [ RECOMMENDED ]-->
+	<script src="/static/kingadmin/js/nifty.min.js"></script>
+	<script src="/static/kingadmin/plugins/dropzone/dropzone_latest.js"></script>
+
+	
+    <script>
+        $(document).ready(function () {
+
+            if ("{{ active_url }}"){
+               var active_url = "{{ active_url }}" ;
+            }else {
+               var active_url = "{{ request.path  }}" ;
+
+            }
+            var active_menu = $("#mainnav-menu ").find("a[href='"+ active_url +"']");
+            active_menu.parent().addClass("active-link");
+            if (active_menu.parent().parent().hasClass("collapse")){
+                active_menu.parent().parent().addClass("in");
+            }
+        });//end doc ready
+
+    </script>
+
+
+{% block bottom-js %}
+{% endblock %}
+
+{% block extra-js %}{% endblock %}
+</body>
+</html>

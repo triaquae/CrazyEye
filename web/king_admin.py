@@ -154,6 +154,7 @@ class TaskLogDetailAdmin(ModelAdminBase):
 
         return "<pre>%s</pre>" % self.instance.event_log
     pretty_event_log.display_name = "任务结果"
+
 register(enabled_admins,UserAdmin)
 register(enabled_admins,HostAdmin)
 register(enabled_admins,HostGroupAdmin)

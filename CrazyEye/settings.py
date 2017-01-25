@@ -40,8 +40,9 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'web',
-    #'debugtools',
+    'bernard',
     'session_security',
+    'kingadmin',
 
 
 )
@@ -123,9 +124,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = (
+STATICFILES_DIRS = [
     "%s/%s" %(BASE_DIR, "statics"),
-)
+]
 
 AUTH_USER_MODEL = 'web.UserProfile'
 
@@ -160,44 +161,9 @@ SHELLINABOX = {
 }
 
 
-#for django admin customaztion
-
-
-# Django Suit configuration example
-SUIT_CONFIG = {
-    # header
-    'ADMIN_NAME': 'CrazyEye管理后台',
-    # 'HEADER_DATE_FORMAT': 'l, j. F Y',
-    # 'HEADER_TIME_FORMAT': 'H:i',
-
-    # forms
-     'SHOW_REQUIRED_ASTERISK': True,  # Default True
-    # 'CONFIRM_UNSAVED_CHANGES': True, # Default True
-
-    # menu
-    # 'SEARCH_URL': '/admin/auth/user/',
-    # 'MENU_ICONS': {
-    #    'sites': 'icon-leaf',
-    #    'auth': 'icon-lock',
-    # },
-    # 'MENU_OPEN_FIRST_CHILD': True, # Default True
-    'MENU_EXCLUDE': ('auth.group',),
-    # 'MENU': (
-    #     'sites',
-    #     {'app': 'auth', 'icon':'icon-lock', 'models': ('user', 'group')},
-    #     {'label': 'Settings', 'icon':'icon-cog', 'models': ('auth.user', 'auth.group')},
-    #     {'label': 'Support', 'icon':'icon-question-sign', 'url': '/support/'},
-    # ),
-
-    # misc
-    # 'LIST_PER_PAGE': 15
-}
 
 
 SSH_CLIENT_PATH = '/usr/local/openssh7/bin/ssh'
 
 SESSION_AUDIT_LOG_DIR = '%s/logs/audit' % BASE_DIR
 
-
-#用户权限列表
-PERMISSION_DIC = {}
