@@ -1,13 +1,10 @@
 from django.db import models
 from web.models import BindHosts,HostGroups
+from  django_celery_beat.models import PeriodicTask
 # Create your models here.
 
 
 
-class Schedule(models.Model):
-    """time sheets"""
-    plan = models.ForeignKey("Plan")
-    date = models.DateTimeField()
 
 
 class Plan(models.Model):
@@ -44,12 +41,12 @@ class Job(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return "%s  job:%s"%(self.stage, self.name)
+        return "order:%s, stage:%s,  job:%s"%(self.order,self.stage, self.name)
 
 
 class SSHTask(models.Model):
     """shell script"""
-    job = models.ForeignKey("Job")
+    job = models.OneToOneField("Job")
     bind_hosts = models.ManyToManyField(BindHosts,blank=True)
     host_groups = models.ManyToManyField(HostGroups,blank=True)
     commands = models.TextField(verbose_name="ssh commands")
@@ -60,7 +57,7 @@ class SSHTask(models.Model):
 
 class SCPTask(models.Model):
     """file transfer by scp command"""
-    job = models.ForeignKey("Job")
+    job = models.OneToOneField("Job")
     bind_hosts = models.ManyToManyField(BindHosts, blank=True)
     host_groups = models.ManyToManyField(HostGroups, blank=True)
     local_path = models.CharField(max_length=128)
@@ -68,3 +65,15 @@ class SCPTask(models.Model):
 
     def __str__(self):
         return "%s %s"%(self.local_path,self.remote_path)
+
+
+class ScheduleLog(models.Model):
+    """Store Schedule run logs """
+    plan = models.ForeignKey("Plan")
+    status_choices = ((0,'failed'),(1,'success'),(2,'error'),(3,'running'))
+    status = models.SmallIntegerField(choices=status_choices)
+    errors = models.TextField(blank=True,null=True)
+    start_date = models.DateTimeField(auto_now_add=True)
+    end_date = models.DateTimeField(auto_now=True)
+
+

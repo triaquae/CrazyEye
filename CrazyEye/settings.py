@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os,datetime
-
+import logging
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'bernard',
     'session_security',
     'kingadmin',
+    'django_celery_beat',
 
 
 )
@@ -166,4 +167,10 @@ SHELLINABOX = {
 SSH_CLIENT_PATH = '/usr/local/openssh7/bin/ssh'
 
 SESSION_AUDIT_LOG_DIR = '%s/logs/audit' % BASE_DIR
+SCHEDULE_LOG_DIR = '%s/logs/bernard/plan_logs' % BASE_DIR
 
+LOG_LEVEL = logging.DEBUG
+
+#for celery
+CELERY_BROKER_URL = 'redis://localhost'
+CELERY_RESULT_BACKEND = 'redis://localhost'

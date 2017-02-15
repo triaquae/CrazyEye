@@ -41,6 +41,7 @@ urlpatterns = [
 
     url(r'^login/$',views.login,name='login'),
     url(r'^accounts/profile/$',views.personal),
+    url(r'^task/',include("bernard.urls")),
     #url(r'^account/(\d+)/password/change/$',views.password_reset_form, name="password_change_form"),
     # url(r'^configure/index/$',views.configure_index,name="table_index"),#显示所有注册的表
     # url(r'^configure/(\w+)/$',views.configure_url_dispatch,name="table_list"), #显示每个表的数据

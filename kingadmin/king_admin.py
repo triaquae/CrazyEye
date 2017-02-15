@@ -174,7 +174,7 @@ site.register(bernard_models.Stage,StageAdmin)
 site.register(bernard_models.Job,JobAdmin)
 site.register(bernard_models.SSHTask,SSHTaskAdmin)
 site.register(bernard_models.SCPTask,SCPTaskAdmin)
-site.register(bernard_models.Schedule,ScheduleAdmin)
+# site.register(bernard_models.Schedule,ScheduleAdmin)
 
 
 
