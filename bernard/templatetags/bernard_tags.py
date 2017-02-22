@@ -30,8 +30,18 @@ def get_plan_crontab(plan_obj):
 
     #lowlowlow
     try:
-        task_obj = models.PeriodicTask.objects.get(args=json.dumps([3]))
+        task_obj = models.PeriodicTask.objects.get(args=json.dumps([plan_obj.id]))
 
         return task_obj
     except Exception as e:
         return None
+
+
+@register.simple_tag
+def  get_plan_stages_in_order(plan_obj):
+    return  plan_obj.stage_set.order_by('order')
+
+
+@register.simple_tag
+def get_stages_jobs_in_order(stage):
+    return stage.job_set.order_by('order')

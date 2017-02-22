@@ -1,0 +1,125 @@
+{% extends "index.html" %}
+{% load bernard_tags %}
+
+{% block page-content %}
+
+
+<div class="panel panel-primary">
+
+    <!--Panel heading-->
+    <div class="panel-heading">
+        <div class="panel-control">
+
+            <!--Nav tabs-->
+            <ul class="nav nav-tabs">
+                <li class="active"><a data-toggle="tab" href="#demo-tabs-box-1" aria-expanded="true">Plan</a>
+                </li>
+                <li class=""><a data-toggle="tab" href="#demo-tabs-box-2" aria-expanded="false">任务日志</a>
+                </li>
+            </ul>
+
+        </div>
+        <h3 class="panel-title">{{ plan_obj }}</h3>
+    </div>
+
+    <!--Panel body-->
+    <div class="panel-body">
+
+        <!--Tabs content-->
+        <div class="tab-content">
+            <div id="demo-tabs-box-1" class="tab-pane fade active in">
+{#                <h4 class="text-thin">First Tab Content</h4>#}
+{#                <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</p>#}
+
+
+
+
+                <ul class="stage-sortable">
+                    {% get_plan_stages_in_order plan_obj  as plan_stages %}
+                    {% for stage in plan_stages %}
+                        <li class="ui-state-info stage-ele" stage-id="{{ stage.id }}" style="margin-bottom: 15px">
+                           <span style="font-weight: bold;"> {{ stage }}
+                            <a class="btn-link pull-right" href="/kingadmin/bernard/stage/change/{{ stage.id }}/" target="_blank">修改</a>
+                           </span>
+                        <div class="jobs-panel"  style="border: 1px dashed silver;margin-bottom: 10px;margin-top: 5px;padding: 10px">
+                            <ul class="job-sortable">
+                                {% get_stages_jobs_in_order stage  as stages_jobs %}
+                                {% for job in stages_jobs %}
+                                <li class="ui-state-default job-ele" job-id="{{ job.id }}" style="margin-top: 5px;padding: 10px">{{ job }}
+                                    <a href="/kingadmin/bernard/job/change/{{ job.id }}/" target="_blank" style="color: red" class=" pull-right">修改</a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        </li>
+
+
+
+                    {% endfor %}
+                </ul>
+
+                <div>
+                    <button class="btn-info" onclick="SaveTaskOrder()">Save</button>
+                </div>
+            </div>
+            <div id="demo-tabs-box-2" class="tab-pane fade">
+                <h4 class="text-thin">Second Tab Content</h4>
+                <p>Duis autem vel eum iriure dolor in hendrerit in vulputate.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block bottom-js %}
+
+    <script>
+        $(document).ready(function () {
+            $( ".stage-sortable" ).sortable();
+            $( ".stage-sortable" ).disableSelection();
+
+            $( ".job-sortable" ).sortable();
+            $( ".job-sortable" ).disableSelection();
+
+        })
+
+
+
+        function SaveTaskOrder(){
+            var stages = [];
+            $(".stage-ele").each(function () {
+                var stage_id = $(this).attr("stage-id");
+                var jobs = [];
+                var job_eles = $(this).find("li");
+                console.log("job items" + job_eles.length)
+                $(job_eles).each(function () {
+
+                    jobs.push($(this).attr("job-id"));
+                });
+
+                stages.push([stage_id, jobs]);
+
+
+
+            })
+            console.log(stages);
+
+            $.post("{% url 'save_task_order'  plan_obj.id %}",{tasks:JSON.stringify(stages)},function(callback){
+                console.log(callback)
+                var callback = JSON.parse(callback);
+                if (callback.state == 'success'){
+                    $.niftyNoty({
+                        type: "success",
+                        container : "floating",
+                        title : "任务执行顺序已保存",
+                        message : "",
+                        closeBtn : false,
+                        timer : 5000
+                    });
+                }
+            });
+        }
+    </script>
+{% endblock %}
+
+

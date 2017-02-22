@@ -6,6 +6,8 @@ from kingadmin.admin_base import BaseKingAdmin,site
 from web import models
 from bernard import models as bernard_models
 
+from django_celery_beat import  models as celery_beat_models
+
 
 
 class UserCreationForm(forms.ModelForm):
@@ -159,6 +161,17 @@ class SCPTaskAdmin(BaseKingAdmin):
     list_display = ('job', 'local_path','remote_path')
     filter_horizontal = ('bind_hosts', 'host_groups')
 
+
+
+
+class CrontabAdmin(BaseKingAdmin):
+    pass #list_display = ('id',)
+
+class PeriodicTaskAdmin(BaseKingAdmin):
+    pass
+class IntervalAdmin(BaseKingAdmin):
+    pass
+
 site.register(models.UserProfile,UserAdmin)
 site.register(models.Hosts,HostAdmin)
 site.register(models.BindHosts,BindHostAdmin)
@@ -174,6 +187,11 @@ site.register(bernard_models.Stage,StageAdmin)
 site.register(bernard_models.Job,JobAdmin)
 site.register(bernard_models.SSHTask,SSHTaskAdmin)
 site.register(bernard_models.SCPTask,SCPTaskAdmin)
+
+
+site.register(celery_beat_models.CrontabSchedule, CrontabAdmin)
+site.register(celery_beat_models.IntervalSchedule, IntervalAdmin)
+site.register(celery_beat_models.PeriodicTask,PeriodicTaskAdmin )
 # site.register(bernard_models.Schedule,ScheduleAdmin)
 
 
