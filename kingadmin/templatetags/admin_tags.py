@@ -131,6 +131,9 @@ def build_table_row(row_obj,table_obj,onclick_column=None,target_link=None):
     else:
         row_ele += "<td><a class='btn-link'  href='{request_path}change/{obj_id}/' >{column}</a></td>".\
             format(request_path=table_obj.request.path,column=row_obj, obj_id=row_obj.id)
+
+
+
     #for dynamic display
     if table_obj.dynamic_fk :
         if hasattr(row_obj,table_obj.dynamic_fk ):
