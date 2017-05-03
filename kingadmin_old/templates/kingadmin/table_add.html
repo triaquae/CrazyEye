@@ -1,0 +1,87 @@
+{% extends 'kingadmin/index.html' %}
+{% load admin_tags %}
+
+{% block page-title-text %}
+{{ model_verbose_name }}
+{% endblock %}
+
+{% block searchbox %}{% endblock %}
+
+{% block breadcrumb %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'table_index' %}">Home</a></li>
+        <li><a href="{% url 'app_tables'  app_name %}">{{ app_name|capfirst }}</a></li>
+
+        <li><a href="{% url 'table_list' app_name model_name %}">{{ model_verbose_name }}</a></li>
+        <li class="active"> 添加 {{ model_verbose_name }}</li>
+    </ol>
+ {% endblock %}
+
+{% block page-content %}
+{% include 'kingadmin/filter_search_box.html' %}
+<script src="/static/js/kingadmin/filter_horizontal.js"></script>
+
+<div class="panel">
+    <div class="panel-heading">
+        <h3 class="panel-title">Add {{ table_obj.model_verbose_name }}
+            <a  href="{% url 'table_list' app_name model_name %}" class="btn btn-sm btn-info btn-labeled fa fa-mail-reply pull-right">
+               返回 {{ table_obj.model_verbose_name }}
+            </a>
+        </h3>
+    </div>
+
+
+
+
+    <form method="post" onsubmit="return CheckSelectedOptions()" class=" form-horizontal form-padding">{% csrf_token %}
+        <div class="panel-body">
+            {% if form_obj.errors%}
+                <span style="color: red">{{ form_obj.errors }}</span>
+            {% endif %}
+            {% for field in form_obj %}
+                <div class="form-group">
+                    {%if field.field.required%}
+                        <label class="col-md-2 control-label">
+                            <b>{{field.label}}</b>
+                        </label>
+                    {% else %}
+                        <label class="col-md-2 control-label">
+                           {{field.label}}
+                        </label>
+                    {% endif %}
+                    <div class="col-md-9">
+                        {% if field.name not in admin_class.filter_horizontal %}
+                            {{ field }}{% add_fk_search_btn form_obj field %}
+{#                            {% decorate_date_field form_obj field %}#}
+                            {% if field.errors %}
+                                <span style="color: red">{{ field.errors }}</span>
+                            {% endif %}
+                        {% else %}
+                            {% include 'kingadmin/filter_horizontal_multi_select.html' %}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+
+
+        </div> <!--end panel-body-->
+        <div class="panel-footer">
+            <div class="row">
+
+                <div class="col-sm-4 col-lg-offset-1 ">
+                    <button class="btn btn-info  " type="submit">Add</button>
+                </div>
+                <div class="col-sm-6 ">
+                    <button class="btn btn-success " name="_continue" type="submit">Save and continue editing</button>
+                    &nbsp;
+                    <button type="submit" class="btn btn-info  " name="_add_another"   >Save and add another</button>
+
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+</div>
+
+{% endblock %}

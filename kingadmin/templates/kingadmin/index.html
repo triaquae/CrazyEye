@@ -600,11 +600,12 @@
 			
 			<!--MAIN NAVIGATION-->
 			<!--===================================================-->
-			<nav id="mainnav-container">
+			{% block mainnav-container %}
+            <nav id="mainnav-container">
 				<div id="mainnav">
 
 					<!--Shortcut buttons-->
-					<!--================================-->
+					<!--
 					<div id="mainnav-shortcut">
 						<ul class="list-unstyled">
 							<li class="col-xs-4" data-content="Shortcut 1">
@@ -624,7 +625,7 @@
 							</li>
 						</ul>
 					</div>
-					<!--================================-->
+					-->
 					<!--End shortcut buttons-->
 
 
@@ -634,10 +635,17 @@
 						<div class="nano">
 
 							<div class="nano-content">
-                                {% block "left-side-menu" %}
-
+                                {% block left-side-menu %}
 								<ul id="mainnav-menu" class="list-group">
-						
+
+                                    {% for app_name,admin_class_dic in enabled_admins.items %}
+                                    <li >
+                                        <a href="{% url 'app_tables' app_name %}">
+                                            <i class="fa fa-play-circle"></i>
+                                            <span class="menu-title">{{ app_name }}</span>
+                                        </a>
+                                    </li>
+                                    {% endfor %}
 {#									<!--Category name-->#}
 {#									<li class="list-header">Link List</li>#}
 {##}
@@ -688,7 +696,7 @@
 			</nav>
 			<!--===================================================-->
 			<!--END MAIN NAVIGATION-->
-			
+			{% endblock %}
 			<!--ASIDE-->
 			<!--===================================================-->
 			<aside id="aside-container">
@@ -859,7 +867,7 @@
 
             <!-- Visible when footer positions are static -->
             <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-            <div class="hide-fixed pull-right pad-rgt">Currently v2.2.2</div>
+            <div class="hide-fixed pull-right pad-rgt">Currently beta v1.0</div>
 
 
 
@@ -889,4 +897,10 @@
 
 
 	
+{% endblock %}
+
+{% block bottom-js %}
+
+    <script src="/static/kingadmin/js/kingadmin/king_admin.js" > </script>
+
 {% endblock %}

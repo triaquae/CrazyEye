@@ -7,5 +7,5 @@ settings.TEMPLATES[0]['DIRS'] += [os.path.join(settings.BASE_DIR, 'kingadmin/tem
 
 settings.STATICFILES_DIRS +=[ os.path.join(settings.BASE_DIR, 'kingadmin/statics')]
 
-# print(settings.STATICFILES_DIRS)
+print(settings.STATICFILES_DIRS)
 # print(settings.TEMPLATES[0]['DIRS'] )

@@ -1,0 +1,117 @@
+
+
+<!--Bootstrap Modal without Animation-->
+<!--===================================================-->
+<div class="modal" id="modal-dialog" role="dialog" tabindex="-1" aria-labelledby="demo-default-modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!--Modal header-->
+            <div class="modal-header">
+                <button data-dismiss="modal" class="close" type="button">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">查找</h4>
+            </div>
+
+
+            <!--Modal body-->
+
+            <div  class="modal-body">
+
+                <div class="input-group mar-btm">
+                    <input id='filter_search_input' type="text" placeholder="Search" class="form-control">
+                    <span class="input-group-btn">
+                        <button onclick="FilterSearch()" class="btn btn-danger btn-labeled fa fa-search" type="button">Search</button>
+                    </span>
+                </div>
+
+                <div id="search-model-body" class="search-box">
+
+                </div>
+            </div>
+
+
+            <!--Modal footer-->
+            <div class="modal-footer">
+                <a data-dismiss="modal" class="btn btn-default" type="button">Close</a>
+{#                <a class="btn btn-primary">Save changes</a>#}
+            </div>
+        </div>
+    </div>
+</div>
+<!--===================================================-->
+<!--End Bootstrap Modal without Animation-->
+
+
+<script type="text/javascript">
+    function PrepareFilterSearch(ele_tag) {
+        //console.log("ele_tag:" + ele_tag);
+        var select_eles = $("select[data-tag='"+ ele_tag +"']");
+        var available_options = $(select_eles[0]).find("option");
+        //console.log(select_eles[0])
+        var ul_ele = "<ul data-tag='"+ ele_tag + "'>";
+        for (var i=0,len=available_options.length; i<len; i++){
+            var ele = available_options[i];
+            //console.log(ele.value );
+
+            var li_ele = "<li class='btn-link'  onclick='SelectThisOption(this)' data='"+ele.value +"'>" + ele.text + "</li>";
+            ul_ele += li_ele;
+            if (i >50){
+                ul_ele += "<li>省略显示" + (available_options.length -1 - i  ) +"条</li>";
+                break;
+            }
+        }
+{#        $.each(available_options,function(index,ele){#}
+{#            //console.log(index);#}
+{#            var li_ele = "<li class='btn-link'  onclick='SelectThisOption(this)' value='"+ele.value +"'>" + ele.text + "</li>";#}
+{#            ul_ele += li_ele;#}
+{#            if (index >3){#}
+{#                return;#}
+{#            }#}
+{#        });#}
+        ul_ele += "</ul>"
+        $("#search-model-body").html(ul_ele);
+    }
+
+    function SelectThisOption(self){
+
+        var selected_option_id =$(self).attr('data');
+        var select_box_tag = $(self).parent().attr('data-tag');
+        $("select[data-tag='"+ select_box_tag +"'").find("option[value='"+ selected_option_id +"']").prop("selected",true);
+        $("#modal-dialog").modal('toggle');
+    }
+    function FilterSearch(){
+        var select_ele_tag = $($("#search-model-body ul")[0]).attr("data-tag");
+        var search_text = $.trim($("#filter_search_input").val());
+
+        var matched_options = $("select[data-tag='"+ select_ele_tag +"'] option:contains('"+ search_text +"')");
+        //var matched_li = $("#search-model-body li:contains('"+ search_text +"')");
+        var li_list = '';
+        for (var i=0,len=matched_options.length; i<len; i++){
+            console.log(i);
+            var ele = matched_options[i];
+            var li_ele = "<li class='btn-link'  onclick='SelectThisOption(this)' value='"+ele.value +"'>" + ele.text + "</li>";
+            li_list += li_ele;
+            if (i >50){
+                li_list += "<li>省略显示" + (matched_options.length -1 - i  ) +"条</li>";
+                break;
+            }
+        }
+
+{#        $.each(matched_options,function(index,ele){#}
+{#            li_list += "<li class='btn-link' onclick='SelectThisOption(this)' value='"+ ele.value +"'>" + ele.text +"</li>";#}
+{#            #}
+{#            #}
+{#        });//end each#}
+        $("#search-model-body ul").html(li_list);
+
+        if (search_text.length ==0){
+            //reset search
+
+            //console.log("select_ele_tag"+select_ele_tag);
+            PrepareFilterSearch(select_ele_tag) ;
+
+        }
+    }
+</script>
