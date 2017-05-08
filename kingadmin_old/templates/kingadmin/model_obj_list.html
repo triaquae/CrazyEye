@@ -1,0 +1,191 @@
+{% extends 'kingadmin/index.html' %}
+{% load admin_tags %}
+
+{% block page-title-text %}
+{{ table_obj.model_verbose_name }}
+{% endblock %}
+
+{% block searchbox %}{% endblock %}
+
+{% block breadcrumb %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'table_index'   %}">Home</a></li>
+        <li><a href="{% url 'app_tables'  app_name %}">{{ app_name|capfirst}}</a></li>
+
+        <li class="active"> {{ table_obj.model_verbose_name }}</li>
+    </ol>
+ {% endblock %}
+{% block page-content %}
+
+<div class="panel">
+    <div class="panel-heading">
+        <h3 class="panel-title">Select {{ table_obj.model_verbose_name }} to change
+        <a href="{% url 'table_add' app_name table_obj.model_name %}" class="btn btn-success btn-labeled fa fa-plus-circle pull-right">
+            Add {{ table_obj.model_verbose_name }}
+        </a>
+        </h3>
+
+    </div>
+    <div class="panel-body">
+
+           {% if  table_obj.list_filter%}
+            <form >
+                <div class="row">
+                    {% include 'king_admin/filter_search_box.html' %}
+                    {% for filter_column in table_obj.list_filter %}
+                        <div class="col-md-3" style="margin-bottom: 15px">
+                            {{ filter_column.verbose_name }} &nbsp;
+                            <i style="cursor: pointer" data-target="#modal-dialog" data-toggle="modal" class="fa fa-search" aria-hidden="true" onclick="PrepareFilterSearch('{{ filter_column.column_name }}')"></i>
+                            <select data-tag="{{ filter_column.column_name }}" name="{{ filter_column.column_name }}" class="form-control" >
+                                {% for choice in filter_column.choices %}
+                                    {% if filter_column.selected == choice.0|to_string  %}
+                                        <option value="{{ choice.0 }}" selected>{{ choice.1 }}</option>
+                                    {% else %}
+                                        <option value="{{ choice.0 }}" >{{ choice.1 }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+
+                        </div>
+                    {% endfor %}
+                    <div class="col-md-3">
+                        <input type="submit" class="btn btn-success" value="开始过滤">
+                    </div>
+                </div>
+            </form>
+        {% endif %}
+
+        {% load_search_element table_obj  %}
+
+        <div class="row" style="margin-top: 10px">
+            <form method="post" onsubmit="return DoTheAction(this)">{% csrf_token %}
+                <input type="hidden" name="model_db_table" value="{{ table_obj.model_db_table }}">
+                <div class="col-md-2">
+                    {%  load_admin_actions table_obj %}
+                </div>
+                <div class="col-md-1">
+                    <button class=" btn-default " >执行</button>
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+
+
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <script>
+                        function SelectAllRows() {
+                            $(".table-responsive input[tag='row-check']").each(function (index,ele) {
+                                    //var td_val = $(tritem).find("td:first input");
+                                    //var td_val = $(ele).val();
+                                    if ($(ele).prop("checked") == false){
+                                        $(ele).prop("checked", true);
+                                    }else {
+                                        $(ele).prop("checked", false);
+                                    }
+
+                            });
+                        }
+
+                        function DoTheAction(form_ele) {
+                            var post_args = {
+                                'selected_ids':[],
+                                'model_name' : "{{ table_obj.model_db_table }}",
+                                'action': $("#admin_action").val()
+                            };
+
+
+                            $(".table-responsive input[tag='row-check']").each(function (index,ele) {
+                                if ($(ele).prop("checked") == true){
+                                       post_args['selected_ids'].push($(ele).val());
+                                    }
+
+                            });//end each
+
+                            console.log(post_args);
+                            if (post_args.selected_ids.length == 0){
+                                alert("必须选中一条或多条纪录进行操作!")
+                                return false;
+                            }
+                            if (post_args.action == ""){
+                                alert("必须选中一个action进行操作!")
+                                return false;
+                            }
+
+                            var selected_ids_ele = "<input  name='selected_ids' type='hidden' value='" + post_args.selected_ids.toString() + "' >"
+                            $(form_ele).append(selected_ids_ele);
+                            //console.log($(ele).find("input[name='selected_ids']") ) //val(post_args.selected_ids.toString());
+
+                            return true;
+                        }
+
+                    </script>
+                    <th><input type="checkbox"  onclick="SelectAllRows()"></th>
+                    {% if  table_obj.list_display %}
+                        {% for column in table_obj.list_display %}
+                            <th class="column-sorted">
+                                <a href="?page={{ table_obj.query_sets.number }}&orderby={% if table_obj.orderby_col_index == forloop.counter0 %}{{ table_obj.orderby_field}}{% else %}{{ column }}{% endif %}{% for k,v in request.GET.items %}{% if k != 'page' and  k != 'orderby' %}&{{ k }}={{ v }}{% endif %}{% endfor %}" >
+                                    {% get_table_column column table_obj %}
+                                    {% display_orderby_arrow table_obj forloop.counter0 %}
+
+                                </a>
+                            </th>
+
+                        {% endfor %}
+                    {% else %}
+                        <th>{{ table_obj.model_verbose_name }}</th>
+                    {% endif %}
+                </tr>
+                </thead>
+                <tbody>
+                    {% for row in table_obj.query_sets %}
+                    <tr>
+                        {% build_table_row  row table_obj    %}
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            <footer>
+              <tr>
+                    <td colspan="12" class="footable-visible">
+                        <div class="pagination">
+
+                            <nav>
+                                <p>共{{ paginator.count }}条数据</p>
+                                <ul class="pagination">
+                                    {% if table_obj.query_sets.has_previous %}
+                                    <li class="disabled">
+                                        <a href="{{ request.get_full_path }}?page={{ table_obj.query_sets.previous_page_number }}" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+                                    </li>
+                                    {% endif %}
+                                    {% for p_num in paginator.page_range %}
+                                        {% render_page_num request table_obj.query_sets p_num %}
+                                    {% endfor %}
+                                    {% if customer_list.has_next %}
+                                    <li>
+                                      <a href="{{ request.get_full_path }}?page={{ table_obj.query_sets.next_page_number }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                      </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+
+                        </div>    <!--end pagination-->
+
+                    </td>
+              </tr>
+            </footer>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'kingadmin/index.html' %}
+{% load admin_tags %}
+
+{% block page-title-text %}KingAdmin{% endblock %}
+{% block breadcrumb %}
+    <ol class="breadcrumb">
+        <li class="active"><a href="{% url 'table_index' %}">Home</a></li>
+        <li class="active">{{ current_app }}</li>
+
+    </ol>
+ {% endblock %}
+{% block page-content %}
+
+{% for app_name,admin_class_dic in enabled_admins.items %}
+
+<div class="row">
+
+    <div class="panel panel-info col-md-8 ">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                <a href="{% url 'app_tables' app_name %}">{{ app_name|upper }}</a>
+            </h3>
+        </div>
+
+        <div class="panel-body">
+            <table class="table table-hover table-vcenter ">
+                    {% for k,admin_class in admin_class_dic.items %}
+                    <tr>
+                        <td><a style="font-weight:bold ;color: #447e9b" href="{% url 'table_list' app_name k  %}">{% get_db_table_name admin_class %}</a></td>
+                        {% if not admin_class.readonly_table %}
+                            <td><a href="{% url 'table_add' app_name k  %}"><i style="color: green" class="fa fa-plus-square-o pull-right" aria-hidden="true">增加</i></a></td>
+                            <td><a href="{% url 'table_list' app_name k  %}"><i style="color: red"  class="fa fa-edit " aria-hidden="true">修改</i></a></td>
+                        {% else %}
+                            <td></td>
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+
+</div>
+{% endfor %}
+
+{% endblock %}

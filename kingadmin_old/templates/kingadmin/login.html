@@ -1,0 +1,85 @@
+{% extends 'kingadmin/base.html' %}
+
+{% block body %}
+	<div id="container" class="cls-container">
+		
+		<!-- BACKGROUND IMAGE -->
+		<!--===================================================-->
+		<div id="bg-overlay" class="bg-img img-balloon" style="background-image: url('/static/kingadmin/img/bg-img-6.jpg');"></div>
+		
+		
+		<!-- HEADER -->
+		<!--===================================================-->
+		<div class="cls-header cls-header-lg">
+			<div class="cls-brand">
+				<a class="box-inline" href="http://oldboyedu.com" target="_blank">
+					<!-- <img alt="Nifty Admin" src="img/logo.png" class="brand-icon"> -->
+					<span class="brand-title">KingAdmin <span class="text-thin"></span></span>
+				</a>
+{#                <p style="color: silver">Produly Powered by Oldboy Python</p>#}
+                <p style="color: silver">本软件由< 老男孩IT教育PYTHON开发学院 >开源贡献</p>
+			</div>
+		</div>
+		<!--===================================================-->
+		
+		
+		<!-- LOGIN FORM -->
+		<!--===================================================-->
+		<div class="cls-content">
+			<div class="cls-content-sm panel ">
+				<div class="panel-body">
+					<p class="pad-btm">Welcome using KingAdmin</p>
+					<form method="post">{% csrf_token %}
+						<div class="form-group">
+							<div class="input-group">
+								<div class="input-group-addon"><i class="fa fa-user"></i></div>
+								<input type="text" name="username" class="form-control" placeholder="Username">
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="input-group">
+								<div class="input-group-addon"><i class="fa fa-asterisk"></i></div>
+								<input type="password" name="password" class="form-control" placeholder="Password">
+							</div>
+						</div>
+						<!--div class="form-group">
+							<div class="input-group">
+								<div class="input-group-addon">
+                                    <img height="30px" src="/static/verify_code_imgs/{{ today_str }}/{{ filename }}.png">
+                                </div>
+								<input style="height: 50px" type="text" name="verify_code" class="form-control" placeholder="验证码">
+								<input  type="hidden" name="verify_code_key" value="{{ filename }}" >
+							</div>
+						</div-->
+						<div class="row">
+							<div class="col-xs-8 text-left checkbox">
+								<label class="form-checkbox form-icon">
+								<input type="checkbox"> Remember me
+								</label>
+							</div>
+							<div class="col-xs-4">
+								<div class="form-group text-right">
+								<button class="btn btn-success text-uppercase" type="submit">Sign In</button>
+								</div>
+							</div>
+						</div>
+                        {% if error %}
+                            <span style="color: red">{{ error.error }}</span>
+                        {% endif %}
+
+					</form>
+				</div>
+			</div>
+{#			<div class="pad-ver">#}
+{#				<a href="pages-password-reminder.html" class="btn-link mar-rgt">Forgot password ?</a>#}
+{#				<a href="pages-register.html" class="btn-link mar-lft">Create a new account</a>#}
+{#			</div>#}
+		</div>
+		<!--===================================================-->
+		
+
+		
+	</div>
+	<!--===================================================-->
+	<!-- END OF CONTAINER -->
+{% endblock %}

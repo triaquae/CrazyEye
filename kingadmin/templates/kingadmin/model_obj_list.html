@@ -27,11 +27,24 @@
 
     </div>
     <div class="panel-body">
+            {% if errors %}
+            <div >
+                <h3 style="color: red;">Below errors happened during updating data!</h3>
+                {% for form_errs in errors %}
 
+                    <ul>
+                        <li style="color: red;font-weight: bold">{{ form_errs.1 }}</li>
+                        {% for k,err in form_errs.0.items %}
+                            <li>{{ k }},{{ err }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endfor %}
+            </div>
+            {% endif %}
            {% if  table_obj.list_filter%}
             <form >
                 <div class="row">
-                    {% include 'king_admin/filter_search_box.html' %}
+                    {% include 'kingadmin/filter_search_box.html' %}
                     {% for filter_column in table_obj.list_filter %}
                         <div class="col-md-3" style="margin-bottom: 15px">
                             {{ filter_column.verbose_name }} &nbsp;
@@ -139,11 +152,11 @@
 
                         {% endfor %}
                     {% else %}
-                        <th>{{ table_obj }}</th>
+                        <th>{{ table_obj.model_verbose_name }}</th>
                     {% endif %}
                 </tr>
                 </thead>
-                <tbody>
+                <tbody id="model_table_data">
                     {% for row in table_obj.query_sets %}
                     <tr>
                         {% build_table_row  row table_obj    %}
@@ -178,8 +191,16 @@
                             </nav>
 
                         </div>    <!--end pagination-->
+                        {% if table_obj.list_editable %}
+                            <div>
+                                <form method="post" onsubmit="return PrepareFormData(this)">{% csrf_token %}
+                                    <button class="btn btn-info pull-right" >Save</button>
 
+                                </form>
+                            </div>
+                        {% endif %}
                     </td>
+
               </tr>
             </footer>
             </table>
@@ -188,4 +209,57 @@
 
 </div>
 
+
+<script>
+
+
+
+    function PrepareFormData(form_ele) {
+        var form_data = [];
+        $("#model_table_data tr").each(function () {
+            var obj_id = $(this).children().first().find("input").val();
+
+            console.log(obj_id);
+            if (obj_id){ //table obj row
+                var row_data = {};//all columns need to be updated
+                $(this).find("[data-tag='editable']").each(function () {
+                    //console.log($(this).attr("name") + "----" +$(this).val())
+                    row_data[$(this).attr("name")] = $(this).val();
+                });//end find each
+                row_data['id'] = obj_id;
+
+                form_data.push(row_data);
+            }
+
+        });//end each
+
+        console.log(form_data)
+
+        var ele = '<input type="hidden" name="editable_data" value=' + JSON.stringify(form_data) + ' >';
+        $(form_ele).append(ele);
+
+        return true;
+    }
+
+</script>
+{% endblock %}
+
+{% block bottom-js %}
+<script>
+    $(document).ready(function () {
+
+        $('input[type="checkbox"][data-tag="editable"]').change(function() {
+             if(this.checked) {
+                 // do something when checked
+                 console.log("checked...")
+                 $(this).val("True")
+
+             }else {
+                 console.log("unchekc")
+                  $(this).val("False")
+             }
+        });
+
+    });//end doc ready
+</script>
 {% endblock %}

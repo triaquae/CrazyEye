@@ -1,0 +1,176 @@
+
+{% load admin_tags %}
+
+<div>
+<div  style="width: 380px;float: left">
+{#                         {% get_attr field %}#}
+     <p>可选 </p>
+        <input autocomplete="off" id='_search_{{ field.name }}' oninput="FuzzySearch('{{ field.name }}')" type="text" class="form-control" placeholder="Search..">
+
+
+
+     {% get_m2m_objs field.name form_obj as m2m_objs %}
+     {% get_chosen_m2m_objs field form_obj.instance as chosen_m2m_objs %}
+
+
+     <select style="height: 230px" id="available_{{ field.name }}"  multiple class="form-control  " {% check_disabled_attr field.name form_obj %}>
+         {% for obj in m2m_objs %}
+             {% if obj not in  chosen_m2m_objs%}
+                <option value="{{ obj.id }}">{{ obj }}</option>
+             {% endif %}
+         {% endfor %}
+     </select>
+     {% if field.name not in form_obj.Meta.admin.readonly_fields %}
+     <p class="btn-link" onclick="ChoseAllOptions('available_{{ field.name }}','id_{{ field.name }}','{{ field.name }}')" align="center" style="cursor:pointer;font-weight:bold;margin-top:10px">
+         Choose all <i class="fa fa-chevron-circle-right" aria-hidden="true"></i>
+     </p>
+    {% endif %}
+ </div>
+ <div class="" align="center" style="margin-top: 75px;float: left;width: 50px">
+     <i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+     <br>
+     <i class="fa fa-arrow-circle-right" style="margin-left: -3px" aria-hidden="true"></i>
+
+ </div>
+ <div  style="width: 380px;float: left;">
+     <p>已选 </p>
+
+
+
+     <select data-type="m2m_chosen" style="height: 230px" multiple class="form-control" id="id_{{ field.name }}" name="{{ field.name }}" {% check_disabled_attr field.name form_obj %} >
+         {% for obj in chosen_m2m_objs %}
+         <option value="{{ obj.id }}" selected>{{ obj }}</option>
+         {% endfor %}
+
+     </select>
+    {% if field.name not in form_obj.Meta.admin.readonly_fields %}
+     <p class="btn-link" onclick="ChoseAllOptions('id_{{ field.name }}','available_{{ field.name }}','{{ field.name }}')" align="center" style="cursor:pointer;font-weight:bold;margin-top:10px">
+         <i class="fa fa-chevron-circle-left" aria-hidden="true"></i>Remove all
+     </p>
+    {% endif %}
+ </div>
+<div style="clear: both"></div>
+</div>
+ <script>
+    //available_{{ field.name }} = [];
+    _temp_data = {} //for search completion
+    document.getElementById("available_{{ field.name }}").addEventListener("dblclick", function (ele) {
+        moveClickedOption(ele,"id_{{ field.name }}","{{ field.name }}");
+
+    });
+    document.getElementById("id_{{ field.name }}").addEventListener("dblclick", function (ele) {
+        moveClickedOption(ele,"available_{{ field.name }}","{{ field.name }}");
+
+    });
+    document.getElementById("id_{{ field.name }}").addEventListener("click", function (ele) {
+        $(ele).preventDefault;
+
+    });
+    function moveClickedOption(ele,target_select_ele_id,field_name){
+        //console.log("to target_select_ele: "+target_select_ele_id);
+        //console.log(ele);
+        //console.log(ele.srcElement.type);
+        if (ele.srcElement.type != 'select-multiple'){ //为避免当select里无option时，再点击会把select自己删除 掉
+
+            var clone_ele = $(ele)[0].srcElement;
+            $(ele)[0].srcElement.remove();
+            $("#" +target_select_ele_id ).append(clone_ele);
+
+
+            //这一段是为模糊查询用的
+            //先初始化，避免_temp_data不存在
+            var search_ele = $("#_search_"+field_name);
+            if (! _temp_data.hasOwnProperty(field_name) ){
+                //第一次search,先把array的数据准备好
+                _temp_data[field_name] = []; //set a empty arrry first
+
+                //console.log("---"+$(search_ele).val())
+                $("#available_"+ field_name + " option").each(function () {
+                    _temp_data[field_name].push(this);
+                })
+            }
+
+
+
+            if (target_select_ele_id.startsWith("available_")){ //move ele from right to left
+                //add it into _temp_data
+                _temp_data[field_name].push(clone_ele);
+            }else { //move ele from left to right
+                //remove this ele from _temp_data
+                var ele_id_needs_to_be_deleted = null;
+                $.each(_temp_data[field_name],function (index) {
+                    if ($(this).val() ==  $(clone_ele).val()){
+                        //console.log($(clone_ele).text() + "-index--" + index)
+                        //_temp_data[field_name].splice(index,1);不能在loop的时候删除
+                        ele_id_needs_to_be_deleted =  index
+                    }
+                })
+
+                if (ele_id_needs_to_be_deleted){
+                    _temp_data[field_name].splice(ele_id_needs_to_be_deleted,1);
+                }
+            }
+
+            console.log(ele.srcElement.firstChild +ele.srcElement.value );
+
+            $("#id_{{ field.name }} option").prop("selected",true); //设定右边select的全为选 中状态
+            //console.log($("#id_{{ field.name }} option")); //设定右边select的全为选 中状态
+        }
+
+    }
+
+    function ChoseAllOptions(from_select_ele_id,target_select_ele_id,field_name) {
+
+        FuzzySearch(field_name);//这里必须先初始化一下可选的数据array,为了避免用户在还没搜索前就点击右边已选中的数据，并将其移到左边
+
+
+        //console.log(from_select_ele_id +'--' +  target_select_ele_id);
+        var from_options = $("#"+from_select_ele_id + " option");
+
+        if (from_select_ele_id.startsWith("available_")){ //从左往右移
+            //clear left
+            _temp_data[field_name] = []
+
+        }else { //from right to left
+            $(from_options).each(function () {
+                _temp_data[field_name].push(this);
+            })
+
+
+        }
+
+
+
+        //console.log(from_options);
+        $("#" +target_select_ele_id).append(from_options);
+
+
+    }
+
+
+
+    function FuzzySearch(field_name) {
+        var search_ele = $("#_search_"+field_name);
+
+        var matched_options = [];
+        if (! _temp_data.hasOwnProperty(field_name) ){
+            //第一次search,先把array的数据准备好
+            _temp_data[field_name] = []; //set a empty arrry first
+
+            $("#available_"+ field_name + " option").each(function () {
+                _temp_data[field_name].push(this);
+            })
+        }
+
+        var search_text = $(search_ele).val();
+        $.each(_temp_data[field_name],function () {
+            if ($(this).text().indexOf(search_text) != -1){
+                matched_options.push($(this).clone());
+                //console.log($(this).text());
+            }
+        })
+
+        $("#available_"+field_name).html(matched_options);
+
+    }
+</script>

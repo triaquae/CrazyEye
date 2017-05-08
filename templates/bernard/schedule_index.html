@@ -13,11 +13,12 @@
                 <thead>
                     <tr>
                         <th>Plan ID</th>
-                        <th>任务名称</th>
+                        <th>任务</th>
                         <th>Crontab</th>
                         <th>上次运行时间</th>
                         <th>上次运行结束时间</th>
                         <th>上次运行结果</th>
+                        <th>已启用</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -25,18 +26,22 @@
                     {% for plan in plans %}
                     <tr>
                         {% get_plan_last_runlog plan as last_run_log %}
-                        <td><a href="#fakelink" class="btn-link">{{ plan.id }}</a></td>
+                        {% get_plan_crontab plan as plan_cron_obj%}
+                        <td><a href="{% url 'plan_detail' plan.id %}" class="btn-link">{{ plan.id }}</a></td>
                         <td>{{ plan.name }}</td>
-                        <td>{% get_plan_crontab plan %}</td>
+                        <td>
+                            <a class="btn-link" href="/kingadmin/django_celery_beat/periodictask/change/{{ plan_cron_obj.id }}/" target="_blank">{{ plan_cron_obj }}</a></td>
                         <td>{{ last_run_log.start_date }}</td>
                         <td>{{ last_run_log.end_date }}</td>
                         <td>{{ last_run_log.get_status_display }}</td>
+                        <td>{{ plan_cron_obj.enabled }}</td>
                     </tr>
                     {% endfor %}
 
                 </tbody>
             </table>
         </div>
+
     </div>
 </div>
 {% endblock %}

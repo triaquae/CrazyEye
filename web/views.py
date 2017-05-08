@@ -17,7 +17,7 @@ import django.utils.timezone
 from django.core.exceptions import ObjectDoesNotExist
 from web import tables
 from web import admin
-from web.king_admin import enabled_admins
+from web.kingadmin import enabled_admins
 from backend import audit as session_audit
 from web import permissions
 import random,string
@@ -581,3 +581,4 @@ def table_del(request,table_name,obj_id):
             'obj':obj,
             'app_label':obj._meta.app_label
                                 })
+

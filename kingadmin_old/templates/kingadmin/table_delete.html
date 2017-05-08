@@ -1,0 +1,47 @@
+{% extends 'kingadmin/index.html' %}
+{% load admin_tags %}
+
+
+{% block extra_head_resources %}
+
+
+{% endblock %}
+
+
+{% block breadcrumb %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'table_index' %}">配置中心</a></li>
+        <li><a href="{% url 'table_list' app_name model_name %}">{{ model_name }}</a></li>
+        <li class="active"> 删除 {{ model_name }}</li>
+    </ol>
+ {% endblock %}
+
+{% block page-content %}
+
+
+{% include 'king_admin/filter_search_box.html' %}
+
+
+<div class="panel">
+    <div class="panel-heading">
+        <h3 class="panel-title">确定要删除 "{{ obj }}" 么?</h3>
+    </div>
+
+    <form method="post" onsubmit="return CheckSelectedOptions()" class=" form-horizontal form-padding">{% csrf_token %}
+        <div class="panel-body">
+        <div class="alert alert-danger media fade in">
+            <strong>警告!</strong>删除动作，请谨慎操作
+        </div>
+            <a class="btn-link" style="color: red" href="/admin/{{ app_label }}/{{ model_table_name }}/{{ obj.id }}/delete/">请点击此处前往后台页面删除数据，应确保只有管理员有权操作！</a>
+        </div> <!--end panel-body-->
+        <div class="panel-footer">
+            <div class="row">
+                <div class="col-sm-6 ">
+                    <a href="{% url 'table_change' app_name model_name obj.id %}" class="btn btn-info pull-right "  type="submit">不删除了,回退</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
+{% endblock %}

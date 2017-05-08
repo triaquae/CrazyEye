@@ -3,8 +3,7 @@ __author__ = 'jieli'
 import datetime
 import re
 from django import template
-
-
+from kingadmin.admin_base import  site
 from django.utils.safestring import mark_safe,mark_for_escaping
 from  django.core.urlresolvers import reverse as url_reverse
 
@@ -78,56 +77,99 @@ def display_orderby_arrow(table_obj,loop_counter):
     return ''
 
 
+def render_list_editable_column(table_obj,row_obj, field_obj):
+    #print(table_obj,row_obj,field_obj,field_obj.name,field_obj.get_internal_type())
+    if field_obj.get_internal_type() in ("CharField","ForeignKey","BigIntegerField","IntegerField"):
+        column_data = field_obj._get_val_from_obj(row_obj)
+        if not field_obj.choices and field_obj.get_internal_type() != "ForeignKey" :
+
+            column = '''<input data-tag='editable' type='text' name='%s' value='%s' >''' %\
+                     (field_obj.name,
+                     field_obj._get_val_from_obj(row_obj) or '')
+
+        else:
+            # if field_obj.get_internal_type() == "ForeignKey":
+            #     column = '''<select data-tag='editable' class='form-control'  name='%s' >'''%field_obj.name
+            # else:
+            column = '''<select data-tag='editable' class='form-control'  name='%s' >'''%field_obj.name
+
+            for option in field_obj.get_choices():
+                if option[0] == column_data:
+                    selected_attr = "selected"
+                else:
+                    selected_attr = ''
+                column += '''<option value='%s' %s >%s</option>'''% (option[0],selected_attr,option[1])
+
+            column += "</select>"
+    elif field_obj.get_internal_type() == 'BooleanField':
+        column_data = field_obj._get_val_from_obj(row_obj)
+        if column_data == True:
+            checked = 'checked'
+        else:
+            checked = ''
+        column = '''<input data-tag='editable'   type='checkbox' name='%s' value="%s"  %s> ''' %(field_obj.name,
+                                                                                               column_data,
+                                                                                              checked)
+
+    else:
+        column = field_obj._get_val_from_obj(row_obj)
+
+    return column
+
 
 @register.simple_tag
 def build_table_row(row_obj,table_obj,onclick_column=None,target_link=None):
     row_ele = "<tr>"
-
+    #print("lsit editab",table_obj.list_editable)
     row_ele += "<td><input type='checkbox' tag='row-check' value='%s' > </td>" % row_obj.id
+    if table_obj.list_display:
+        for index,column_name in enumerate(table_obj.list_display):
 
-    for index,column_name in enumerate(table_obj.list_display):
+            if hasattr(row_obj,column_name):
+                field_obj = row_obj._meta.get_field(column_name)
+                column_data = field_obj._get_val_from_obj(row_obj)
+                if field_obj.choices:#choices type
+                    column_data = getattr(row_obj,"get_%s_display" % column_name)()
+                else:
+                    column_data = getattr(row_obj,column_name)
 
-        if hasattr(row_obj,column_name):
-            field_obj = row_obj._meta.get_field(column_name)
-            column_data = field_obj._get_val_from_obj(row_obj)
-            if field_obj.choices:#choices type
-                column_data = getattr(row_obj,"get_%s_display" % column_name)()
-            else:
-                column_data = getattr(row_obj,column_name)
+                if 'DateTimeField' in field_obj.__repr__():
+                    column_data = getattr(row_obj,column_name).strftime( "%Y-%m-%d %H:%M:%S") \
+                            if getattr(row_obj,column_name) else None
+                if 'ManyToManyField' in field_obj.__repr__():
+                    column_data = getattr(row_obj, column_name).select_related().count()
 
-            #if column_name in table_obj.fk_fields:
-            #    column_data = r"%s" %getattr(row_obj,column_name).__str__().strip("<>")
-            if 'DateTimeField' in field_obj.__repr__():
-                column_data = getattr(row_obj,column_name).strftime( "%Y-%m-%d %H:%M:%S") \
-                        if getattr(row_obj,column_name) else None
-            if 'ManyToManyField' in field_obj.__repr__():
-                column_data = getattr(row_obj, column_name).select_related().count()
-            if onclick_column == column_name:
-                column = ''' <td><a class='btn-link' href=%s>%s</a></td> '''% (url_reverse(target_link,args=(column_data, )),column_data)
-            #if column_name in table_obj.onclick_fields:
-            #    column = '''<td><a class='btn-link' href='%s' target='_blank'>%s</a></td>''' % \
-            #             (url_reverse(table_obj.onclick_fields[column_name],args=(row_obj.id, )), column_data)
+                if onclick_column == column_name:
+                    column = ''' <td><a class='btn-link' href=%s>%s</a></td> '''% (url_reverse(target_link,args=(column_data, )),column_data)
 
-            elif index == 0:#首列可点击进入更改页
-                column = '''<td><a class='btn-link'  href='%schange/%s/' >%s</a> </td> ''' %(table_obj.request.path,
-                                                                           row_obj.id,
-                                                                           column_data)
-            elif column_name in table_obj.colored_fields: #特定字段需要显示color
-                color_dic = table_obj.colored_fields[column_name]
-                if column_data in color_dic:
-                    column = "<td style='background-color:%s'>%s</td>" % (color_dic[column_data],
-                                                               column_data)
+                elif index == 0:#首列可点击进入更改页
+                    column = '''<td><a class='btn-link'  href='%schange/%s/' >%s</a> </td> ''' %(table_obj.request.path,
+                                                                               row_obj.id,
+                                                                               column_data)
+                elif column_name in table_obj.colored_fields: #特定字段需要显示color
+                    color_dic = table_obj.colored_fields[column_name]
+                    if column_data in color_dic:
+                        column = "<td style='background-color:%s'>%s</td>" % (color_dic[column_data],
+                                                                   column_data)
+                    else:
+                        column = "<td>%s</td>" % column_data
+
+                elif column_name in table_obj.list_editable:
+                    column = "<td>%s</td>" % render_list_editable_column(table_obj,row_obj,field_obj)
                 else:
                     column = "<td>%s</td>" % column_data
-            else:
-                column = "<td>%s</td>" % column_data
 
-        elif hasattr(table_obj.admin_class, column_name): #customized field
-            field_func = getattr(table_obj.admin_class, column_name)
-            table_obj.admin_class.instance = row_obj
-            column = "<td>%s</td>" % field_func(table_obj.admin_class)
+            elif hasattr(table_obj.admin_class, column_name): #customized field
+                field_func = getattr(table_obj.admin_class, column_name)
+                table_obj.admin_class.instance = row_obj
+                column = "<td>%s</td>" % field_func(table_obj.admin_class)
 
-        row_ele += column
+            row_ele += column
+    else:
+        row_ele += "<td><a class='btn-link'  href='{request_path}change/{obj_id}/' >{column}</a></td>". \
+            format(request_path=table_obj.request.path, column=row_obj, obj_id=row_obj.id)
+
+
     #for dynamic display
     if table_obj.dynamic_fk :
         if hasattr(row_obj,table_obj.dynamic_fk ):
@@ -319,6 +361,8 @@ def get_time_humanize_display(time_seconds):
 @register.simple_tag
 def get_chosen_m2m_objs(form_field_obj, model_obj):
     '''return chosen m2m objs'''
+    #print("367 model obj", model_obj)
+
     selected_pks = form_field_obj.value()
     try :
         m2m_objs = getattr(model_obj,form_field_obj.name)
@@ -326,9 +370,85 @@ def get_chosen_m2m_objs(form_field_obj, model_obj):
         ##print("get_chosen_m2m_objs", form_field_obj.value(), selected_objs)
         ##print(selected_objs.values())
         return selected_objs
-    except ValueError as e :
+    except Exception as e:
         return []
 
+
+
+@register.simple_tag
+def add_new_obj_btn(form_obj ,field):
+    """put a add btn for foreignkey and m2m field"""
+    #print("add_new_obj_btn site enabled ",site.enabled_admins)
+    field_obj = form_obj.instance._meta.get_field(field.name)
+    field_type = field_obj.get_internal_type()
+
+    if field_type in ("ForeignKey", "ManyToManyField"):
+        app_label = field_obj.rel.to()._meta.app_label
+        model_name = field_obj.rel.to()._meta.model_name
+        if app_label in site.enabled_admins:
+            if model_name in site.enabled_admins.get(app_label): #make sure this class is registered
+
+                if field.name not in form_obj.Meta.admin.readonly_fields:
+                    popup_window = '/kingadmin/{app}/{model}/add/?_popup=1&_to_field={field_name}'.format(
+                        app=field_obj.rel.to()._meta.app_label,
+                        model=field_obj.rel.to()._meta.model_name,
+                        field_name  =  field.name,
+
+                    )
+                    print("pop up win",popup_window)
+                    ele = '''
+                            &nbsp;&nbsp;&nbsp;<i style="cursor: pointer;color:#44ce44"
+                            class="fa fa-plus" aria-hidden="true"
+                            onclick="PopUpWindow('%s')"></i>''' % (popup_window)
+                    return mark_safe(ele)
+
+    return ''
+
+
+# @register.simple_tag
+# def add_new_obj_btn(form_obj ,field):
+#     """put a add btn for foreignkey and m2m field"""
+#
+#     field_obj = form_obj.instance._meta.get_field(field.name)
+#     field_type = field_obj.get_internal_type()
+#     if field_type in ("ForeignKey","ManyToManyField"):
+#         if field.name not in form_obj.Meta.admin.readonly_fields:
+#             popup_window = "window.open('/kingadmin/{app}/{model}/add/?_popup=1','','width=800,height=700')".format(
+#                 app=field_obj.rel.to()._meta.app_label,
+#                 model=field_obj.rel.to()._meta.model_name,
+#
+#             )
+#             print("pop up win",popup_window)
+#             ele = '''
+#                     &nbsp;&nbsp;&nbsp;<i style="cursor: pointer;color:#44ce44"
+#                     class="fa fa-plus" aria-hidden="true"
+#                     onclick="%s"></i>''' % (popup_window)
+#             return mark_safe(ele)
+#
+#     return ''
+
+
+@register.simple_tag
+def  check_pop_up_window (request,form_obj):
+    """check if needs to close this window"""
+    print("check_pop_up_window:",request.get_full_path(),[form_obj.errors],request.method)
+    if "_popup=1" in request.get_full_path():
+        if request.method == "POST":
+            if not form_obj.errors:
+                to_field_name = request.get_full_path().split('_to_field=')[1]
+
+                ele = '''
+                <script type='text/javascript'>
+                    //window.close();
+                    window.opener.popupCallback('pop some data','%s', '%s','%s'); //Call callback function
+                    window.close();
+                </script>
+                ''' % (form_obj.instance.id,form_obj.instance,to_field_name)
+                return mark_safe(ele)
+
+        return ''
+    else:
+        return ''
 
 @register.simple_tag
 def add_fk_search_btn(form_obj,field):
@@ -467,5 +587,16 @@ def display_obj_related(objs):
         #mode_name = objs[0]._meta.model_name
         return mark_safe(recursive_related_objs_lookup(objs))
 
+@register.simple_tag
+def get_form_global_error(obj):
 
-
+    form_err = obj.as_data().get('__all__')
+    if form_err:
+        return form_err
+    else:
+        return ''
+@register.simple_tag
+def printf(obj):
+    print("printf debug:",obj)
+    print("printf debug dir :",dir(obj))
+    print("printf debug dir :",obj.as_data())

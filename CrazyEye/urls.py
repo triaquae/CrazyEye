@@ -17,7 +17,6 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 from web import views,api_urls
-from web import cus_admin
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
@@ -42,12 +41,6 @@ urlpatterns = [
     url(r'^login/$',views.login,name='login'),
     url(r'^accounts/profile/$',views.personal),
     url(r'^task/',include("bernard.urls")),
-    #url(r'^account/(\d+)/password/change/$',views.password_reset_form, name="password_change_form"),
-    # url(r'^configure/index/$',views.configure_index,name="table_index"),#显示所有注册的表
-    # url(r'^configure/(\w+)/$',views.configure_url_dispatch,name="table_list"), #显示每个表的数据
-    # url(r'^configure/(\w+)/change/(\d+)/$',views.table_change,name="table_change"),
-    # url(r'^configure/(\w+)/change/(\d+)/password/$',views.password_reset_form),
-    # url(r'^configure/(\w+)/add/$',views.table_add,name="table_add"),
-    # url(r'^configure/(\w+)/delete/(\d+)/$',views.table_del,name="table_del"),
+
 
 ]

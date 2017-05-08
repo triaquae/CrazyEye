@@ -4,7 +4,7 @@
 <div>
 <div  style="width: 380px;float: left">
 {#                         {% get_attr field %}#}
-     <p>可选 </p>
+     <p>可选 {% add_new_obj_btn form_obj field %} </p>
         <input autocomplete="off" id='_search_{{ field.name }}' oninput="FuzzySearch('{{ field.name }}')" type="text" class="form-control" placeholder="Search..">
 
 
