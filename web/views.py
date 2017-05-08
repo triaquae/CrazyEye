@@ -179,7 +179,7 @@ def get_uploaded_fileinfo(file_dic,upload_dir):
 @login_required
 @csrf_exempt
 def multitask_file_upload(request,random_str):
-    print('---random str:',random_str,request.FILES)
+    #print('---random str:',random_str,request.FILES)
     upload_dir = "%s/task_data/tmp/%s" %(settings.FileUploadDir,random_str)
     response_dic = {'files':{}}
     utils.handle_upload_file(request,random_str,response_dic)
@@ -260,7 +260,6 @@ def host_detail(request):
 
         #access_records = models.AuditLog.objects.filter(host__host_id=host_id,action_type=1).order_by('-date')
         access_records = models.Session.objects.filter(bind_host__host_id=host_id).order_by('-date')
-        #print("acc records;",access_records)
 
         paginator = Paginator(access_records,10)
         page = request.GET.get('page')
@@ -413,16 +412,11 @@ def session_reccord(request,session_id):
                 #print("last_cmd_datetime_str",last_cmd_datetime_str)
                 last_cmd_struct_time = time.strptime(last_cmd_datetime_str,"%Y_%m_%d %H:%M:%S")
                 last_cmd_timestamp = time.mktime(last_cmd_struct_time)
-                #print('last cmd timestamp:',last_cmd_timestamp)
                 session_obj.stay_time = last_cmd_timestamp - session_obj.date.timestamp()
                 session_obj.save()
         else:
             log_data = [['n/a','---no session log---']]
-        # if os.path.isfile(session_log_file):
-        #     session_log = open(session_log_file).read()
-        # else:
-        #     print('file not exist ',session_log_file)
-        #     session_log = '---no session log---'
+
 
         return render(request,"session_log.html",{'session_data':log_data,'session_obj':session_obj})
     except ObjectDoesNotExist as e:
@@ -432,7 +426,7 @@ def session_reccord(request,session_id):
 @permissions.check_permission
 @login_required
 def configure_url_dispatch(request,url):
-    print('---url dispatch',url)
+    #print('---url dispatch',url)
     #print(enabled_admins)
     if url in enabled_admins:
         #print(enabled_admins[url])
@@ -492,7 +486,7 @@ def configure_url_dispatch(request,url):
 @permissions.check_permission
 @login_required
 def table_change(request,table_name,obj_id):
-    print("table change:",table_name ,obj_id)
+    #print("table change:",table_name ,obj_id)
     if table_name in enabled_admins:
         #print(enabled_admins[table_name])
         obj = enabled_admins[table_name].model.objects.get(id=obj_id)
@@ -587,7 +581,4 @@ def table_del(request,table_name,obj_id):
             'obj':obj,
             'app_label':obj._meta.app_label
                                 })
-
-
-
 
