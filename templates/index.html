@@ -684,7 +684,8 @@
                 series : [{
                     type:'column',
                     name : '用户数',
-                    data : data.user_login_statistics,
+			//数字类型，防止Highcharts Error#14
+                    data : Number(data.user_login_statistics),
                     tooltip: {
                         valueDecimals: 0
                     }
