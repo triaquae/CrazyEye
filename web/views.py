@@ -139,7 +139,6 @@ def hosts_multi(request):
 
 @login_required
 def multitask_cmd(request):
-    #print '==post:',request.POST
     multi_task = host_mgr.MultiTask('run_cmd',request)
     task_id = multi_task.run()
     if task_id:
