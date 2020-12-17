@@ -2091,12 +2091,12 @@ Makes editable any HTML element on the page. Applied as jQuery method.
                         };                        
                     }                    
 
-                    // ajax success callabck (response 200 OK)
+                    // ajax success callback (response 200 OK)
                     ajaxOptions.success = typeof config.success === 'function' ? function(response) {
                             config.success.call($elems, response, config);
                         } : $.noop;
                                   
-                    // ajax error callabck
+                    // ajax error callback
                     ajaxOptions.error = typeof config.error === 'function' ? function() {
                              config.error.apply($elems, arguments);
                         } : $.noop;
